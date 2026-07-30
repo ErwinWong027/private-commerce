@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私域电商售前客服 - 政策/规则/数据清单</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #10213e;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #10213e;
+      --accent: #5db2e2;
+      --success: #0f766e;
+      --warn: #d97706;
+      --danger: #dc2626;
+      --chip: #eef6fb;
+      --shadow: 0 10px 30px rgba(16, 33, 62, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "MiSans", "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .nav {
+      width: 88%;
+      margin: 18px auto 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 8px rgba(16, 33, 62, 0.05);
+      font-size: 13px;
+    }
+
+    .nav a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .page {
+      width: 88%;
+      margin: 16px auto 40px;
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero {
+      padding: 34px 36px 26px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.25;
+      color: var(--primary);
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 1100px;
+    }
+
+    .meta {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .section {
+      padding: 28px 36px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section:last-child { border-bottom: none; }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      color: var(--primary);
+    }
+
+    .lead {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .note, .warn, .ok {
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 14px;
+      margin: 14px 0 0;
+    }
+
+    .note {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+    }
+
+    .warn {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+    }
+
+    .ok {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+    }
+
+    .grid-2, .grid-3 {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: var(--primary);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .step-no {
+      border-radius: 12px;
+      background: var(--primary);
+      color: #fff;
+      text-align: center;
+      padding: 10px 8px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .step ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    .step li,
+    .card li {
+      margin: 6px 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    td small {
+      color: var(--muted);
+      display: block;
+      margin-top: 6px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .pill.real { background: #ecfdf5; color: var(--success); }
+    .pill.mock { background: #eff6ff; color: #1d4ed8; }
+    .pill.rule { background: #fff7ed; color: var(--warn); }
+    .pill.high { background: #fef2f2; color: var(--danger); }
+
+    .code {
+      margin-top: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .sources li {
+      margin: 10px 0;
+    }
+
+    .sources a {
+      color: #1d4ed8;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .footer {
+      padding: 22px 36px 34px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 1fr; }
+      .page, .nav { width: 94%; }
+      .hero, .section, .footer { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="私域电商售前客服-导航索引.html">返回导航索引</a>
+    <span style="color:#94a3b8;"> / </span>
+    <a href="私域电商售前客服-产品画布.html">产品画布</a>
+    <span style="color:#94a3b8;"> / </span>
+    <a href="私域电商售前客服-业务流程.html">业务流程</a>
+  </div>
+
+  <div class="page">
+    <div class="hero">
+      <h1>私域电商售前客服 - 政策 / 规则 / 数据清单</h1>
+      <p>
+        本文件基于真实业务场景记录、既有业务流程/产品画布/机会地图，重新梳理可用于 Demo 演示的最小闭环资料。
+        重点不是“把所有业务做全”，而是把“接待 - 版本/正品答疑 - 价格说明 - 下单承接 - 风险兜底”跑顺。
+        原始会话中的姓名、电话、地址等隐私字段均不纳入本清单；不足项以“补充样例”方式补齐，并显式标注。
+      </p>
+      <div class="meta">
+        <span class="tag">分析来源：真实业务场景记录.docx + 现有规划文件</span>
+        <span class="tag">适用目标：最小售前转化闭环 Demo</span>
+        <span class="tag">数据原则：不收集隐私，不伪造监管编号</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>1. 从真实对话看到的业务主线</h2>
+      <p class="lead">
+        从头到尾看完真实会话后，可以确认这不是“复杂咨询型销售”，而是高度模板化的私域 1v1 成交流程。
+        客户真正反复问的，是几个固定决策点：版本、正品、价格、发货、副作用、怎么使用、能不能优惠、怎么付款。
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>最高频问题</h3>
+          <ul>
+            <li>正品/真假/怎么验真</li>
+            <li>日版、孟版、珠峰有什么区别</li>
+            <li>多少钱、一盒还是一支、有没有优惠</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>次高频问题</h3>
+          <ul>
+            <li>之前使用过什么剂量，现在该买哪种</li>
+            <li>有没有副作用，会不会恶心</li>
+            <li>从哪里发货、多久能到、冷链/运费怎么说</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>真实问题特征</h3>
+          <ul>
+            <li>大量问题其实是重复答疑，不需要复杂推理</li>
+            <li>少量问题触及效果、安全、适用人群，合规风险最高</li>
+            <li>成交动作最后都会落到地址确认、付款、发货承接</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note">
+        结合对话关键词统计，真实会话最密集的主题依次是：<b>正品验真、版本差异、效果/推荐、副作用与禁忌、发货履约、支付下单</b>。
+        这和现有产品画布里定义的最小闭环高度一致。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>2. 完整业务流过程</h2>
+      <p class="lead">
+        下面这条流程，已经把真实对话和既有规划文件统一成同一口径。Demo 不需要覆盖所有分支，只要把主干跑通即可。
+      </p>
+      <div class="timeline">
+        <div class="step">
+          <div class="step-no">Step 1</div>
+          <div>
+            <h3>客户进入企微并发起第一句咨询</h3>
+            <div>典型话术：你好、在吗、7.5 什么价、想了解一下。</div>
+            <ul>
+              <li>系统动作：自动欢迎、确认咨询主题、避免冷场。</li>
+              <li>需要的数据：欢迎语模板、首轮引导语、支持的咨询主题列表。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">Step 2</div>
+          <div>
+            <h3>客户确认自己问的是哪一类问题</h3>
+            <div>通常是 3 类：问版本、问正品、问价格；少部分直接问副作用、怎么使用、发货和付款。</div>
+            <ul>
+              <li>系统动作：意图识别，把问题路由到对应答法。</li>
+              <li>需要的数据：问题分类词典、关键词样例、转人工触发词。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">Step 3</div>
+          <div>
+            <h3>客户建立信任：版本差异与正品证明</h3>
+            <div>典型话术：日版和孟版区别是？是不是正品？能验吗？</div>
+            <ul>
+              <li>系统动作：给出版本对比、包装说明、验真方式、可信凭证。</li>
+              <li>需要的数据：版本卡、包装卡、验真流程卡、可公开展示的凭据卡。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">Step 4</div>
+          <div>
+            <h3>客户进入决策：价格、规格、优惠、购买数量</h3>
+            <div>典型话术：一支多少、一盒多少、买两支优惠吗、运费怎么算。</div>
+            <ul>
+              <li>系统动作：返回价格表、简单优惠规则、付款说明。</li>
+              <li>需要的数据：版本价格表、活动规则表、发货费规则、付款路径说明。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">Step 5</div>
+          <div>
+            <h3>客户出现风险问题：效果、副作用、禁忌、适用人群</h3>
+            <div>这是最容易踩政策红线的环节，也是 Demo 最需要“守住边界”的地方。</div>
+            <ul>
+              <li>系统动作：只返回白名单话术；超出白名单就保守回复或转人工。</li>
+              <li>需要的数据：禁说词、白名单回复、禁忌人群说明、必须转人工规则。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-no">Step 6</div>
+          <div>
+            <h3>客户确认购买：地址、支付、发货承接</h3>
+            <div>典型话术：怎么付款、从哪里发、多久到、运费多少。</div>
+            <ul>
+              <li>系统动作：提示付款方式、发货时效、进入人工接单或人工确认。</li>
+              <li>需要的数据：支付方式说明、发货时效说明、地区时效口径、人工接手模板。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3. 已收集到的具体数据</h2>
+      <p class="lead">
+        下面这些内容已经可以从真实业务场景记录中直接提取出来，足够支撑第一版 Demo。为了避免误解，我把“真实已收集”与“仍需补充”拆开写。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%;">类别</th>
+            <th style="width:40%;">已收集的具体数据</th>
+            <th style="width:18%;">来源</th>
+            <th style="width:24%;">在 Demo 中怎么使用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>欢迎与首响</td>
+            <td>
+              统一欢迎语已出现多次：<br>
+              “哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～”
+            </td>
+            <td>真实会话</td>
+            <td>作为自动欢迎语与首轮承接模板</td>
+          </tr>
+          <tr>
+            <td>版本与包装</td>
+            <td>
+              1. 日版一盒两支；孟版通常一盒一支<br>
+              2. 日版是自动笔，孟版是针剂版本<br>
+              3. “日版只能整盒购买，不能拆开卖”<br>
+              4. 珠峰也被客户问到，但当前真实说明较少
+            </td>
+            <td>真实会话</td>
+            <td>回答“版本区别”“一盒和一支怎么理解”“能不能拆卖”</td>
+          </tr>
+          <tr>
+            <td>正品与验真</td>
+            <td>
+              1. 标准口径：“保证是正品的，到货你可以验”<br>
+              2. 已出现验真动作：让客户上官网验、发送验真视频、展示包装图<br>
+              3. 有客户明确问到“如果扫码不是正品是否退货退款”
+            </td>
+            <td>真实会话</td>
+            <td>演示“正品说明 + 验真步骤 + 不确定时转人工”</td>
+          </tr>
+          <tr>
+            <td>价格与活动</td>
+            <td>
+              1. 日版 2.5：548/盒（1 盒 2 支）<br>
+              2. 日版 5.0：698/盒（1 盒 2 支）<br>
+              3. 日版 10：1190/盒（1 盒 2 支）<br>
+              4. 孟版 2.5：230/支；618 活动减 20 后为 210<br>
+              5. 孟版 5.0：270/支<br>
+              6. 孟版 10：340/支<br>
+              7. 孟版 12.5：370/支<br>
+              8. 真实会话中存在“1200-80=1120”“优惠 20”等人工优惠口径
+            </td>
+            <td>真实会话</td>
+            <td>可直接做成价格表与优惠规则表</td>
+          </tr>
+          <tr>
+            <td>副作用与禁忌</td>
+            <td>
+              1. 常见反应口径：饱腹感、恶心、嗜睡、口渴、便秘、呕吐、部分人发热<br>
+              2. 低血糖处理口径：轻度喝糖水，严重需停止使用并大量补糖<br>
+              3. 禁忌/慎用人群：甲状腺肿瘤或癌症病史、正在使用胰岛素/磺脲类药物、过敏体质、肾功能不全、备孕/孕妇/哺乳期、甲减甲状腺结节
+            </td>
+            <td>真实会话</td>
+            <td>作为风险问答白名单；超出边界直接转人工</td>
+          </tr>
+          <tr>
+            <td>保存与使用说明</td>
+            <td>
+              1. 未开封：2-8°C 冷藏，禁止冷冻<br>
+              2. 已开封：&lt;30°C 常温可存 21 天<br>
+              3. 无冰箱时可用泡沫冰袋冷藏箱<br>
+              4. 真实口径中多次出现“每周使用一次”“新手建议先从 2.5 开始使用”
+            </td>
+            <td>真实会话</td>
+            <td>回答“怎么使用”“怎么保存”“第一次使用从什么剂量开始”</td>
+          </tr>
+          <tr>
+            <td>支付与发货</td>
+            <td>
+              1. 发货地高频口径：深圳发货<br>
+              2. 发货时效高频口径：付款后 48 小时内发出；部分对话里说明 2-3 天到<br>
+              3. 顺丰冷链口径出现过<br>
+              4. 运费口径出现过：运费到付约 20 左右<br>
+              5. 支付方式出现过：微信、支付宝、扫码；企微未开通收款功能
+            </td>
+            <td>真实会话</td>
+            <td>回答“从哪里发”“多久能到”“怎么付款”，并转人工确认收货信息</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>4. 仍需补充的样例数据</h2>
+      <p class="lead">
+        这部分不是“凭空编造”，而是为了把流程跑通而补的样例。它们可以用于界面演示和问答测试，但不能冒充真实业务承诺。
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:18%;">类别</th>
+            <th style="width:30%;">已经有的真实底座</th>
+            <th style="width:30%;">建议补充的样例数据</th>
+            <th style="width:22%;">注意事项</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>产品版本数据</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              版本名、包装、剂量、价格、保存方式、发货说明
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              版本对比卡的展现形式、推荐话术、3-5 条标准客户问法
+            </td>
+            <td>样例可改名称，但不要把不存在的真实品牌或真实监管信息硬写进去</td>
+          </tr>
+          <tr>
+            <td>正品证明数据</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              包装图、实物图、验真流程、物流包装说明、可公开展示的来源口径
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              凭据卡片的排版样式、样例验真步骤截图
+            </td>
+            <td><span class="pill high">禁止伪造</span> 批准文号、注册证书编号、质检结论、蓝帽子编号</td>
+          </tr>
+          <tr>
+            <td>价格活动数据</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              当前报价、优惠规则、到付/包邮说明、活动口径
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              额外组合价样例、测试订单号、优惠问法样例
+            </td>
+            <td>补充价格要显式标“样例价”或“测试价”，避免被误解为正式销售报价</td>
+          </tr>
+          <tr>
+            <td>合规话术</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              客服现行禁说词、现有风险回复
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              风险问题测试集、标准保守答法样例
+            </td>
+            <td>即使是 Demo，也要按正式合规标准来；不能用“先演示再说”绕过</td>
+          </tr>
+          <tr>
+            <td>用户对话样本</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              匿名化问题文本、问题类别、真实问法
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              测试昵称、测试地区、测试订单号
+            </td>
+            <td><span class="pill high">禁止保留</span> 姓名、手机号、详细地址、收款信息</td>
+          </tr>
+          <tr>
+            <td>履约与支付</td>
+            <td>
+              <span class="pill real">真实采集</span>
+              发货城市、时效口径、支付方式说明、客服接手动作
+            </td>
+            <td>
+              <span class="pill mock">补充样例</span>
+              测试订单状态、测试物流轨迹、测试支付结果
+            </td>
+            <td>如果还没接系统，物流/支付只演示“说明与转人工”，不要假装自动下单成功</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>5. 可直接拿来使用的数据包</h2>
+      <p class="lead">
+        下面这份已经按“真实已收集”和“补充样例”重新整理。前者可以直接进入知识库，后者可以作为测试集或界面占位数据使用。
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>真实已收集数据</h3>
+          <ul>
+            <li>欢迎语 1 份</li>
+            <li>版本数据 2-3 组：日版 / 孟版 / 珠峰（珠峰信息较少）</li>
+            <li>价格数据 7 条以上：2.5 / 5.0 / 10 / 12.5 等剂量口径</li>
+            <li>副作用与禁忌说明 1 份</li>
+            <li>保存与使用说明 1 份</li>
+            <li>发货与支付口径 1 份</li>
+            <li>匿名化真实问法可继续从会话中扩展</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>建议补充样例</h3>
+          <ul>
+            <li>10 条测试会话：问版本、问正品、问价格、问副作用、找人工</li>
+            <li>3 条测试订单状态：待付款、待发货、已发货</li>
+            <li>1 套“凭据卡 / 版本对比卡 / 价格卡”展示样式</li>
+            <li>1 套测试昵称 / 测试地区 / 测试订单号</li>
+            <li>1 份说明：补充样例仅用于流程演示，不用于对外销售承诺</li>
+          </ul>
+        </div>
+      </div>
+      <div class="ok">
+        推荐先把 Demo 做成“<b>能答、能说明、能转人工</b>”，而不是“自动完成支付和发货”。这样更稳，也更符合当前数据准备程度。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>6. 可直接落地的数据结构建议</h2>
+      <p class="lead">
+        下面这份结构已经尽量换成“收集好的具体数据”。不确定的数据没有硬编，只在需要测试时预留样例位。
+      </p>
+      <div class="code">{
+  "products": [
+    {
+      "demo_id": "VER-001",
+      "display_name": "日版 2.5",
+      "dose": "2.5",
+      "package_desc": "1盒2支",
+      "usage_desc": "每周使用一次",
+      "storage_desc": "2-8°C冷藏，已开封按说明保存",
+      "price_desc": "548/盒",
+      "version_compare": "自动笔，操作更方便",
+      "proof_cards": ["包装图", "验真步骤图", "版本说明卡"]
+    },
+    {
+      "demo_id": "VER-002",
+      "display_name": "孟版 5.0",
+      "dose": "5.0",
+      "package_desc": "1盒1支",
+      "usage_desc": "每周使用一次",
+      "storage_desc": "按冷链与保存说明执行",
+      "price_desc": "270/支",
+      "version_compare": "针剂版本，性价比较高",
+      "proof_cards": ["包装图", "版本说明卡"]
+    },
+    {
+      "demo_id": "VER-003",
+      "display_name": "日版 5.0",
+      "dose": "5.0",
+      "package_desc": "1盒2支",
+      "usage_desc": "每周使用一次",
+      "storage_desc": "2-8°C冷藏，已开封按说明保存",
+      "price_desc": "698/盒",
+      "version_compare": "自动笔，适合更关注使用便利性的客户",
+      "proof_cards": ["包装图", "版本说明卡"]
+    },
+    {
+      "demo_id": "VER-004",
+      "display_name": "孟版 10",
+      "dose": "10",
+      "package_desc": "1支",
+      "usage_desc": "每周使用一次",
+      "storage_desc": "按冷链与保存说明执行",
+      "price_desc": "340/支",
+      "version_compare": "高剂量版本，建议结合既往使用情况说明",
+      "proof_cards": ["包装图", "版本说明卡"]
+    }
+  ],
+  "promo_rules": [
+    {
+      "rule_id": "PROMO-001",
+      "name": "618 活动口径",
+      "condition": "孟版单支购买",
+      "result": "减20元",
+      "validity": "真实会话出现过"
+    },
+    {
+      "rule_id": "PROMO-002",
+      "name": "人工优惠口径",
+      "condition": "客户议价或多件购买",
+      "result": "存在“优惠10”“优惠20”“1200-80=1120”等人工口径",
+      "validity": "真实会话出现过，正式上线前需统一"
+    }
+  ],
+  "compliance_rules": [
+    {
+      "intent": "效果承诺",
+      "trigger_words": ["瘦多少", "多久见效", "保证有效"],
+      "response_mode": "safe_reply",
+      "reply": "每个人情况不同，不能承诺固定效果，具体以产品说明和个人情况为准。"
+    },
+    {
+      "intent": "疾病治疗",
+      "trigger_words": ["治疗", "降血糖", "治好", "替代药物"],
+      "response_mode": "transfer",
+      "reply": "这类问题我不能直接给结论，帮您转人工进一步说明。"
+    },
+    {
+      "intent": "副作用与禁忌",
+      "trigger_words": ["恶心", "副作用", "孕妇", "备孕", "甲状腺"],
+      "response_mode": "safe_reply",
+      "reply": "常见反应和禁忌人群需按固定说明回复，超出说明范围直接转人工。"
+    }
+  ],
+  "handoff_rules": {
+    "keywords": ["人工", "转人工", "投诉", "不放心"],
+    "low_confidence_action": "transfer",
+    "summary_template": "客户关注点 + 已答内容 + 未解决问题"
+  }
+}</div>
+    </div>
+
+    <div class="section">
+      <h2>7. 广告法与相关政策要点</h2>
+      <p class="lead">
+        本节只摘最直接影响 Demo 的规则，不做泛法条堆砌。重点是：哪些内容绝对不能说，哪些内容即使能说也必须有来源依据。
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>必须守住的红线</h3>
+          <ul>
+            <li>不得对效果、安全性作断言或保证。</li>
+            <li>不得涉及疾病预防、治疗功能。</li>
+            <li>不得暗示产品是保障健康所必需。</li>
+            <li>不得与药品、其他保健食品作比较背书。</li>
+            <li>不得用专家、医生、患者、机构作推荐证明。</li>
+            <li>不得使用“国家级、最高级、最佳”等绝对化表述。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>必须显式说明的点</h3>
+          <ul>
+            <li>保健食品广告内容不能超出注册/备案凭证和说明书范围。</li>
+            <li>保健食品广告应显著标明“保健食品不是药物，不能代替药物治疗疾病”。</li>
+            <li>涉及价格、赠品、规格、期限的内容，要准确、清楚、明白。</li>
+            <li>需要审查的保健食品广告，未经审查不得发布。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="warn">
+        <b>一个很重要的政策细节：</b>
+        根据 2025 年市场监管总局发布的《〈中华人民共和国广告法〉适用问题执法指南（一）》中的口径，
+        借助电话、短信、即时通信工具进行点对点交流，一般会被认为“受众具有特定性”，通常不按大众广告处理。
+        但这不意味着私域客服可以随便说。原因有两点：
+        1）很多话术会复用到朋友圈、海报、直播引流物料、公域页面；2）保健食品相关表述本身就高度敏感。
+        所以 Demo 仍建议按“广告合规高标准”来设计回复边界。
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28%;">场景</th>
+            <th style="width:34%;">建议规则</th>
+            <th style="width:38%;">Demo 落地方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>客户问“有没有效果”“能瘦多少”</td>
+            <td>不能承诺固定效果，不能说“保证瘦”“瘦几斤”</td>
+            <td>统一回复：效果因人而异，不承诺具体结果；需要进一步了解请转人工</td>
+          </tr>
+          <tr>
+            <td>客户问“能治病吗”“能降某项指标吗”</td>
+            <td>不得涉及疾病预防、治疗功能</td>
+            <td>统一回复：不能替代药物，不提供治疗承诺，直接转人工</td>
+          </tr>
+          <tr>
+            <td>客户问“哪个版本最好”</td>
+            <td>避免绝对化、最好、最强、顶级等表述</td>
+            <td>改成“区别在于包装、使用方式、价格带，按需求选择”</td>
+          </tr>
+          <tr>
+            <td>客户问“是不是正品”</td>
+            <td>可以说验真方式、包装识别、可验证路径，但不要虚构官方资质</td>
+            <td>展示真实包装图和验真流程卡，缺材料时只做“样例凭据卡”</td>
+          </tr>
+          <tr>
+            <td>客户问“今天买减多少、送什么”</td>
+            <td>价格、赠品、活动条件必须明确，不能模糊表达</td>
+            <td>所有优惠由规则表输出，不让模型自由算</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>8. 本次建议的收集动作</h2>
+      <p class="lead">
+        如果马上要做 Demo，建议按下面顺序收集，不要一上来就追求完整。
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>先整理真实资料</h3>
+          <ul>
+            <li>把已有版本、价格、包装形式整理成 1 张正式价格表</li>
+            <li>把已有正品说明、验真方式整理成 1 张凭据说明卡</li>
+            <li>把已有副作用、禁忌、保存方式整理成 1 张风险说明卡</li>
+            <li>从历史对话里再补 20 条匿名问题，按“版本 / 正品 / 价格 / 风险 / 发货”分类</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>再补测试样例</h3>
+          <ul>
+            <li>补 10 条测试问答，覆盖问价格、问版本、问正品、问效果、找人工</li>
+            <li>补 3 条测试订单状态，用于展示“可接人工”</li>
+            <li>补 1 套样例凭据卡和版本对比卡</li>
+            <li>所有测试内容都标注“测试样例”</li>
+          </ul>
+        </div>
+      </div>
+      <div class="ok">
+        最适合当前阶段的产品形态不是“全自动卖货机器人”，而是<b>企微内的 AI 售前助手</b>：
+        先接待、再答疑、再说明价格，遇到风险问题就转人工。
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>9. 政策依据与参考来源</h2>
+      <ul class="sources">
+        <li>
+          《中华人民共和国广告法》：重点参考第 8 条、第 9 条、第 18 条关于价格准确、绝对化表述、保健食品广告禁区的规定<br>
+          <a href="http://legalinfo.moj.gov.cn/pub/sfbzhfx/zt/2021zt/2021bhzscq/2021bhzscq_xgfl/202104/t20210414_354458.html">http://legalinfo.moj.gov.cn/pub/sfbzhfx/zt/2021zt/2021bhzscq/2021bhzscq_xgfl/202104/t20210414_354458.html</a>
+        </li>
+        <li>
+          《药品、医疗器械、保健食品、特殊医学用途配方食品广告审查管理暂行办法》：重点参考第 7 条、第 9 条、第 11 条<br>
+          <a href="https://www.gov.cn/gongbao/content/2020/content_5488918.htm">https://www.gov.cn/gongbao/content/2020/content_5488918.htm</a>
+        </li>
+        <li>
+          《〈中华人民共和国广告法〉适用问题执法指南（一）》：重点参考关于“即时通信工具点对点交流一般具有受众特定性”的口径<br>
+          <a href="https://www.samr.gov.cn:83/cms_files/filemanager/1647978232/attach/20261/eda217ebaac8491d8cc0654d9857e649.pdf">https://www.samr.gov.cn:83/cms_files/filemanager/1647978232/attach/20261/eda217ebaac8491d8cc0654d9857e649.pdf</a>
+        </li>
+        <li>
+          2026 年地方市场监管合规提示（用于实务理解）：食品/保健食品广告不得宣称减肥疗效、不得出现“安全无副作用”等表述<br>
+          <a href="https://www.shantou.gov.cn/cnst/zdly/spypaqxxgk/wfgg/content/post_2553048.html">https://www.shantou.gov.cn/cnst/zdly/spypaqxxgk/wfgg/content/post_2553048.html</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      生成说明：本文件依据真实业务场景记录、现有业务流程与产品画布整理而成。隐私类原始数据未纳入；补充样例内容需在实际演示时明确标注为测试样例数据。
+    </div>
+  </div>
+</body>
+</html>
