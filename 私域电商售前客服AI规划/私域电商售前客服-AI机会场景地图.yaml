@@ -1,0 +1,130 @@
+title: "私域电商售前客服 AI 机会场景地图（RAG 1v1 自动回复价值落点 · 16 个机会）"
+stages:
+  - name: "引流承接·加好友"
+    steps:
+      - activity: "承接抖音引流客户的首次触达"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微消息回调/欢迎语链路"
+        repetitive_tasks:
+          - "夜间与高峰期咨询积压，人工次日集中回复（首响>8小时）"
+          - "欢迎语发送与渠道打标依赖人工逐个操作"
+        cognitive_tasks:
+          - "判断客户来源与意图，选择合适的开场引导"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "7×24 秒级自动首响"
+            description: "RAG chatbot 在客户添加企微的首触达环节,通过消息实时回调实现全天候秒级自动应答与欢迎承接,以将夜间首响时长从>8小时压缩至秒级,不再错过加粉后30分钟的开口黄金窗口"
+          - type: "longtail"
+            name: "夜间咨询全自动接待"
+            description: "RAG chatbot 在夜间直播后咨询高峰(占全部咨询35%~45%)环节,独立完成询价初筛与需求承接,以零夜班编制覆盖全部非工作时段流量,消除流量在等待中流失"
+          - type: "repetitive"
+            name: "来源自动打标与个性化开场"
+            description: "系统在客户接入环节,基于渠道活码自动完成来源打标并发送对应直播场次的个性化开场,以保证标签完整性100%(采购SCRM/企微原生能力即可,不自建)"
+
+  - name: "询价·需求澄清"
+    steps:
+      - activity: "应答正品求证与澄清客户需求"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/正品溯源与问题链库"
+        repetitive_tasks:
+          - "同质化询价与求证问题(是不是正品/什么版本/多少钱/怎么吃)反复人工回答"
+        cognitive_tasks:
+          - "正品凭据与版本差异说明话术未标准化(沉淀在老客服个人脑中)"
+          - "功效类长尾问题必须踩准《广告法》边界(新客服30天培训的最大占比)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "正品溯源与版本应答"
+            description: "RAG chatbot 在正品求证环节(标品信任逻辑下的首位高频问题),检索正品溯源库(资质文号/授权链路/防伪验证方式/版本差异说明)标准化应答,以统一正品信任口径,消除回答含糊导致的流失"
+          - type: "cognitive"
+            name: "需求澄清问题链自动引导"
+            description: "RAG chatbot 在需求澄清环节,检索结构化问题链知识库(版本/规格/用法适配)逐步引导客户确认适配款,以将老客服的澄清经验产品化,消除新老客服水平参差"
+          - type: "cognitive"
+            name: "合规话术库应答功效类长尾问题"
+            description: "RAG chatbot 在功效与安全类长尾问题环节(低频但合规风险最高),仅检索预审核合规话术库生成回答(合规内置于建库阶段),以实现回答合规稳定,消除人工临场发挥的违规风险"
+          - type: "innovation"
+            name: "真人话术拟合应答"
+            description: "RAG chatbot 在全部售前对话环节,基于会话存档中金牌客服的真实对话语料调优应答风格,以使自动回复与真人回答高度拟合,客户无明显机器感"
+        risk_control:
+          - "**合规边界**: 功效表述绝对禁止由大模型自由生成,RAG 只检索预审核合规语料;库内无答案即触发兜底转人工,不做推测性回答"
+
+  - name: "商品对比"
+    steps:
+      - activity: "应答版本/规格差异与真伪辨别问题"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/商品库"
+        repetitive_tasks:
+          - "人工翻资料复制粘贴版本/规格参数,耗时且错漏"
+        cognitive_tasks:
+          - "将版本/规格差异转译为客户听得懂的选择建议(标品只差在版本)"
+          - "不同客服讲法不一致,客户交叉验证后失去信任"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "商品库检索版本对比应答"
+            description: "RAG chatbot 在商品对比环节,检索商品库(SKU/版本/规格/价格/正品凭据)自动生成结构化版本对比结论,以秒级替代人工翻资料,并保证全渠道口径一致不前后矛盾"
+          - type: "cognitive"
+            name: "适配版本推荐应答"
+            description: "RAG chatbot 在选款建议环节,基于需求澄清收集的用法/预算信息检索商品库匹配适配版本与规格,以合规话术给出推荐理由,回答口径与资质范围严格一致"
+        risk_control:
+          - "**合规边界**: 对比结论不得涉及未获批的功效宣称;推荐理由仅使用商品库内预审核表述"
+
+  - name: "促销算账"
+    steps:
+      - activity: "应答优惠计算与到手价"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/促销规则库"
+        repetitive_tasks:
+          - "人工手动计算满减/赠品/组合价,客户反复改组合需反复重算"
+        cognitive_tasks:
+          - "复杂规则叠加下算准到手价(人工错价即客诉与赔付)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "促销规则库确定性算账"
+            description: "RAG chatbot 在促销算账环节,检索结构化促销规则库计算确定性到手价,大模型仅对结果做话术润色,以秒级完成算账并杜绝人工错价,客户反复调整组合可即时重算"
+          - type: "cognitive"
+            name: "合规凑单建议应答"
+            description: "RAG chatbot 在凑单咨询环节,基于促销规则库的满减门槛给出凑单组合建议与对应到手价,以透明的方案对比帮助客户自主决策,不做压迫式推销"
+        risk_control:
+          - "**高风险容错边界**: 价格与优惠结果绝对禁止由大模型独立计算,必须由促销规则库检索返回确定性结果,大模型仅负责话术润色,避免幻觉错价"
+
+  - name: "下单·发货跟进"
+    steps:
+      - activity: "应答订单与物流查询"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/订单物流数据源"
+        repetitive_tasks:
+          - "人工跨系统查单后手动复述,大量重复劳动"
+          - "夜间物流咨询无人应答"
+        cognitive_tasks:
+          - "发货时效承诺需考虑仓储物流实际状态(说错即客诉)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "物流状态自动查询应答"
+            description: "RAG chatbot 在发货物流咨询环节,对接订单/物流数据源实时查询并自动回复状态与轨迹,以7×24即时应答替代人工跨系统查询复述"
+          - type: "cognitive"
+            name: "发货时效确定性承诺"
+            description: "RAG chatbot 在发货时效咨询环节,基于订单系统返回的确定性时效数据生成承诺话术,以保证时效承诺与履约一致,消除凭感觉承诺引发的客诉"
+        risk_control:
+          - "**高风险容错边界**: 发货时效承诺绝对禁止由大模型推测,必须以订单/物流数据源返回值为准;数据缺失时回复保守话术并转人工"
+
+  - name: "全流程·兜底与守护"
+    steps:
+      - activity: "RAG 未命中兜底与质量守护"
+        role: "RAG chatbot + 人工兜底客服"
+        touchpoint: "企微会话/转接机制/评测集"
+        repetitive_tasks:
+          - "无(本阶段为横向机制设计)"
+        cognitive_tasks:
+          - "判定何时该转人工:知识库未命中/客户点名人工/异常情绪"
+          - "持续验证自动回复质量与转化率守护基线"
+        ai_opportunities:
+          - type: "innovation"
+            name: "未命中兜底转人工机制"
+            description: "系统在RAG检索未命中或客户主动要求人工时,自动转接人工客服并附上下文摘要,以保证全流程唯一人工触点的接管零摩擦——这是不设真人在环审核的成立前提"
+          - type: "innovation"
+            name: "转化率守护监测"
+            description: "系统在AI接管期间,按周监测加好友到首单转化率与人工对照组的差异,以守护约10%的正常水位不下降;连续两周显著低于基线即触发回滚与知识库复盘"
+          - type: "cognitive"
+            name: "真实会话回流调优"
+            description: "FDE 在上线后运营环节,基于真实会话中的未命中问题与低拟合回答持续扩充知识库与调优话术,以使RAG自动接待率与真人拟合度随交付周期持续爬升"
+        risk_control:
+          - "**守护边界**: 转化率是最重要的守护指标(维持不下降),不作为提升目标;不分析未转化客户的犹豫信号,不为此增加人工环节"

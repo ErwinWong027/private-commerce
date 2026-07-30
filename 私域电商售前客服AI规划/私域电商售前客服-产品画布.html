@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正品溯源与版本应答 · RAG 售前信任确认助手</title>
+  <style>
+    :root {
+      --color-primary: #10213E;
+      --color-accent: #5DB2E2;
+      --color-secondary: #625D9C;
+      --color-success: #00524C;
+      --color-info: #6FB1C8;
+      --color-warning: #F59E0B;
+      --color-destructive: #EF4444;
+      --color-background: #FFFFFF;
+      --color-bg-alt: #F5F5F6;
+      --color-foreground: #10213E;
+      --color-text-muted: #64748B;
+      --color-border: #E2E8F0;
+      --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+      --radius-md: 8px;
+      --font-family: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-alt);
+      padding: 32px;
+      color: var(--color-foreground);
+      line-height: 1.5;
+    }
+
+    .canvas-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      min-height: 800px;
+    }
+
+    /* Standardized Header */
+    .page-header {
+      padding: 32px 40px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-header h1::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      padding-left: 16px;
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--color-primary); color: #fff;
+      padding: 12px 24px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none; z-index: 1000;
+    }
+
+    .canvas-body {
+      padding: 24px 40px 40px 40px;
+      display: flex;
+      flex: 1;
+      gap: 16px;
+      overflow-x: auto;
+    }
+
+    /* 5 columns Grid */
+    .column {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Card Base */
+    .card {
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      transition: transform 0.15s ease-out;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-alt);
+    }
+
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .card-subtitle {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-header-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: rgba(16, 33, 62, 0.05);
+      color: var(--color-primary);
+    }
+
+    .card-header-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .card-body {
+      padding: 20px;
+      font-size: 14px;
+      color: var(--color-foreground);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-body ul, .card-body ol {
+      list-style: none;
+    }
+
+    .card-body li {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .card-body li:last-child {
+      margin-bottom: 0;
+    }
+
+    .bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    
+    .number-bullet {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-accent);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    /* Color Overrides for specific cards */
+    .theme-roles { border-left: 4px solid var(--color-secondary); }
+    .theme-pains { border-left: 4px solid var(--color-destructive); }
+    .theme-input { border-left: 4px solid var(--color-accent); }
+    .theme-data { border-left: 4px solid var(--color-info); }
+    .theme-workflow { border-left: 4px solid var(--color-primary); }
+    .theme-cap { border-left: 4px solid var(--color-secondary); }
+    .theme-output { border-left: 4px solid var(--color-accent); }
+    .theme-tools { border-left: 4px solid var(--color-info); }
+    .theme-product { border-left: 4px solid var(--color-success); }
+    .theme-gains { border-left: 4px solid var(--color-success); }
+
+  </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a></div></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="canvas-container">
+    <header class="page-header">
+      <div class="header-left">
+        <h1>正品溯源与版本应答 · RAG 售前信任确认助手</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="canvas-body">
+      
+      <!-- Col 1: userRoles & userPains -->
+      <div class="column">
+        <!-- userRoles -->
+        <div class="card theme-roles">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户角色</div>
+              <div class="card-subtitle">使用该AI场景的用户角色和群体</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>减脂塑形需求的 25~45 岁女性客户（抖音直播引流后添加企微）</li>
+              
+                <li><span class="bullet"></span>售前客服（人工，从口径背诵转为兜底处置）</li>
+              
+                <li><span class="bullet"></span>FDE 前沿部署工程师（建库与调优）</li>
+              
+            </ul>
+          </div>
+        </div>
+        <!-- userPains -->
+        <div class="card theme-pains">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户痛点</div>
+              <div class="card-subtitle">用户当前面临的问题 and 挑战</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2v1"/><path d="M12 6a6 6 0 0 1 6 6c0 1.66-.67 3.16-1.76 4.25a2.99 2.99 0 0 0-.88 2.12v.63h-6v-.63c0-.8-.31-1.55-.88-2.12A5.99 5.99 0 0 1 6 12a6 6 0 0 1 6-6Z"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>客户最担心买到假货/仿品/非正规版本，反复索要正品凭据，回答含糊或版本说不清就流失</li>
+              
+                <li><span class="bullet"></span>正品凭据、授权链路、防伪验证方式散落，新客服记不全，答复口径不一</li>
+              
+                <li><span class="bullet"></span>孟版/日版等版本差异说不清，客户交叉验证后失去信任</li>
+              
+                <li><span class="bullet"></span>夜间与高峰期无人应答，加粉 30 分钟黄金信任窗口错过</li>
+              
+                <li><span class="bullet"></span>涉及功效表述时易越界，踩《广告法》红线</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 2: aiInput & dataKnowledge -->
+      <div class="column">
+        <div class="card theme-input">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 场景输入</div>
+              <div class="card-subtitle">AI系统需要的输入数据和格式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>客户在企微发出的正品/版本/渠道类询问（如「这是正品吗」「孟版和日版有什么区别」「怎么验真」）</li>
+              
+                <li><span class="bullet"></span>客户提及的具体 SKU 或直播场次来源标签</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-data">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">数据/知识</div>
+              <div class="card-subtitle">AI系统需要的数据 and 领域知识</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>正品溯源库：资质文号/蓝帽子备案、品牌授权链路、防伪码验证方式</li>
+              
+                <li><span class="bullet"></span>商品库：SKU、版本/规格、正品凭据与版本差异说明</li>
+              
+                <li><span class="bullet"></span>预审核合规话术库：涉及功效/安全的表述一律走预审核语料（红线守门）</li>
+              
+                <li><span class="bullet"></span>会话存档语料：金牌客服的正品答疑真实话术（用于拟合真人口径）</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3: workflow & modelUsage (Core Capabilities) -->
+      <div class="column">
+        <div class="card theme-workflow">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 处理 WORKFLOW</div>
+              <div class="card-subtitle">AI系统的工作流程和步骤</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M14 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M20 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M10 18H5c-1.7 0-3-1.3-3-3v-1"/><polyline points="7 21 10 18 7 15"/><rect width="8" height="8" x="14" y="14" rx="2"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ol>
+              
+                <li><span class="number-bullet">1.</span>意图识别：判定为正品/版本/渠道信任类问题，命中则进入正品溯源检索链路</li>
+              
+                <li><span class="number-bullet">2.</span>检索应答：从正品溯源库与商品库检索匹配凭据与版本差异，组织为统一口径话术</li>
+              
+                <li><span class="number-bullet">3.</span>合规过滤：若问题夹带功效诉求，仅从预审核合规话术库取表述，绝不由大模型自由生成</li>
+              
+                <li><span class="number-bullet">4.</span>置信度判定：检索置信度低于阈值或客户点名人工时，触发未命中兜底转人工并附上下文摘要</li>
+              
+                <li><span class="number-bullet">5.</span>语料回流：未命中问题入补录队列，FDE 每周复盘补齐正品溯源库</li>
+              
+                <li><span class="number-bullet">6.</span>人工仅作兜底：RAG 未命中、客户点名人工、异常情绪时接管，不设真人在环审核</li>
+              
+            </ol>
+          </div>
+        </div>
+        <div class="card theme-cap">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">核心能力</div>
+              <div class="card-subtitle">场景所需的关键 AI 及工程能力</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 2-2"/><path d="m19 11-2-2"/><path d="M12 2v2"/><path d="m18 6 1-1"/><path d="m6 6-1-1"/><path d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/><path d="M7 14a5 5 0 0 0 10 0"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>核心编排：通用大模型（如 GPT-4o / Claude 3.5 Sonnet 级）负责意图识别、多轮澄清与话术组织（拟合真人风格）</li>
+              
+                <li><span class="bullet"></span>硬约束：正品凭据与功效表述只能来自检索到的预审核语料（检索式而非自由生成），禁止模型编造凭据或功效</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 4: aiOutput & tools -->
+      <div class="column">
+        <div class="card theme-output">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 输出</div>
+              <div class="card-subtitle">AI系统产生的输出结果 and 格式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M3 5h4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微对话中秒级返回统一口径的正品凭据说明 + 版本差异对比 + 验真指引</li>
+              
+                <li><span class="bullet"></span>命中不足时输出保守话术并无摩擦转接人工</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-tools">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">工具调用</div>
+              <div class="card-subtitle">AI系统需要调用的内外部 API</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微微信客服（kf 账号）API 消息回调与代发</li>
+              
+                <li><span class="bullet"></span>企微会话存档 API（合规自证 + 语料源）</li>
+              
+                <li><span class="bullet"></span>RAG 平台与正品溯源/商品/合规话术知识库</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 5: productType & userGains -->
+      <div class="column">
+        <div class="card theme-product">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">产品形态</div>
+              <div class="card-subtitle">AI系统的产品形式 and 交互方式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微侧 FDE 定制部署的 RAG 自动回复 chatbot（全自动 1v1，人工兜底）</li>
+              
+                <li><span class="bullet"></span>交付「能直接上岗自动接待」的业务结果，而非标准化 SaaS 工具</li>
+              
+                <li><span class="bullet"></span>风险边界：优先走 kf 官方通道规避封号风险；无蓝帽子 SKU 不做功效表述；库内无答案即转人工</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-gains">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户收益</div>
+              <div class="card-subtitle">用户通过使用该AI场景获得的好处</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>正品信任确认从「老客服口径参差」变为全渠道统一、秒级、可信</li>
+              
+                <li><span class="bullet"></span>首响≤10 秒且 7×24 覆盖，不再错过加粉黄金信任窗口</li>
+              
+                <li><span class="bullet"></span>功效表述红线事件 0 起，正品答疑口径 100% 一致</li>
+              
+                <li><span class="bullet"></span>客户端：快速拿到明确正品凭据与版本差异，降低买假焦虑</li>
+              
+                <li><span class="bullet"></span>业务守护：售前转化率维持约 10% 守护基线不下降（正品类问答命中率上线后建基线跟踪）</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--color-text-muted); max-width: 1440px; margin-left: auto; margin-right: auto; padding: 16px 0 8px;">
+    Generated by ai-canvas-generator &middot; &copy; 2026 Inspire AI4PM
+  </div>
+
+  <div class="toast" id="toast">已成功复制 YAML 数据</div>
+  
+  <script type="application/yaml" id="raw-yaml">
+title: 正品溯源与版本应答 · RAG 售前信任确认助手
+description: 针对瘦身减肥保健品私域售前的单一 AI 场景产品画布。标品信任逻辑下，进入企微 1v1 的客户不问「有没有效」（功效认知已在直播间完成），只问「是不是正品 / 是哪个版本规格 / 渠道可不可信」——本场景由 RAG chatbot 检索正品溯源库，在企微对话中秒级、统一、可信地完成正品信任确认，替代散落在老客服脑中的口径。
+userRoles:
+  - 减脂塑形需求的 25~45 岁女性客户（抖音直播引流后添加企微）
+  - 售前客服（人工，从口径背诵转为兜底处置）
+  - FDE 前沿部署工程师（建库与调优）
+userPains:
+  - 客户最担心买到假货/仿品/非正规版本，反复索要正品凭据，回答含糊或版本说不清就流失
+  - 正品凭据、授权链路、防伪验证方式散落，新客服记不全，答复口径不一
+  - 孟版/日版等版本差异说不清，客户交叉验证后失去信任
+  - 夜间与高峰期无人应答，加粉 30 分钟黄金信任窗口错过
+  - 涉及功效表述时易越界，踩《广告法》红线
+aiInput:
+  - 客户在企微发出的正品/版本/渠道类询问（如「这是正品吗」「孟版和日版有什么区别」「怎么验真」）
+  - 客户提及的具体 SKU 或直播场次来源标签
+dataKnowledge:
+  - 正品溯源库：资质文号/蓝帽子备案、品牌授权链路、防伪码验证方式
+  - 商品库：SKU、版本/规格、正品凭据与版本差异说明
+  - 预审核合规话术库：涉及功效/安全的表述一律走预审核语料（红线守门）
+  - 会话存档语料：金牌客服的正品答疑真实话术（用于拟合真人口径）
+workflow:
+  - 意图识别：判定为正品/版本/渠道信任类问题，命中则进入正品溯源检索链路
+  - 检索应答：从正品溯源库与商品库检索匹配凭据与版本差异，组织为统一口径话术
+  - 合规过滤：若问题夹带功效诉求，仅从预审核合规话术库取表述，绝不由大模型自由生成
+  - 置信度判定：检索置信度低于阈值或客户点名人工时，触发未命中兜底转人工并附上下文摘要
+  - 语料回流：未命中问题入补录队列，FDE 每周复盘补齐正品溯源库
+  - 人工仅作兜底：RAG 未命中、客户点名人工、异常情绪时接管，不设真人在环审核
+modelUsage:
+  - 核心编排：通用大模型（如 GPT-4o / Claude 3.5 Sonnet 级）负责意图识别、多轮澄清与话术组织（拟合真人风格）
+  - 硬约束：正品凭据与功效表述只能来自检索到的预审核语料（检索式而非自由生成），禁止模型编造凭据或功效
+aiOutput:
+  - 企微对话中秒级返回统一口径的正品凭据说明 + 版本差异对比 + 验真指引
+  - 命中不足时输出保守话术并无摩擦转接人工
+tools:
+  - 企微微信客服（kf 账号）API 消息回调与代发
+  - 企微会话存档 API（合规自证 + 语料源）
+  - RAG 平台与正品溯源/商品/合规话术知识库
+productType:
+  - 企微侧 FDE 定制部署的 RAG 自动回复 chatbot（全自动 1v1，人工兜底）
+  - 交付「能直接上岗自动接待」的业务结果，而非标准化 SaaS 工具
+  - 风险边界：优先走 kf 官方通道规避封号风险；无蓝帽子 SKU 不做功效表述；库内无答案即转人工
+userGains:
+  - 正品信任确认从「老客服口径参差」变为全渠道统一、秒级、可信
+  - 首响≤10 秒且 7×24 覆盖，不再错过加粉黄金信任窗口
+  - 功效表述红线事件 0 起，正品答疑口径 100% 一致
+  - 客户端：快速拿到明确正品凭据与版本差异，降低买假焦虑
+  - 业务守护：售前转化率维持约 10% 守护基线不下降（正品类问答命中率上线后建基线跟踪）
+  </script>
+
+  <script>
+    function copyYAML() {
+      const yaml = document.getElementById('raw-yaml').textContent.trim();
+      navigator.clipboard.writeText(yaml).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
+
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-里程碑计划.html"><div class="dir">← 上一步 · 落地</div><div class="t">⑦ 里程碑计划</div><div class="d">前承：依赖驱动排期：被依赖机会前置，6 个月三阶段 FDE 交付甘特图</div></a><a class="navcard next" href="私域电商售前客服-导航索引.html"><div class="dir">规划终点 →</div><div class="t">返回导航索引</div><div class="d">七步闭环完成：现状→战略→流程→蓝图→场景→优先级→里程碑（+单场景产品画布）</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

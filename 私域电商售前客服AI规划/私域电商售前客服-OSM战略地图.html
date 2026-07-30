@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>保健品私域电商售前客服 · 北极星 OSM 战略分析（NSM：首单转化率护城河 稳健维持 ≥10% · 三层拆解）</title>
+  <style>
+    :root {
+      /* Inspire Design System Tokens (Standard Light Mode) */
+      --color-primary: #10213E;      /* Starry Blues */
+      --color-accent: #5DB2E2;       /* Creative Blue */
+      --color-secondary: #625D9C;    /* Amethyst */
+      --color-success: #00524C;      /* Myrtle Deep Green */
+      --color-info: #6FB1C8;         /* Cerulean Frost */
+      --color-warning: #F59E0B;      /* Warning */
+      --color-destructive: #EF4444;  /* Danger */
+      --color-background: #FFFFFF;   /* Pure White */
+      --color-bg-alt: #F5F5F6;       /* Tech Gray */
+      --color-foreground: #10213E;   /* Primary Text */
+      --color-text-muted: #64748B;   /* Text Secondary */
+      --color-border: #E2E8F0;       /* Border/Line */
+      
+      --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+      --shadow-md: 0 8px 16px -4px rgba(16, 33, 62, 0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font-family: 'MiSans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: 0.15s ease-out;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-alt);
+      padding: 48px 24px;
+      color: var(--color-foreground);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Page Container ===== */
+    .page-wrap {
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      width: 85%;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+
+    /* Standardized Header */
+    .page-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-header h1::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+    
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--color-primary); color: #fff;
+      padding: 16px 32px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 700;
+      display: none; z-index: 1000;
+      box-shadow: var(--shadow-md);
+      animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ===== OSM Canvas ===== */
+    .osm-canvas {
+      display: flex;
+      min-width: var(--osm-canvas-width, 960px);
+      position: relative;
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    /* ===== Lane Label (sticky left column) ===== */
+    .label-col {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      left: 0;
+      z-index: 30;
+      background: var(--color-background);
+      border-right: 1px solid var(--color-border);
+    }
+
+    .lane-label {
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      background: var(--color-bg-alt);
+      border-bottom: 1px solid var(--color-border);
+      width: 140px;
+      min-width: 140px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+    .lane-label.obj { height: var(--osm-obj-lane-h, 200px); }
+    .lane-label.sub { height: var(--osm-sub-lane-h, 600px); }
+
+    /* ===== Content Lanes ===== */
+    .content-col { display: flex; flex-direction: column; flex-grow: 1; }
+
+    .obj-lane {
+      position: relative;
+      height: var(--osm-obj-lane-h, 200px);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-alt);
+    }
+    .sub-lane {
+      position: relative;
+      height: var(--osm-sub-lane-h, 600px);
+      background: var(--color-background);
+    }
+
+    /* ===== SVG connector overlay ===== */
+    .connector-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+    .connector-path {
+      fill: none;
+      stroke: var(--color-border);
+      stroke-width: 2;
+      stroke-dasharray: 4 4;
+    }
+
+    /* ===== Objective Nodes ===== */
+    .node-obj {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--color-background);
+      border: 2px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .node-obj:hover { transform: translate(-50%, -54%); box-shadow: var(--shadow-md); }
+    .node-obj .name { font-size: 16px; font-weight: 700; color: var(--color-primary); line-height: 1.4; }
+    .node-obj .val  { font-size: 13px; font-weight: 600; color: var(--color-accent); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    .node-sub {
+      position: absolute;
+      transform: translateX(-50%);
+      background: var(--color-background);
+      border: 2px solid var(--color-success);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      z-index: 10;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .node-sub:hover { transform: translate(-50%, -4px); box-shadow: var(--shadow-md); }
+    .node-sub .name { font-size: 14px; font-weight: 700; color: var(--color-success); line-height: 1.4; }
+    .node-sub .val  { font-size: 12px; font-weight: 600; color: var(--color-text-muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    /* ===== Card Blocks (Strategy / Metric / Scenario) ===== */
+    .card-block {
+      position: absolute;
+      transform: translateX(-50%);
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      overflow-y: auto;
+      z-index: 5;
+      transition: var(--transition);
+    }
+    .card-block:hover { box-shadow: var(--shadow-md); border-color: var(--color-accent); }
+    .card-block.strategy  { width: var(--osm-box-w, 200px); }  /* height set inline (text-estimated) */
+    .card-block.metric    { width: var(--osm-box-w, 200px); }  /* height set inline (text-estimated) */
+    .card-block.scenario  { width: var(--osm-box-w, 200px); } /* height auto */
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-border);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .card-header.blue   { color: var(--color-accent); }
+    .card-header.green  { color: var(--color-success); }
+    .card-header.purple { color: var(--color-secondary); }
+
+    /* Strategy list */
+    .strat-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .strat-item {
+      font-size: 13px;
+      color: var(--color-foreground);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .strat-dot {
+      flex-shrink: 0;
+      width: 6px; height: 6px;
+      background: var(--color-accent);
+      border-radius: 50%;
+      margin-top: 7px;
+    }
+
+    /* Metric item */
+    .metric-item {
+      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-bg-alt);
+    }
+    .metric-item:last-child { border-bottom: none; }
+    .metric-name { font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
+    .metric-calc { font-style: italic; color: var(--color-text-muted); font-size: 11px; margin-bottom: 4px; }
+    .metric-val  { display: flex; align-items: center; gap: 6px; color: var(--color-primary); font-weight: 600; }
+
+    /* Scenario item */
+    .scenario-item {
+      border-left: 4px solid var(--color-secondary);
+      padding: 12px;
+      margin-bottom: 12px;
+      background: var(--color-bg-alt);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      transition: var(--transition);
+    }
+    .scenario-item:hover { background: #E2E8F0; }
+    .scenario-item:last-child { margin-bottom: 0; }
+    .scenario-name { font-weight: 700; font-size: 14px; color: var(--color-primary); margin-bottom: 6px; }
+    .scenario-desc { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; }
+
+    /* ===== Trend icons (inline SVG, color via CSS) ===== */
+    .icon-up    { color: var(--color-success); }
+    .icon-down  { color: var(--color-destructive); }
+    .icon-stable{ color: var(--color-warning); }
+    
+    .footer {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      margin-top: 32px;
+      text-align: right;
+      letter-spacing: 0.02em;
+    }
+  </style>
+  <style>
+    /* Jinja2-injected dynamic layout values */
+    :root {
+      --osm-canvas-width: 1010px;
+      --osm-obj-lane-h:   171px;
+      --osm-sub-lane-h:   1511px;
+      --osm-box-w:        280px;
+    }
+  </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a></div></div><!-- ai4pm-nav-top-end -->
+  <div class="page-wrap">
+    <header class="page-header">
+      <div class="header-left">
+        <h1>保健品私域电商售前客服 · 北极星 OSM 战略分析（NSM：首单转化率护城河 稳健维持 ≥10% · 三层拆解）</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="osm-canvas">
+
+      <!-- Sticky Lane Labels -->
+      <div class="label-col">
+        <div class="lane-label obj">目标<br>Objective</div>
+        <div class="lane-label sub">策略与度量<br>Actions</div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-col">
+
+        <!-- ── Row 1: Top-level Objective Bar ── -->
+        <div class="obj-lane">
+          <!-- SVG connectors from top-level objectives down to sub-objectives -->
+          <svg class="connector-svg" id="svg-top">
+            
+            <path class="connector-path" d="M 490.0 159.0 C 490.0 180.0 180.0 180.0 180.0 201"/>
+            
+            <path class="connector-path" d="M 490.0 159.0 C 490.0 180.0 490.0 180.0 490.0 201"/>
+            
+            <path class="connector-path" d="M 490.0 159.0 C 490.0 180.0 800.0 180.0 800.0 201"/>
+            
+          </svg>
+          
+          <div class="node-obj" style="left: 490.0px; width: 280px;">
+            <div class="name">北极星指标：高意向客户首单转化率（AI 赋能下的转化率护城河）</div>
+            
+            <div class="val">稳健维持 ≥10%（9%~10% 为健康区间底线）<svg class="icon-stable" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            
+          </div>
+          
+        </div>
+
+        <!-- ── Row 2: Sub-objectives + Cards ── -->
+        <div class="sub-lane">
+          <!-- SVG connectors within sub-lane (sub→strategy→metric→scenario) -->
+          <svg class="connector-svg" id="svg-sub">
+            
+            <path class="connector-path" d="M 180.0 117 L 180.0 145"/>
+            
+            <path class="connector-path" d="M 180.0 489 L 180.0 517"/>
+            
+            <path class="connector-path" d="M 180.0 943 L 180.0 971"/>
+            
+            <path class="connector-path" d="M 490.0 134 L 490.0 162"/>
+            
+            <path class="connector-path" d="M 490.0 438 L 490.0 466"/>
+            
+            <path class="connector-path" d="M 490.0 892 L 490.0 920"/>
+            
+            <path class="connector-path" d="M 800.0 117 L 800.0 145"/>
+            
+            <path class="connector-path" d="M 800.0 441 L 800.0 469"/>
+            
+            <path class="connector-path" d="M 800.0 876 L 800.0 904"/>
+            
+          </svg>
+
+          
+          <!-- Sub-objective title -->
+          <div class="node-sub" style="left: 180.0px; top: 30px; width: 280px;">
+            <div class="name">底线层 B · 转化率护城河（维持）</div>
+            
+            <div class="val">整体转化率不掉出 9%~10% 健康区间<svg class="icon-stable" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            
+          </div>
+
+          <!-- Strategy card -->
+          
+          <div class="card-block strategy" style="left: 180.0px; top: 145px; height: 344px;">
+            <div class="card-header blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              策略 / Strategies
+            </div>
+            <ul class="strat-list">
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>AI 接管会话与人工会话按周分组对照，连续两周显著低于健康区间即触发回滚与知识库复盘</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>灰度放量闸门：按流量比例逐步扩大 RAG 接管范围，每档放量前须通过转化率闸门</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>合规内置于知识库——用法用量/副作用类专业问答只走预审核合规语料；红线事件直接摧毁信任盘，合规塌方即转化塌方</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>RAG 话术从会话存档真实成交对话学习，拟合金牌销售口径而非通用模板</span></li>
+              
+            </ul>
+          </div>
+          
+
+          <!-- Metric card -->
+          
+          <div class="card-block metric" style="left: 180.0px; top: 517px; height: 426px;">
+            <div class="card-header green">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              指标 / Metrics
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">售前首单转化率（北极星指标）</div>
+              <div class="metric-calc">成交下单客户数 / 加好友询价客户数（周度）</div>
+              <div class="metric-val">基线: 约10% 目标: 稳健维持 ≥10%，不掉出 9% 底线<svg class="icon-stable" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">AI vs 人工转化率差值</div>
+              <div class="metric-calc">RAG 接管组周转化率 - 人工对照组周转化率</div>
+              <div class="metric-val">守护线: 差值无显著为负（连续两周为负触发回滚）<svg class="icon-stable" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">合规红线事件数</div>
+              <div class="metric-calc">功效宣称触碰《广告法》红线的对外回复条数（月度）</div>
+              <div class="metric-val">当前: 靠人工培训兜底、水平参差 目标: 0 起<svg class="icon-down" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+            </div>
+            
+          </div>
+          
+
+          <!-- Scenario card -->
+          
+          <div class="card-block scenario" style="left: 180.0px; top: 971px;">
+            <div class="card-header purple">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              业务场景 / Scenarios
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">转化率守护监测与回滚</div>
+              <div class="scenario-desc">数据看板按周输出 RAG 接管组与人工对照组的转化率对照;连续两周 RAG 组显著低于健康区间时自动告警,该流量段回退人工接管,FDE 复盘未命中日志与话术拟合度后修复再灰度——确保降本增效不以基本盘为代价。</div>
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">专业问答合规应答</div>
+              <div class="scenario-desc">减肥保健品售前有大量专业问答(如&#34;替西帕肽怎么打&#34;&#34;有什么副作用&#34;),人工回答易疲劳出错、口径参差且有越界风险;RAG 只从预审核合规话术库检索应答,每一次解答都合规、专业、口径一致,把&#34;绝对合规&#34;从培训要求变成系统能力。</div>
+            </div>
+            
+          </div>
+          
+
+          
+          <!-- Sub-objective title -->
+          <div class="node-sub" style="left: 490.0px; top: 30px; width: 280px;">
+            <div class="name">效率层 E · 边际成本骤降（AI ROI 主源）</div>
+            
+            <div class="val">RAG 自动接待率 ≥80% · 人力与流量解耦<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            
+          </div>
+
+          <!-- Strategy card -->
+          
+          <div class="card-block strategy" style="left: 490.0px; top: 162px; height: 276px;">
+            <div class="card-header blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              策略 / Strategies
+            </div>
+            <ul class="strat-list">
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>RAG 接管标准化售前问答（正品版本/价格促销/物流发货三类为主），把人工从机械问答中解放出来跟进高价值客户</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>直播放量不再触发「加人」——咨询量与客服编制解耦，新增流量的服务边际成本趋近于零</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>新客服培训从话术背诵转向兜底处置，培训周期大幅压缩</span></li>
+              
+            </ul>
+          </div>
+          
+
+          <!-- Metric card -->
+          
+          <div class="card-block metric" style="left: 490.0px; top: 466px; height: 426px;">
+            <div class="card-header green">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              指标 / Metrics
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">RAG 自动接待率（效率层核心指标）</div>
+              <div class="metric-calc">RAG 全自动完成应答的会话数 / 售前总会话数（旧北极星，rev.3 降级至此）</div>
+              <div class="metric-val">当前: 0% 目标: 上线3个月 ≥80%<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">兜底转人工率</div>
+              <div class="metric-calc">转人工会话数 / 总会话数（RAG 未命中 + 客户点名人工）</div>
+              <div class="metric-val">当前: 100% 目标: ≤20%（行业优秀实践可降 30%~40%）<svg class="icon-down" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">人效与培训周期</div>
+              <div class="metric-calc">单客服可承载咨询量倍数；新客服独立上岗培训天数</div>
+              <div class="metric-val">承载 ≥3 倍 · 培训 30天 → ≤7天<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            </div>
+            
+          </div>
+          
+
+          <!-- Scenario card -->
+          
+          <div class="card-block scenario" style="left: 490.0px; top: 920px;">
+            <div class="card-header purple">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              业务场景 / Scenarios
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">RAG 未命中兜底转接</div>
+              <div class="scenario-desc">RAG 检索置信度低于阈值或客户明确要求人工时,自动转接在线客服并推送已澄清的上下文摘要(客户需求、已答内容、卡点问题);未命中问题自动进入知识库补录队列,由 FDE 每周复盘补齐语料,兜底率随运营持续收敛。</div>
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">直播放量人力不加编</div>
+              <div class="scenario-desc">抖音直播间放量投放,当日咨询量翻倍,RAG 自动接待层弹性承载全部标准化问答,人工编制不变;运营侧只需在直播前把本场促销规则更新入促销规则库,算账口径即刻生效,无需临时培训客服。</div>
+            </div>
+            
+          </div>
+          
+
+          
+          <!-- Sub-objective title -->
+          <div class="node-sub" style="left: 800.0px; top: 30px; width: 280px;">
+            <div class="name">增量层 I · 长尾与夜间捞回（纯增量突破）</div>
+            
+            <div class="val">额外捞回原本流失的 2%~3% 转化<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            
+          </div>
+
+          <!-- Strategy card -->
+          
+          <div class="card-block strategy" style="left: 800.0px; top: 145px; height: 296px;">
+            <div class="card-header blue">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              策略 / Strategies
+            </div>
+            <ul class="strat-list">
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>7×24 秒级首响：夜间直播后咨询高峰（占比 35%~45%，现状零接待）全量承接，流量不再在等待中冷却流失</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>人工精力只够顾及头部客户——被忽略的长尾/沉睡客户由 AI 一视同仁承接并精准唤回</span></li>
+              
+              <li class="strat-item"><span class="strat-dot"></span><span>增量单独归因：夜间/长尾成交打独立标记记账，证明为纯增量、不冲击 10% 基本盘口径</span></li>
+              
+            </ul>
+          </div>
+          
+
+          <!-- Metric card -->
+          
+          <div class="card-block metric" style="left: 800.0px; top: 469px; height: 407px;">
+            <div class="card-header green">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              指标 / Metrics
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">夜间咨询承接率</div>
+              <div class="metric-calc">22:00-9:00 获得有效应答的咨询数 / 夜间总咨询数</div>
+              <div class="metric-val">当前: ≈0% 目标: 100%<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">首次响应时长（全时段）</div>
+              <div class="metric-calc">首条自动回复时间 - 用户首条消息时间（P90）</div>
+              <div class="metric-val">当前: 白班1~3分钟/夜间&gt;8小时 目标: ≤10秒<svg class="icon-down" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+            </div>
+            
+            <div class="metric-item">
+              <div class="metric-name">增量转化捞回率</div>
+              <div class="metric-calc">夜间/长尾/唤回渠道成交客户数 / 总询价客户数（独立归因口径）</div>
+              <div class="metric-val">目标: +2%~3% 纯增量（上线后建基线跟踪）<svg class="icon-up" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            </div>
+            
+          </div>
+          
+
+          <!-- Scenario card -->
+          
+          <div class="card-block scenario" style="left: 800.0px; top: 904px;">
+            <div class="card-header purple">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              业务场景 / Scenarios
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">夜间全自动接待闭环</div>
+              <div class="scenario-desc">夜间时段询价、需求澄清、商品对比、促销算账、下单引导全流程由 RAG 独立完成;RAG 未命中的问题自动挂起并生成待办,次日早班人工首优先跟进,并附上 chatbot 已完成的澄清上下文,避免客户重复描述。</div>
+            </div>
+            
+            <div class="scenario-item">
+              <div class="scenario-name">长尾与沉睡客户承接唤回</div>
+              <div class="scenario-desc">人工在班时优先服务高意向头部客户,长尾咨询往往数小时无人跟进直至流失;AI 对全部咨询秒级一视同仁承接,并对 48h 未成交的沉睡客户按促销节点用预审核话术精准唤回,把原本注定流失的询价转成增量成交。</div>
+            </div>
+            
+          </div>
+          
+
+          
+        </div>
+
+      </div><!-- /content-col -->
+    </main><!-- /osm-canvas -->
+
+    <footer style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--color-border); text-align: center; font-size: 12px; color: var(--color-text-muted);">
+      Generated by osm-map-generator · 2026-07-30 12:58 · &copy; 2026 Inspire AI4PM
+    </footer>
+  </div>
+  
+  <div class="toast" id="toast">已成功复制 YAML 数据</div>
+  <script type="application/yaml" id="raw-yaml">
+# ============================================================================
+# 保健品私域电商售前客服 · 北极星 OSM 战略分析（rev.3 北极星口径升级）
+# 第 2 步 / 共 7 步 · 前承：①业务现状分析（含SWOT，三约束+10%健康水位）→ 本步收敛为战略指标体系 · 后启：③业务流程 → ④服务蓝图 → ⑤AI场景地图 → ⑥优先级矩阵 → ⑦里程碑计划
+# ----------------------------------------------------------------------------
+# 【rev.3 北极星口径升级说明】
+#   北极星指标不必是&#34;提高&#34;的指标——它的准确定义是&#34;衡量核心业务健康度和最终
+#   价值的最关键指标&#34;。高客单价、重信任的私域业务中流量获取成本极高：转化率
+#   从 10% 掉到 8%，对利润的打击是毁灭性的，&#34;守住 10% 基本盘&#34;本身就是巨大的
+#   商业价值。因此北极星指标升级为：
+#   ★ 高意向客户首单转化率（目标：稳健维持 ≥10%）＝ AI 赋能下的转化率护城河
+#   旧口径的&#34;RAG 自动接待率 ≥80%&#34;不再作为北极星，降级为效率层核心指标。
+#
+# 【汇报话术（对评审专家的表述转换）】
+#   不说&#34;目标是维持 10% 不变&#34;，而说：&#34;引入 AI 的核心目的，不是盲目追求转化率
+#   数字增长，而是在业务规模扩大、夜间流量涌入时，以极低的边际成本稳定承接并
+#   维持这 10% 的转化率。&#34; AI 的真正 ROI 体现在人力成本骤降与长尾/夜间增量。
+#
+# 【三层拆解：维持之下找增量】
+#   底线层（维持）——AI 独立接待下整体转化率不掉出 9%~10% 健康区间；
+#   效率层（大幅优化）——RAG 自动接待率 ≥80%、转人工率 ≤20%，人力与流量解耦，
+#     这是 AI ROI 的主要来源；
+#   增量层（突破）——长尾/沉睡/夜间客户原本直接流失，AI 承接后额外捞回
+#     2%~3% 转化，属于纯增量，不冲击 10% 基本盘口径。
+# ============================================================================
+title: &#34;保健品私域电商售前客服 · 北极星 OSM 战略分析（NSM：首单转化率护城河 稳健维持 ≥10% · 三层拆解）&#34;
+config:
+  height:
+    objectiveScore: 90
+objectives:
+  # ── 北极星指标（NSM）＝ AI 赋能下的转化率护城河 ──────────────────────
+  - name: &#34;北极星指标：高意向客户首单转化率（AI 赋能下的转化率护城河）&#34;
+    value: &#34;稳健维持 ≥10%（9%~10% 为健康区间底线）&#34;
+    trend: stable
+    subObjectives:
+
+      # ── 底线层：维持 ────────────────────────────────────────────
+      - name: &#34;底线层 B · 转化率护城河（维持）&#34;
+        value: &#34;整体转化率不掉出 9%~10% 健康区间&#34;
+        trend: stable
+        strategies:
+          - AI 接管会话与人工会话按周分组对照，连续两周显著低于健康区间即触发回滚与知识库复盘
+          - 灰度放量闸门：按流量比例逐步扩大 RAG 接管范围，每档放量前须通过转化率闸门
+          - 合规内置于知识库——用法用量/副作用类专业问答只走预审核合规语料；红线事件直接摧毁信任盘，合规塌方即转化塌方
+          - RAG 话术从会话存档真实成交对话学习，拟合金牌销售口径而非通用模板
+        metrics:
+          - name: 售前首单转化率（北极星指标）
+            calculation: &#34;成交下单客户数 / 加好友询价客户数（周度）&#34;
+            value: &#34;基线: 约10% 目标: 稳健维持 ≥10%，不掉出 9% 底线&#34;
+            trend: stable
+          - name: AI vs 人工转化率差值
+            calculation: &#34;RAG 接管组周转化率 - 人工对照组周转化率&#34;
+            value: &#34;守护线: 差值无显著为负（连续两周为负触发回滚）&#34;
+            trend: stable
+          - name: 合规红线事件数
+            calculation: &#34;功效宣称触碰《广告法》红线的对外回复条数（月度）&#34;
+            value: &#34;当前: 靠人工培训兜底、水平参差 目标: 0 起&#34;
+            trend: down
+        relatedScenarios:
+          scenarios:
+            - name: 转化率守护监测与回滚
+              description: 数据看板按周输出 RAG 接管组与人工对照组的转化率对照;连续两周 RAG 组显著低于健康区间时自动告警,该流量段回退人工接管,FDE 复盘未命中日志与话术拟合度后修复再灰度——确保降本增效不以基本盘为代价。
+            - name: 专业问答合规应答
+              description: 减肥保健品售前有大量专业问答(如&#34;替西帕肽怎么打&#34;&#34;有什么副作用&#34;),人工回答易疲劳出错、口径参差且有越界风险;RAG 只从预审核合规话术库检索应答,每一次解答都合规、专业、口径一致,把&#34;绝对合规&#34;从培训要求变成系统能力。
+
+      # ── 效率层：大幅优化（AI ROI 主源）──────────────────────────
+      - name: &#34;效率层 E · 边际成本骤降（AI ROI 主源）&#34;
+        value: &#34;RAG 自动接待率 ≥80% · 人力与流量解耦&#34;
+        trend: up
+        strategies:
+          - RAG 接管标准化售前问答（正品版本/价格促销/物流发货三类为主），把人工从机械问答中解放出来跟进高价值客户
+          - 直播放量不再触发「加人」——咨询量与客服编制解耦，新增流量的服务边际成本趋近于零
+          - 新客服培训从话术背诵转向兜底处置，培训周期大幅压缩
+        metrics:
+          - name: RAG 自动接待率（效率层核心指标）
+            calculation: &#34;RAG 全自动完成应答的会话数 / 售前总会话数（旧北极星，rev.3 降级至此）&#34;
+            value: &#34;当前: 0% 目标: 上线3个月 ≥80%&#34;
+            trend: up
+          - name: 兜底转人工率
+            calculation: &#34;转人工会话数 / 总会话数（RAG 未命中 + 客户点名人工）&#34;
+            value: &#34;当前: 100% 目标: ≤20%（行业优秀实践可降 30%~40%）&#34;
+            trend: down
+          - name: 人效与培训周期
+            calculation: &#34;单客服可承载咨询量倍数；新客服独立上岗培训天数&#34;
+            value: &#34;承载 ≥3 倍 · 培训 30天 → ≤7天&#34;
+            trend: up
+        relatedScenarios:
+          scenarios:
+            - name: RAG 未命中兜底转接
+              description: RAG 检索置信度低于阈值或客户明确要求人工时,自动转接在线客服并推送已澄清的上下文摘要(客户需求、已答内容、卡点问题);未命中问题自动进入知识库补录队列,由 FDE 每周复盘补齐语料,兜底率随运营持续收敛。
+            - name: 直播放量人力不加编
+              description: 抖音直播间放量投放,当日咨询量翻倍,RAG 自动接待层弹性承载全部标准化问答,人工编制不变;运营侧只需在直播前把本场促销规则更新入促销规则库,算账口径即刻生效,无需临时培训客服。
+
+      # ── 增量层：突破（纯增量，不冲击基本盘口径）──────────────────
+      - name: &#34;增量层 I · 长尾与夜间捞回（纯增量突破）&#34;
+        value: &#34;额外捞回原本流失的 2%~3% 转化&#34;
+        trend: up
+        strategies:
+          - 7×24 秒级首响：夜间直播后咨询高峰（占比 35%~45%，现状零接待）全量承接，流量不再在等待中冷却流失
+          - 人工精力只够顾及头部客户——被忽略的长尾/沉睡客户由 AI 一视同仁承接并精准唤回
+          - 增量单独归因：夜间/长尾成交打独立标记记账，证明为纯增量、不冲击 10% 基本盘口径
+        metrics:
+          - name: 夜间咨询承接率
+            calculation: &#34;22:00-9:00 获得有效应答的咨询数 / 夜间总咨询数&#34;
+            value: &#34;当前: ≈0% 目标: 100%&#34;
+            trend: up
+          - name: 首次响应时长（全时段）
+            calculation: &#34;首条自动回复时间 - 用户首条消息时间（P90）&#34;
+            value: &#34;当前: 白班1~3分钟/夜间&gt;8小时 目标: ≤10秒&#34;
+            trend: down
+          - name: 增量转化捞回率
+            calculation: &#34;夜间/长尾/唤回渠道成交客户数 / 总询价客户数（独立归因口径）&#34;
+            value: &#34;目标: +2%~3% 纯增量（上线后建基线跟踪）&#34;
+            trend: up
+        relatedScenarios:
+          scenarios:
+            - name: 夜间全自动接待闭环
+              description: 夜间时段询价、需求澄清、商品对比、促销算账、下单引导全流程由 RAG 独立完成;RAG 未命中的问题自动挂起并生成待办,次日早班人工首优先跟进,并附上 chatbot 已完成的澄清上下文,避免客户重复描述。
+            - name: 长尾与沉睡客户承接唤回
+              description: 人工在班时优先服务高意向头部客户,长尾咨询往往数小时无人跟进直至流失;AI 对全部咨询秒级一视同仁承接,并对 48h 未成交的沉睡客户按促销节点用预审核话术精准唤回,把原本注定流失的询价转成增量成交。
+
+  </script>
+  <script>
+    function copyYAML() {
+      const yaml = document.getElementById('raw-yaml').textContent.trim();
+      navigator.clipboard.writeText(yaml).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-业务现状分析.html"><div class="dir">← 上一步 · 调研</div><div class="t">① 业务现状分析</div><div class="d">前承：现状基线/生态成熟度/接入方案三合一 + SWOT，锚定三约束与 10% 守护基线</div></a><a class="navcard next" href="私域电商售前客服-业务流程.html"><div class="dir">下一步 · 分析 →</div><div class="t">③ 业务流程</div><div class="d">后启：L1 价值流×5 阶段×L2 流程解剖人工售前全链路，定位 11 个痛点（critical×4）</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

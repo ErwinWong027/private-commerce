@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保健品私域电商售前客服 AI 规划 - 导航索引</title>
+<style>
+:root{
+  --color-primary:#10213E; --color-accent:#5DB2E2; --color-secondary:#625D9C;
+  --color-success:#00524C; --color-warning:#F59E0B;
+  --color-bg:#FFFFFF; --color-bg-alt:#F5F5F6; --color-fg:#10213E;
+  --color-muted:#64748B; --color-border:#E2E8F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;background:var(--color-bg-alt);color:var(--color-fg);line-height:1.6;}
+.container{width:85%;margin:0 auto;padding:32px 0 64px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;padding:24px 0 20px;border-bottom:1px solid var(--color-border);margin-bottom:28px;}
+.page-header h1{font-size:28px;font-weight:600;color:var(--color-primary);}
+.page-header .subtitle{font-size:14px;color:var(--color-muted);margin-top:6px;}
+.gen-info{text-align:right;font-size:12px;color:var(--color-muted);line-height:1.8;}
+.hero{background:linear-gradient(135deg,#1B2B47 0%,#4A9FD8 100%);color:#fff;border-radius:8px;padding:24px 28px;margin-bottom:24px;font-size:14.5px;line-height:1.9;}
+.hero b{color:#BFE3F7;}
+.section{background:var(--color-bg);border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.08);padding:28px 32px;margin-bottom:24px;}
+.section h2{font-size:20px;font-weight:600;color:var(--color-primary);margin-bottom:16px;}
+/* 方法论四段 */
+.method{display:grid;grid-template-columns:1fr 1fr 3fr 2fr;gap:12px;margin-bottom:8px;}
+.method .m{border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#fff;text-align:center;}
+.m.research{background:var(--color-primary);}
+.m.strategy{background:var(--color-success);}
+.m.analysis{background:var(--color-secondary);}
+.m.landing{background:var(--color-warning);}
+/* 步骤卡 */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.step-card{position:relative;border:1px solid var(--color-border);border-radius:8px;background:#fff;padding:18px 18px 16px;border-top:4px solid var(--color-accent);display:flex;flex-direction:column;transition:box-shadow .2s;}
+.step-card:hover{box-shadow:0 4px 14px rgba(16,33,62,.14);}
+.step-card .num{position:absolute;top:-14px;left:14px;width:28px;height:28px;border-radius:50%;background:var(--color-primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(16,33,62,.25);}
+.step-card.appendix .num{background:var(--color-warning);}
+.step-card .phase{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--color-secondary);margin-bottom:4px;}
+.step-card h3{font-size:15px;color:var(--color-primary);margin-bottom:8px;}
+.step-card h3 a{color:inherit;text-decoration:none;border-bottom:1px dashed var(--color-accent);}
+.step-card h3 a:hover{color:var(--color-accent);}
+.step-card .role{font-size:12.5px;color:var(--color-muted);margin-bottom:8px;flex:1;}
+.step-card .takeaway{font-size:12px;background:var(--color-bg-alt);border-left:3px solid var(--color-accent);border-radius:0 4px 4px 0;padding:8px 10px;margin-bottom:10px;}
+.step-card .links a{display:inline-block;font-size:12px;font-weight:600;color:#fff;background:var(--color-accent);border-radius:5px;padding:4px 12px;text-decoration:none;margin-right:8px;}
+.step-card .links a:hover{opacity:.85;}
+/* 逻辑链 */
+.chain{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;}
+.chain .node{flex:1;min-width:140px;background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:6px;padding:12px 12px;margin-right:26px;margin-bottom:10px;position:relative;font-size:12.5px;}
+.chain .node:last-child{margin-right:0;}
+.chain .node::after{content:"→";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--color-accent);font-size:18px;font-weight:700;}
+.chain .node:last-child::after{content:"";}
+.chain .node b{display:block;font-size:13px;color:var(--color-primary);margin-bottom:4px;}
+.banner{background:#FEF3E2;border-left:4px solid var(--color-warning);border-radius:0 6px 6px 0;padding:14px 18px;font-size:13px;margin-bottom:24px;}
+.banner b{color:var(--color-warning);}
+footer{text-align:center;font-size:12px;color:var(--color-muted);padding-top:12px;}
+@media (max-width:1280px){.steps{grid-template-columns:repeat(2,1fr);}.method{grid-template-columns:1fr 1fr;}}
+@media (max-width:768px){.steps{grid-template-columns:1fr;}.method{grid-template-columns:1fr;}.chain{flex-direction:column;}.chain .node{margin-right:0;}.chain .node::after{content:"↓";right:auto;left:50%;top:auto;bottom:-22px;transform:translateX(-50%);}.page-header{flex-direction:column;align-items:flex-start;gap:10px;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>保健品私域电商售前客服 AI 规划 · 导航索引</h1>
+      <div class="subtitle">100~1000 元中客单价瘦身保健品 · 抖音直播 → 企微人工 1v1 售前 · FDE × 企微端 RAG 1v1 自动回复</div>
+    </div>
+    <div class="gen-info">
+      Generated by ai4pm-skills<br>
+      2026-07-29 · v3 目录重构 · 7 步闭环 + 产品画布
+    </div>
+  </div>
+
+  <div class="hero">
+    <b>一句话读懂本规划：</b>高客单价重信任的私域业务中，约 10% 售前转化率是健康水位，掉到 8% 对利润是毁灭性打击——因此北极星指标为<b>高意向客户首单转化率（稳健维持 ≥10%），AI 赋能下的转化率护城河</b>。针对人工售前的三个结构性约束（响应受班次限制 / 人力随流量线性上涨 / 合规靠人工兜底），以 <b>FDE 模式</b>在企微端部署<b>基于 RAG 的 1v1 自动回复 chatbot</b>，在业务扩大、夜间流量涌入时以极低边际成本稳定承接；<b>三层拆解</b>：底线维持（9%~10% 健康区间）、效率降本（RAG 自动接待率 ≥80%， AI ROI 主源）、增量捕捉（长尾/夜间捞回 +2%~3% 纯增量）。标品信任逻辑：客户只问<b>是不是正品 / 什么版本 / 渠道可不可信</b>，功效认知已在直播间完成。
+  </div>
+
+  <div class="banner">
+    <b>v3 目录重构说明：</b>原「①现状调研、②生态成熟度、⑤接入方案」三份已<b>合并为第 1 步·业务现状分析（含 SWOT）</b>；新增<b>③业务流程（business-process）、⑥优先级矩阵（scenario-matrix）、⑦里程碑计划（milestone-plan，依赖驱动排期）与单场景产品画布（ai-canvas）</b>。阅读顺序：现状 → 战略 → 流程 → 蓝图 → 场景 → 优先级 → 里程碑。
+  </div>
+
+  <div class="section">
+    <h2>方法论四段 × 七步交付（+ 单场景画布）</h2>
+    <div class="method">
+      <div class="m research">调研（①）</div>
+      <div class="m strategy">战略（②）</div>
+      <div class="m analysis">分析（③ ④ ⑤ ⑥）</div>
+      <div class="m landing">落地（⑦ + 画布）</div>
+    </div>
+    <div class="steps" style="margin-top:22px;">
+      <div class="step-card">
+        <div class="num">1</div>
+        <div class="phase">调研 · 事实基座</div>
+        <h3><a href="私域电商售前客服-业务现状分析.html">业务现状分析（含 SWOT）</a></h3>
+        <div class="role">回答"现状到底什么样、为什么是我们"：现状基线 / 企微生态成熟度 / FDE 接入方案三合一，新增 SWOT 与交叉策略矩阵。</div>
+        <div class="takeaway"><b>关键结论：</b>三个结构性约束 → 三个 AI 价值方向；FDE × RAG 全自动为空白象限；转化率约 10% 为守护基线。</div>
+        <div class="links"><a href="私域电商售前客服-业务现状分析.html">打开报告</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">2</div>
+        <div class="phase">战略 · NSM</div>
+        <h3><a href="私域电商售前客服-OSM战略地图.html">北极星 OSM 分析</a></h3>
+        <div class="role">回答"战略是什么、怎么度量"：NSM = 高意向客户首单转化率（稳健维持 ≥10%，转化率护城河）；三层拆解：底线维持 / 效率降本（RAG 自动接待率 ≥80%）/ 增量捞回（+2%~3%）。</div>
+        <div class="takeaway"><b>关键结论：</b>守住 10% 基本盘本身就是巨大商业价值；AI 的真正 ROI 在人力成本骤降与长尾/夜间增量，连续两周低于健康区间即回滚。</div>
+        <div class="links"><a href="私域电商售前客服-OSM战略地图.html">打开战略地图</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">3</div>
+        <div class="phase">分析 · 流程解剖</div>
+        <h3><a href="私域电商售前客服-业务流程.html">业务流程深度分析</a></h3>
+        <div class="role">回答"业务流长什么样、哪里最痛"：L1 售前价值流 × 5 阶段 × 12 个 L2 流程（角色/系统/输入输出），11 个痛点定位到流程级。</div>
+        <div class="takeaway"><b>关键结论：</b>critical×4——夜间首响、正品口径、合规话术、促销错价；根因均指向知识未结构化。</div>
+        <div class="links"><a href="私域电商售前客服-业务流程.html">打开流程分析</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">4</div>
+        <div class="phase">分析 · 触点体验</div>
+        <h3><a href="私域电商售前客服-服务蓝图.html">As-Is 服务蓝图</a></h3>
+        <div class="role">回答"客户视角的体验断点在哪"：承接③业务流程口径，5 阶段三层泳道（客户/前台/后台），标注每个触点的认知负荷与期望落差。</div>
+        <div class="takeaway"><b>关键结论：</b>功效回答合规、促销算账两处认知负荷 critical；夜间时段整段流程无人接待。</div>
+        <div class="links"><a href="私域电商售前客服-服务蓝图.html">打开蓝图</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">5</div>
+        <div class="phase">分析 · 价值落点</div>
+        <h3><a href="私域电商售前客服-AI机会场景地图.html">AI 场景地图</a></h3>
+        <div class="role">回答"RAG 自动回复帮在哪"：把流程与蓝图痛点转成 16 个 AI 机会（秒级首响、正品溯源应答、规则库算账、兜底转接、转化率守护）。</div>
+        <div class="takeaway"><b>关键结论：</b>价值落点全部落在效率与体验；价格 / 发货时效禁止大模型独立决策（防幻觉）。</div>
+        <div class="links"><a href="私域电商售前客服-AI机会场景地图.html">打开地图</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">6</div>
+        <div class="phase">分析 · 优先级排序</div>
+        <h3><a href="私域电商售前客服-优先级矩阵.html">AI 优先级矩阵</a></h3>
+        <div class="role">回答"先做哪个"：16 个机会按收益（覆盖×频次×价值）÷ 成本（数据+设计+集成+知识）评分，落入 5×5 收益成本网格。</div>
+        <div class="takeaway"><b>关键结论：</b>Quick Win = 首响/正品应答/打标；兜底机制是依赖根节点须最先具备；合规话术库不按分数、按红线守门排期。</div>
+        <div class="links"><a href="私域电商售前客服-优先级矩阵.html">打开矩阵</a></div>
+      </div>
+      <div class="step-card">
+        <div class="num">7</div>
+        <div class="phase">落地 · 排期</div>
+        <h3><a href="私域电商售前客服-里程碑计划.html">里程碑计划（甘特图）</a></h3>
+        <div class="role">回答"怎么排期"：依赖驱动——被依赖的机会前置（kf 通道/RAG 平台/兜底机制/四大知识库为根节点），6 个月三阶段、5 条工作流 23 项任务。</div>
+        <div class="takeaway"><b>关键结论：</b>M2 地基上线（接得住+答得准正品+守得住转化）→ M4 扩面 → M6 拟合真人持续提质。</div>
+        <div class="links"><a href="私域电商售前客服-里程碑计划.html">打开甘特图</a></div>
+      </div>
+      <div class="step-card appendix">
+        <div class="num">⊕</div>
+        <div class="phase">附录 · 单场景深化</div>
+        <h3><a href="私域电商售前客服-产品画布.html">AI 产品画布：正品溯源与版本应答</a></h3>
+        <div class="role">回答"单个场景怎么做成产品"：选取标品信任逻辑下的首位高频场景（矩阵 Quick Win），10 维度画布拆解用户/数据/工作流/模型/边界。</div>
+        <div class="takeaway"><b>关键结论：</b>正品凭据与功效表述只能来自预审核语料检索，禁止模型编造；库内无答案即兜底转人工。</div>
+        <div class="links"><a href="私域电商售前客服-产品画布.html">打开画布</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>阅读逻辑链（为什么是这个顺序）</h2>
+    <div class="chain">
+      <div class="node"><b>① 业务现状分析</b>三约束成立吗？生态接得住吗？SWOT 定位如何？</div>
+      <div class="node"><b>② 北极星 OSM</b>NSM=转化率护城河，三层拆解：维持/降本/增量</div>
+      <div class="node"><b>③ 业务流程</b>业务流解剖到 L2 级，痛点长在哪个流程节点？</div>
+      <div class="node"><b>④ 服务蓝图</b>同一流程的客户体验视角：断点与认知负荷</div>
+      <div class="node"><b>⑤ AI 场景地图</b>痛点 × 成熟能力 = 16 个 RAG 价值落点</div>
+      <div class="node"><b>⑥ 优先级矩阵</b>收益÷成本评分：先做哪个、依赖谁？</div>
+      <div class="node"><b>⑦ 里程碑计划</b>被依赖者前置的 6 个月三阶段交付排期</div>
+    </div>
+  </div>
+
+  <footer>保健品私域电商售前客服 AI 规划 · 导航索引 · 2026-07-29 · v3 目录重构 · Powered by ai4pm-skills</footer>
+</div>
+</body>
+</html>

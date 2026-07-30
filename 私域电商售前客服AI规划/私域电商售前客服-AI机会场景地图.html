@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>私域电商售前客服 AI 机会场景地图（RAG 1v1 自动回复价值落点 · 16 个机会） - AI Opportunity Map</title>
+    <style>
+        :root {
+            /* Inspire Design System Tokens */
+            --color-primary: #10213E;
+            --color-accent: #5DB2E2;
+            --color-secondary: #625D9C;
+            --color-success: #00524C;
+            --color-info: #6FB1C8;
+            --color-warning: #F59E0B;
+            --color-destructive: #EF4444;
+            --color-background: #FFFFFF;
+            --color-bg-alt: #F5F5F6;
+            --color-foreground: #10213E;
+            --color-text-muted: #64748B;
+            --color-border: #E2E8F0;
+            
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+
+            /* Local Layout Tokens */
+            --header-width: 180px;
+            --cell-width: 320px;
+            
+            /* AI Scenario Types */
+            --repetitive-bg: #FFFFFF;
+            --repetitive-border: #F59E0B;
+            --cognitive-bg: #FFFFFF;
+            --cognitive-border: #5DB2E2;
+            --longtail-bg: #FFFFFF;
+            --longtail-border: #625D9C;
+            --innovation-bg: #FFFFFF;
+            --innovation-border: #00524C;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'MiSans', 'Microsoft YaHei', 'Inter', sans-serif;
+            background-color: var(--color-bg-alt); 
+            margin: 0; 
+            padding: 40px 0; 
+            color: var(--color-foreground);
+            line-height: 1.5;
+        }
+
+        /* 85% Centered Container */
+        .page-container {
+            width: 85%;
+            margin: 0 auto;
+            background: var(--color-background);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Standardized Header */
+        .page-header {
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 32px 40px;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-primary);
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+
+        .page-header h1::before {
+            content: "";
+            display: block;
+            width: 4px;
+            height: 24px;
+            background: var(--color-accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--color-text-muted);
+            font-weight: 500;
+            padding-left: 16px;
+            margin: 0;
+        }
+
+        .header-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .meta-info {
+            font-size: 12px;
+            color: var(--color-text-muted);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-secondary {
+            background: white;
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease-out;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-secondary:hover { background: var(--color-bg-alt); }
+
+        /* Filter Panel */
+        .filter-panel { 
+            padding: 20px 40px; 
+            background: #fcfcfd;
+            border-bottom: 1px solid var(--color-border);
+            display: flex; 
+            gap: 24px; 
+            align-items: center; 
+            font-size: 13px; 
+        }
+        
+        .filter-panel strong { color: var(--color-primary); }
+        
+        .filter-label { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            cursor: pointer; 
+            color: var(--color-text-muted); 
+            font-weight: 500;
+        }
+        
+        .filter-label input[type="checkbox"] { 
+            width: 15px;
+            height: 15px;
+            accent-color: var(--color-accent);
+        }
+
+        /* Map Structure */
+        .map-wrapper {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .scroll-container {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .lane-row { 
+            display: flex; 
+            width: max-content; 
+            border-bottom: 1px solid var(--color-border);
+            align-items: stretch;
+        }
+        
+        .lane-row:last-child { border-bottom: none; }
+        
+        .lane-header { 
+            width: var(--header-width); 
+            flex-shrink: 0; 
+            background-color: var(--color-bg-alt); 
+            border-right: 2px solid var(--color-border); 
+            font-weight: 700; 
+            font-size: 13px; 
+            color: var(--color-primary); 
+            position: sticky; 
+            left: 0; 
+            z-index: 20;
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .lane-body { display: flex; }
+        
+        .step-cell { 
+            width: var(--cell-width); 
+            flex-shrink: 0; 
+            padding: 24px 20px; 
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .step-cell:last-child { border-right: none; }
+
+        /* Stages Row */
+        .row-stage { background-color: var(--color-bg-alt); }
+        .stage-badge {
+            background: var(--color-primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Activity Card */
+        .activity-card {
+            background: var(--color-background);
+            border: 2px solid var(--color-primary);
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--color-primary);
+        }
+
+        /* Touchpoints */
+        .touchpoint-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--color-text-muted);
+        }
+        .info-item b { color: var(--color-foreground); font-weight: 600; }
+
+        /* Task List */
+        ul.task-list { 
+            margin: 0; 
+            padding-left: 1.25rem; 
+            font-size: 13px; 
+            color: var(--color-foreground); 
+        }
+        ul.task-list li { margin-bottom: 8px; }
+
+        /* AI Opportunity Cards - Optimized Contrast */
+        .ai-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-card {
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--color-border);
+            border-left-width: 6px;
+            background: var(--color-background);
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(16, 33, 62, 0.05);
+        }
+        .ai-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .theme-repetitive { border-left-color: var(--repetitive-border); }
+        .theme-cognitive { border-left-color: var(--cognitive-border); }
+        .theme-longtail { border-left-color: var(--longtail-border); }
+        .theme-innovation { border-left-color: var(--innovation-border); }
+
+        .ai-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--color-primary);
+        }
+        .ai-desc {
+            font-size: 13px;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .badge-repetitive { background-color: var(--repetitive-border); }
+        .badge-cognitive { background-color: var(--cognitive-border); }
+        .badge-longtail { background-color: var(--longtail-border); }
+        .badge-innovation { background-color: var(--innovation-border); }
+
+        /* Empty State */
+        .empty-text {
+            color: var(--color-text-muted);
+            font-style: italic;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 32px; right: 32px;
+            background: var(--color-primary); color: #fff;
+            padding: 12px 24px; border-radius: 8px;
+            font-size: 14px; font-weight: 600;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            display: none; z-index: 1000;
+        }
+
+        /* Print Styles */
+        @media print {
+            body { padding: 0; background: white; }
+            .page-container { width: 100%; box-shadow: none; border: none; }
+            .btn-group, .filter-panel, .toast { display: none !important; }
+            .lane-header { position: relative !important; }
+        }
+    </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a></div></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+    <div class="page-container">
+        <header class="page-header">
+      <div class="header-left">
+        <h1>私域电商售前客服 AI 机会场景地图（RAG 1v1 自动回复价值落点 · 16 个机会）</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+        <div class="filter-panel">
+            <strong>筛选场景：</strong>
+            <label class="filter-label"><input type="checkbox" checked value="repetitive" onchange="filterCards()"> 🟡 重复性替代</label>
+            <label class="filter-label"><input type="checkbox" checked value="cognitive" onchange="filterCards()"> 🔵 高认知辅助</label>
+            <label class="filter-label"><input type="checkbox" checked value="longtail" onchange="filterCards()"> 🟣 长尾场景</label>
+            <label class="filter-label"><input type="checkbox" checked value="innovation" onchange="filterCards()"> 🟢 流程创新</label>
+        </div>
+
+        <div class="map-wrapper">
+            <div class="scroll-container">
+                <!-- Header Row: Stages -->
+                <div class="lane-row row-stage">
+                    <div class="lane-header">阶段 / Stages</div>
+                    <div class="lane-body">
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">引流承接·加好友</span>
+                        </div>
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">询价·需求澄清</span>
+                        </div>
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">商品对比</span>
+                        </div>
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">促销算账</span>
+                        </div>
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">下单·发货跟进</span>
+                        </div>
+                        
+                        <div class="step-cell" style="--total-steps: 1; width: calc(var(--total-steps) * 320px); align-items: center; justify-content: center;">
+                            <span class="stage-badge">全流程·兜底与守护</span>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <!-- Row 2: Activity -->
+                <div class="lane-row">
+                    <div class="lane-header">用户活动 / Activities</div>
+                    <div class="lane-body">
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">承接抖音引流客户的首次触达</div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">应答正品求证与澄清客户需求</div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">应答版本/规格差异与真伪辨别问题</div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">应答优惠计算与到手价</div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">应答订单与物流查询</div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="activity-card">RAG 未命中兜底与质量守护</div>
+                            </div>
+                            
+                        
+                    </div>
+                </div>
+
+                <!-- Row 3: Role & Touchpoint -->
+                <div class="lane-row">
+                    <div class="lane-header">执行角色与系统</div>
+                    <div class="lane-body">
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG 自动回复 chatbot</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微消息回调/欢迎语链路</div>
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG 自动回复 chatbot</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微聊天窗口/正品溯源与问题链库</div>
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG 自动回复 chatbot</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微聊天窗口/商品库</div>
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG 自动回复 chatbot</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微聊天窗口/促销规则库</div>
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG 自动回复 chatbot</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微聊天窗口/订单物流数据源</div>
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="touchpoint-info">
+                                    <div class="info-item">👤 <b>角色:</b> RAG chatbot + 人工兜底客服</div>
+                                    <div class="info-item">💻 <b>系统:</b> 企微会话/转接机制/评测集</div>
+                                </div>
+                            </div>
+                            
+                        
+                    </div>
+                </div>
+
+                <!-- Row 4: Pain Points -->
+                <div class="lane-row">
+                    <div class="lane-header">业务痛点 / 繁琐任务</div>
+                    <div class="lane-body">
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>夜间与高峰期咨询积压，人工次日集中回复（首响>8小时）</li>
+                                    
+                                    <li>欢迎语发送与渠道打标依赖人工逐个操作</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>同质化询价与求证问题(是不是正品/什么版本/多少钱/怎么吃)反复人工回答</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>人工翻资料复制粘贴版本/规格参数,耗时且错漏</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>人工手动计算满减/赠品/组合价,客户反复改组合需反复重算</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>人工跨系统查单后手动复述,大量重复劳动</li>
+                                    
+                                    <li>夜间物流咨询无人应答</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                
+                                <ul class="task-list">
+                                    
+                                    <li>无(本阶段为横向机制设计)</li>
+                                    
+                                </ul>
+                                
+                            </div>
+                            
+                        
+                    </div>
+                </div>
+
+                <!-- Row 5: AI Opportunities -->
+                <div class="lane-row">
+                    <div class="lane-header">AI 机会场景</div>
+                    <div class="lane-body">
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 7×24 秒级自动首响</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在客户添加企微的首触达环节,通过消息实时回调实现全天候秒级自动应答与欢迎承接,以将夜间首响时长从>8小时压缩至秒级,不再错过加粉后30分钟的开口黄金窗口</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-longtail" data-type="longtail">
+                                        <div class="ai-title">
+                                            <span>💡 夜间咨询全自动接待</span>
+                                            <span class="badge badge-longtail">长尾场景</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在夜间直播后咨询高峰(占全部咨询35%~45%)环节,独立完成询价初筛与需求承接,以零夜班编制覆盖全部非工作时段流量,消除流量在等待中流失</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 来源自动打标与个性化开场</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">系统在客户接入环节,基于渠道活码自动完成来源打标并发送对应直播场次的个性化开场,以保证标签完整性100%(采购SCRM/企微原生能力即可,不自建)</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 正品溯源与版本应答</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在正品求证环节(标品信任逻辑下的首位高频问题),检索正品溯源库(资质文号/授权链路/防伪验证方式/版本差异说明)标准化应答,以统一正品信任口径,消除回答含糊导致的流失</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 需求澄清问题链自动引导</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在需求澄清环节,检索结构化问题链知识库(版本/规格/用法适配)逐步引导客户确认适配款,以将老客服的澄清经验产品化,消除新老客服水平参差</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 合规话术库应答功效类长尾问题</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在功效与安全类长尾问题环节(低频但合规风险最高),仅检索预审核合规话术库生成回答(合规内置于建库阶段),以实现回答合规稳定,消除人工临场发挥的违规风险</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-innovation" data-type="innovation">
+                                        <div class="ai-title">
+                                            <span>💡 真人话术拟合应答</span>
+                                            <span class="badge badge-innovation">流程创新</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在全部售前对话环节,基于会话存档中金牌客服的真实对话语料调优应答风格,以使自动回复与真人回答高度拟合,客户无明显机器感</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 商品库检索版本对比应答</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在商品对比环节,检索商品库(SKU/版本/规格/价格/正品凭据)自动生成结构化版本对比结论,以秒级替代人工翻资料,并保证全渠道口径一致不前后矛盾</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 适配版本推荐应答</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在选款建议环节,基于需求澄清收集的用法/预算信息检索商品库匹配适配版本与规格,以合规话术给出推荐理由,回答口径与资质范围严格一致</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 促销规则库确定性算账</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在促销算账环节,检索结构化促销规则库计算确定性到手价,大模型仅对结果做话术润色,以秒级完成算账并杜绝人工错价,客户反复调整组合可即时重算</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 合规凑单建议应答</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在凑单咨询环节,基于促销规则库的满减门槛给出凑单组合建议与对应到手价,以透明的方案对比帮助客户自主决策,不做压迫式推销</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-repetitive" data-type="repetitive">
+                                        <div class="ai-title">
+                                            <span>💡 物流状态自动查询应答</span>
+                                            <span class="badge badge-repetitive">重复性</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在发货物流咨询环节,对接订单/物流数据源实时查询并自动回复状态与轨迹,以7×24即时应答替代人工跨系统查询复述</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 发货时效确定性承诺</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">RAG chatbot 在发货时效咨询环节,基于订单系统返回的确定性时效数据生成承诺话术,以保证时效承诺与履约一致,消除凭感觉承诺引发的客诉</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                            
+                            <div class="step-cell">
+                                <div class="ai-container">
+                                    
+                                    <div class="ai-card theme-innovation" data-type="innovation">
+                                        <div class="ai-title">
+                                            <span>💡 未命中兜底转人工机制</span>
+                                            <span class="badge badge-innovation">流程创新</span>
+                                        </div>
+                                        <div class="ai-desc">系统在RAG检索未命中或客户主动要求人工时,自动转接人工客服并附上下文摘要,以保证全流程唯一人工触点的接管零摩擦——这是不设真人在环审核的成立前提</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-innovation" data-type="innovation">
+                                        <div class="ai-title">
+                                            <span>💡 转化率守护监测</span>
+                                            <span class="badge badge-innovation">流程创新</span>
+                                        </div>
+                                        <div class="ai-desc">系统在AI接管期间,按周监测加好友到首单转化率与人工对照组的差异,以守护约10%的正常水位不下降;连续两周显著低于基线即触发回滚与知识库复盘</div>
+                                    </div>
+                                    
+                                    <div class="ai-card theme-cognitive" data-type="cognitive">
+                                        <div class="ai-title">
+                                            <span>💡 真实会话回流调优</span>
+                                            <span class="badge badge-cognitive">高认知</span>
+                                        </div>
+                                        <div class="ai-desc">FDE 在上线后运营环节,基于真实会话中的未命中问题与低拟合回答持续扩充知识库与调优话术,以使RAG自动接待率与真人拟合度随交付周期持续爬升</div>
+                                    </div>
+                                    
+                                    
+                                </div>
+                            </div>
+                            
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <footer style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--color-border); text-align: center; font-size: 12px; color: var(--color-text-muted);">
+        Generated by ai-opportunity-map-generator · 2026-07-30 12:30:55 · &copy; 2026 Inspire AI4PM
+    </footer>
+
+    <div class="toast" id="toast">已成功复制 YAML 数据</div>
+    
+    <script type="application/yaml" id="raw-yaml">
+title: "私域电商售前客服 AI 机会场景地图（RAG 1v1 自动回复价值落点 · 16 个机会）"
+stages:
+  - name: "引流承接·加好友"
+    steps:
+      - activity: "承接抖音引流客户的首次触达"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微消息回调/欢迎语链路"
+        repetitive_tasks:
+          - "夜间与高峰期咨询积压，人工次日集中回复（首响>8小时）"
+          - "欢迎语发送与渠道打标依赖人工逐个操作"
+        cognitive_tasks:
+          - "判断客户来源与意图，选择合适的开场引导"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "7×24 秒级自动首响"
+            description: "RAG chatbot 在客户添加企微的首触达环节,通过消息实时回调实现全天候秒级自动应答与欢迎承接,以将夜间首响时长从>8小时压缩至秒级,不再错过加粉后30分钟的开口黄金窗口"
+          - type: "longtail"
+            name: "夜间咨询全自动接待"
+            description: "RAG chatbot 在夜间直播后咨询高峰(占全部咨询35%~45%)环节,独立完成询价初筛与需求承接,以零夜班编制覆盖全部非工作时段流量,消除流量在等待中流失"
+          - type: "repetitive"
+            name: "来源自动打标与个性化开场"
+            description: "系统在客户接入环节,基于渠道活码自动完成来源打标并发送对应直播场次的个性化开场,以保证标签完整性100%(采购SCRM/企微原生能力即可,不自建)"
+
+  - name: "询价·需求澄清"
+    steps:
+      - activity: "应答正品求证与澄清客户需求"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/正品溯源与问题链库"
+        repetitive_tasks:
+          - "同质化询价与求证问题(是不是正品/什么版本/多少钱/怎么吃)反复人工回答"
+        cognitive_tasks:
+          - "正品凭据与版本差异说明话术未标准化(沉淀在老客服个人脑中)"
+          - "功效类长尾问题必须踩准《广告法》边界(新客服30天培训的最大占比)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "正品溯源与版本应答"
+            description: "RAG chatbot 在正品求证环节(标品信任逻辑下的首位高频问题),检索正品溯源库(资质文号/授权链路/防伪验证方式/版本差异说明)标准化应答,以统一正品信任口径,消除回答含糊导致的流失"
+          - type: "cognitive"
+            name: "需求澄清问题链自动引导"
+            description: "RAG chatbot 在需求澄清环节,检索结构化问题链知识库(版本/规格/用法适配)逐步引导客户确认适配款,以将老客服的澄清经验产品化,消除新老客服水平参差"
+          - type: "cognitive"
+            name: "合规话术库应答功效类长尾问题"
+            description: "RAG chatbot 在功效与安全类长尾问题环节(低频但合规风险最高),仅检索预审核合规话术库生成回答(合规内置于建库阶段),以实现回答合规稳定,消除人工临场发挥的违规风险"
+          - type: "innovation"
+            name: "真人话术拟合应答"
+            description: "RAG chatbot 在全部售前对话环节,基于会话存档中金牌客服的真实对话语料调优应答风格,以使自动回复与真人回答高度拟合,客户无明显机器感"
+        risk_control:
+          - "**合规边界**: 功效表述绝对禁止由大模型自由生成,RAG 只检索预审核合规语料;库内无答案即触发兜底转人工,不做推测性回答"
+
+  - name: "商品对比"
+    steps:
+      - activity: "应答版本/规格差异与真伪辨别问题"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/商品库"
+        repetitive_tasks:
+          - "人工翻资料复制粘贴版本/规格参数,耗时且错漏"
+        cognitive_tasks:
+          - "将版本/规格差异转译为客户听得懂的选择建议(标品只差在版本)"
+          - "不同客服讲法不一致,客户交叉验证后失去信任"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "商品库检索版本对比应答"
+            description: "RAG chatbot 在商品对比环节,检索商品库(SKU/版本/规格/价格/正品凭据)自动生成结构化版本对比结论,以秒级替代人工翻资料,并保证全渠道口径一致不前后矛盾"
+          - type: "cognitive"
+            name: "适配版本推荐应答"
+            description: "RAG chatbot 在选款建议环节,基于需求澄清收集的用法/预算信息检索商品库匹配适配版本与规格,以合规话术给出推荐理由,回答口径与资质范围严格一致"
+        risk_control:
+          - "**合规边界**: 对比结论不得涉及未获批的功效宣称;推荐理由仅使用商品库内预审核表述"
+
+  - name: "促销算账"
+    steps:
+      - activity: "应答优惠计算与到手价"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/促销规则库"
+        repetitive_tasks:
+          - "人工手动计算满减/赠品/组合价,客户反复改组合需反复重算"
+        cognitive_tasks:
+          - "复杂规则叠加下算准到手价(人工错价即客诉与赔付)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "促销规则库确定性算账"
+            description: "RAG chatbot 在促销算账环节,检索结构化促销规则库计算确定性到手价,大模型仅对结果做话术润色,以秒级完成算账并杜绝人工错价,客户反复调整组合可即时重算"
+          - type: "cognitive"
+            name: "合规凑单建议应答"
+            description: "RAG chatbot 在凑单咨询环节,基于促销规则库的满减门槛给出凑单组合建议与对应到手价,以透明的方案对比帮助客户自主决策,不做压迫式推销"
+        risk_control:
+          - "**高风险容错边界**: 价格与优惠结果绝对禁止由大模型独立计算,必须由促销规则库检索返回确定性结果,大模型仅负责话术润色,避免幻觉错价"
+
+  - name: "下单·发货跟进"
+    steps:
+      - activity: "应答订单与物流查询"
+        role: "RAG 自动回复 chatbot"
+        touchpoint: "企微聊天窗口/订单物流数据源"
+        repetitive_tasks:
+          - "人工跨系统查单后手动复述,大量重复劳动"
+          - "夜间物流咨询无人应答"
+        cognitive_tasks:
+          - "发货时效承诺需考虑仓储物流实际状态(说错即客诉)"
+        ai_opportunities:
+          - type: "repetitive"
+            name: "物流状态自动查询应答"
+            description: "RAG chatbot 在发货物流咨询环节,对接订单/物流数据源实时查询并自动回复状态与轨迹,以7×24即时应答替代人工跨系统查询复述"
+          - type: "cognitive"
+            name: "发货时效确定性承诺"
+            description: "RAG chatbot 在发货时效咨询环节,基于订单系统返回的确定性时效数据生成承诺话术,以保证时效承诺与履约一致,消除凭感觉承诺引发的客诉"
+        risk_control:
+          - "**高风险容错边界**: 发货时效承诺绝对禁止由大模型推测,必须以订单/物流数据源返回值为准;数据缺失时回复保守话术并转人工"
+
+  - name: "全流程·兜底与守护"
+    steps:
+      - activity: "RAG 未命中兜底与质量守护"
+        role: "RAG chatbot + 人工兜底客服"
+        touchpoint: "企微会话/转接机制/评测集"
+        repetitive_tasks:
+          - "无(本阶段为横向机制设计)"
+        cognitive_tasks:
+          - "判定何时该转人工:知识库未命中/客户点名人工/异常情绪"
+          - "持续验证自动回复质量与转化率守护基线"
+        ai_opportunities:
+          - type: "innovation"
+            name: "未命中兜底转人工机制"
+            description: "系统在RAG检索未命中或客户主动要求人工时,自动转接人工客服并附上下文摘要,以保证全流程唯一人工触点的接管零摩擦——这是不设真人在环审核的成立前提"
+          - type: "innovation"
+            name: "转化率守护监测"
+            description: "系统在AI接管期间,按周监测加好友到首单转化率与人工对照组的差异,以守护约10%的正常水位不下降;连续两周显著低于基线即触发回滚与知识库复盘"
+          - type: "cognitive"
+            name: "真实会话回流调优"
+            description: "FDE 在上线后运营环节,基于真实会话中的未命中问题与低拟合回答持续扩充知识库与调优话术,以使RAG自动接待率与真人拟合度随交付周期持续爬升"
+        risk_control:
+          - "**守护边界**: 转化率是最重要的守护指标(维持不下降),不作为提升目标;不分析未转化客户的犹豫信号,不为此增加人工环节"
+    </script>
+
+    <script>
+        function filterCards() {
+            const checkboxes = document.querySelectorAll('.filter-panel input[type="checkbox"]');
+            const activeTypes = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            
+            const allCards = document.querySelectorAll('.ai-card');
+            allCards.forEach(card => {
+                const type = card.getAttribute('data-type');
+                if (activeTypes.includes(type)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function copyYAML() {
+            const yaml = document.getElementById('raw-yaml').textContent.trim();
+            navigator.clipboard.writeText(yaml).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2500);
+            });
+        }
+    </script>
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-服务蓝图.html"><div class="dir">← 上一步 · 分析</div><div class="t">④ 服务蓝图</div><div class="d">前承：三层泳道解剖 As-Is 人工售前 5 阶段，定位认知负荷 critical 的痛点节点</div></a><a class="navcard next" href="私域电商售前客服-优先级矩阵.html"><div class="dir">下一步 · 排序 →</div><div class="t">⑥ 优先级矩阵</div><div class="d">后启：16 个机会按收益×成本评分排序，识别 Quick Win 与依赖根节点</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

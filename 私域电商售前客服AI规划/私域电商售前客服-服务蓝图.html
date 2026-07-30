@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私域电商售前客服服务蓝图（As-Is 人工现状 · 承接③业务流程口径） - Service Blueprint | Inspire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Inspire Design System Tokens (Standard Light Mode) */
+      --color-primary: #10213E;      /* Starry Blues */
+      --color-accent: #5DB2E2;       /* Creative Blue */
+      --color-secondary: #625D9C;    /* Amethyst */
+      --color-success: #00524C;      /* Myrtle Deep Green */
+      --color-info: #6FB1C8;         /* Cerulean Frost */
+      --color-warning: #F59E0B;      /* Warning */
+      --color-destructive: #EF4444;  /* Danger */
+      --color-background: #FFFFFF;   /* Pure White */
+      --color-bg-alt: #F5F5F6;       /* Tech Gray */
+      --color-foreground: #10213E;   /* Primary Text */
+      --color-text-muted: #64748B;   /* Text Secondary */
+      --color-border: #E2E8F0;       /* Border/Line */
+      
+      --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+      --shadow-md: 0 10px 15px -3px rgba(16, 33, 62, 0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font-family: 'MiSans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: 0.15s ease-out;
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg-alt);
+      color: var(--color-foreground);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Page Container ===== */
+    .page-wrap {
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      width: 85%;
+      margin: 48px auto;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      min-height: calc(100vh - 96px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Standardized Header */
+    .page-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-header h1::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      padding-left: 16px;
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+
+    /* ── Blueprint canvas ── */
+    .bp-outer-container {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: white;
+    }
+
+    .bp-canvas {
+      min-width: var(--bp-canvas-width, 960px);
+      overflow: hidden;
+      background: #fff;
+    }
+
+    /* ── Phase header row ── */
+    .phase-header-row {
+      display: flex;
+      background: var(--color-bg-alt);
+      border-bottom: 2px solid var(--color-border);
+    }
+    .corner-cell {
+      width: 128px;
+      min-width: 128px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 2px solid var(--color-border);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      letter-spacing: .05em;
+      padding: 8px 4px;
+      text-transform: uppercase;
+    }
+    .phase-headers { display: flex; }
+    .phase-header-cell {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      height: 48px;
+      background: var(--color-secondary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      position: relative;
+      transition: var(--transition);
+    }
+    .phase-header-cell:hover { opacity: 0.9; }
+
+    /* arrow chevron shape */
+    .phase-header-cell.first-phase {
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+    }
+    .phase-header-cell.mid-phase {
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+    }
+
+    .lane-cells { display: flex; flex: 1; }
+
+    /* ── Phase cell ── */
+    .phase-cell {
+      flex-shrink: 0;
+      border-right: 1px solid #e2e8f0;
+      padding: 8px 10px;
+    }
+    .phase-cell:last-child { border-right: none; }
+
+    /* ── Layer divider (dashed) ── */
+    .layer-divider {
+      border-top: 1.5px dashed #cbd5e1;
+      margin: 2px 0;
+    }
+
+    /* ── Action / Activity card ── */
+    .cards-row { display: flex; flex-wrap: nowrap; gap: 6px; }
+    
+    .card-container {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .card {
+      width: 100px;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      color: #334155;
+      line-height: 1.4;
+      text-align: center;
+    }
+    .card.front-card { background: #f0f9ff; }
+    .card.back-card  { background: #f0f9ff; } /* bg-sky-50 used universally in react cards */
+    .card-w { width: var(--card-width, 100px); }
+
+    .card-name { font-weight: 500; color: #334155; }
+    
+    .card-role {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.6rem;
+      color: #64748b;
+    }
+    .role-avatar {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .role-avatar svg { width: 12px; height: 12px; color: #475569; }
+
+    /* Touchpoint and System Chip container */
+    .chip-container {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Touchpoint badge */
+    .touchpoint-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 4px;
+      padding: 2px 6px;
+      text-align: center;
+    }
+
+    /* System touchpoint chip */
+    .sys-chip {
+      display: inline-block;
+      font-size: 0.6rem;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 4px;
+      padding: 2px 6px;
+      text-align: center;
+    }
+
+    /* Cognitive load badge */
+    .load-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.6rem;
+      border-radius: 999px;
+      padding: 2px 6px;
+      border-width: 1px;
+      border-style: solid;
+      margin-top: 2px;
+    }
+    .load-low      { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .load-medium   { background: #fef9c3; border-color: #fde047; color: #713f12; }
+    .load-high     { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
+    .load-critical { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+
+    /* Pain point & expectation tags */
+    .pain-item {
+      display: flex; align-items: flex-start; gap: 4px;
+      font-size: 0.62rem; color: #2563eb; line-height: 1.45;
+    }
+    .pain-bullet { flex-shrink: 0; color: #60a5fa; }
+    .expect-item {
+      display: flex; align-items: flex-start; gap: 4px;
+      font-size: 0.62rem; color: #16a34a; line-height: 1.45;
+    }
+    .expect-bullet { flex-shrink: 0; }
+
+    /* Footer */
+    .bp-footer {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      margin-top: 14px;
+      text-align: right;
+    }
+  </style>
+
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a></div></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+  
+
+  <div class="page-wrap">
+    <header class="page-header">
+      <div class="header-left">
+        <h1>私域电商售前客服服务蓝图（As-Is 人工现状 · 承接③业务流程口径）</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="bp-outer-container">
+    <div class="bp-canvas" style="--bp-canvas-width: 1030px; --card-width: 100px;">
+
+      
+      <div class="phase-header-row">
+        <div class="corner-cell">阶段<br>Phase</div>
+        <div class="phase-headers">
+          
+          <div class="phase-header-cell first-phase" style="--ph-width: 226px; width: var(--ph-width);">
+            引流承接·加好友
+          </div>
+          
+          <div class="phase-header-cell mid-phase" style="--ph-width: 226px; width: var(--ph-width);">
+            询价·需求澄清
+          </div>
+          
+          <div class="phase-header-cell mid-phase" style="--ph-width: 150px; width: var(--ph-width);">
+            商品对比
+          </div>
+          
+          <div class="phase-header-cell mid-phase" style="--ph-width: 150px; width: var(--ph-width);">
+            促销算账
+          </div>
+          
+          <div class="phase-header-cell mid-phase" style="--ph-width: 150px; width: var(--ph-width);">
+            下单·发货跟进
+          </div>
+          
+        </div>
+      </div>
+
+      
+      
+      <div class="swimlane-row layer-customer">
+        <div class="lane-label">客户行为</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 50px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                <div class="card front-card">
+                  <div class="card-name">深夜看完直播扫码添加客服询价</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 50px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                <div class="card front-card">
+                  <div class="card-name">问价格并求证是不是正品/什么版本</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                <div class="card front-card">
+                  <div class="card-name">询问版本/规格差异与真伪辨别</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                <div class="card front-card">
+                  <div class="card-name">询问活动优惠并反复调整组合</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                <div class="card front-card">
+                  <div class="card-name">下单后询问发货与物流进度</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-customer">
+        <div class="lane-label">触点</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="touchpoint-badge">抖音小风车/获客助手链接/企微名片</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="touchpoint-badge">企微聊天窗口</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="touchpoint-badge">企微聊天窗口/商品详情页</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="touchpoint-badge">企微聊天窗口</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="touchpoint-badge">企微聊天窗口/订单页</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-customer">
+        <div class="lane-label">痛点<br>期待</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>夜间添加后无人应答，热情冷却</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>次日才收到回复，已脱离直播冲动情境</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>不知道如何开场提问</span></div>
+              
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>加上好友立刻有人回应</span></div>
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>直接告诉我价格和活动</span></div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>最关心是不是正品、是哪个版本/规格，回答含糊或版本说不清就流失</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>担心买到假货仿品，反复索要正品凭据</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>描述模糊反复被追问，体验差</span></div>
+              
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>得到明确的正品凭据与版本/规格差异说明</span></div>
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>被专业地引导确认适配版本与用法</span></div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>版本/规格差异说不清（标品只差在版本，如替西帕肽之孟版/日版）</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>等客服翻资料回复慢</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>担心比其他渠道买贵、买到非正规版本</span></div>
+              
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>清晰的版本对比结论与正品凭据</span></div>
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>回答专业一致，不前后矛盾</span></div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>满减/赠品/组合价规则复杂算不清</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>客服算错价导致纠纷</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>高峰期算账等待久</span></div>
+              
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>快速给出准确的到手价</span></div>
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>报价前后一致、说到做到</span></div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 50px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>何时发货说不准</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>物流查询要等客服上班</span></div>
+              
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>随问随答的物流状态</span></div>
+              
+              <div class="expect-item"><span class="expect-bullet">○</span><span>靠谱的发货时效承诺</span></div>
+              
+            
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="layer-divider" style="margin: 0;"></div>
+
+      
+      
+      <div class="swimlane-row layer-front">
+        <div class="lane-label">前台活动</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 70px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">上班后集中处理隔夜咨询</div>
+                </div>
+              </div>
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">发送欢迎语并手动打标</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 70px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">按经验应答正品求证与需求澄清</div>
+                </div>
+              </div>
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">应答功效/安全类长尾问题（低频但合规风险最高）</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 70px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">手动整理版本/规格参数生成对比话术</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 70px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">手动计算促销组合价</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 70px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  售前客服（人工）
+                </div>
+                
+                <div class="card front-card">
+                  <div class="card-name">手动查单回复物流状态</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-front">
+        <div class="lane-label">系统触点</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">企微工作台</span>
+                
+              </div>
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">企微工作台/SCRM</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">企微工作台/个人经验</span>
+                
+              </div>
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">话术文档/群共享文件</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">商品资料文档/详情页</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">促销规则文档/计算器</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">订单后台/物流查询页</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-front">
+        <div class="lane-label">痛点<br>负荷</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>夜间35%~45%咨询积压至次日，首响&gt;8小时</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>高峰期人均同时接待8-15人，漏回错回</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>开口黄金窗口（加粉后30分钟）大量错过</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-high">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    
+    high
+  </span>
+  
+  </div>
+              
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>手动打标易遗漏</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>欢迎语模板化，新人不熟悉话术边界</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-low">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    
+    low
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>正品求证/版本对比话术未标准化，新老客服水平参差</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>新客服培训30天才能独立上岗</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>经验沉淀在个人聊天记录，离职即流失</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-high">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    
+    high
+  </span>
+  
+  </div>
+              
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>功效表述踩《广告法》红线风险靠自觉兜底（主动说功效拉单最易越界）</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>夜间和大促疲劳时段违规话术高发</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>话术文档更新不及时，检索靠翻聊天记录</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-critical">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    
+    critical
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>手动翻资料复制粘贴，耗时且易错漏</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>不同客服讲法不一致，客户交叉验证后失去信任</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>涉及功效对比时易越界表述</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-high">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    
+    high
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>规则叠加复杂，人工计算易错价</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>错价承诺引发客诉与赔付</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>客户反复改组合需反复重算，高峰期压力大</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-critical">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    
+    critical
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>跨系统查询后手动复述，占用大量重复劳动</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>夜间物流咨询无人应答</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>发货时效凭感觉承诺，说错引发客诉</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="layer-divider" style="margin: 0;"></div>
+
+      
+      
+      <div class="swimlane-row layer-back">
+        <div class="lane-label">支撑流程</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 60px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  客服主管
+                </div>
+                
+                <div class="card back-card">
+                  <div class="card-name">班次制排班管理</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 60px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  运营/资深客服兼任
+                </div>
+                
+                <div class="card back-card">
+                  <div class="card-name">话术库维护与新人培训</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 60px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  运营
+                </div>
+                
+                <div class="card back-card">
+                  <div class="card-name">SKU资料与资质维护</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 60px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  运营
+                </div>
+                
+                <div class="card back-card">
+                  <div class="card-name">促销规则制定与同步</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 60px;">
+            <div class="cards-row">
+              
+              <div class="card-container card-w">
+                
+                <div class="card-role">
+                  <div class="role-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                  仓储/电商后台
+                </div>
+                
+                <div class="card back-card">
+                  <div class="card-name">订单与物流数据维护</div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-back">
+        <div class="lane-label">后台系统</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">排班表/企微后台</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">文档工具/培训材料</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">商品文档/资质文件</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">文档/群通知</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div class="cards-row">
+              
+              <div class="chip-container card-w">
+                
+                <span class="sys-chip">订单系统/物流系统</span>
+                
+              </div>
+              
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+      <div class="swimlane-row layer-back">
+        <div class="lane-label">痛点<br>负荷</div>
+        <div class="lane-cells">
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>全天候流量×班次制人力的结构性错位</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>补夜班需三班倒，至少加2-3个编制</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 226px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>无专职编制，话术库覆盖率低</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>合规审核靠事后抽检，覆盖率低</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>蓝帽子资质覆盖情况未系统化管理</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>新品资料更新滞后</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>规则以文档/口头同步，客服理解偏差</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>规则频繁变更难跟进</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+          <div class="phase-cell" style="--ph-width: 150px; width: var(--ph-width); min-height: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+            
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>数据未开放接口，客服只能人肉查询</span></div>
+              
+              <div class="pain-item"><span class="pain-bullet">•</span><span>大促期发货时效波动大</span></div>
+              
+              
+              <div>
+  
+  <span class="load-badge load-medium">
+    
+    <svg style="width:12px; height:12px; flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    
+    medium
+  </span>
+  
+  </div>
+              
+            
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+    </div>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--color-border); text-align: center; font-size: 12px; color: var(--color-text-muted);">
+      Generated by blueprint-map-generator · 2026-07-30 12:30 · &copy; 2026 Inspire AI4PM
+    </footer>
+  </div>
+    <div class="toast" id="toast">已成功复制 YAML 数据</div>
+    
+    <script type="application/yaml" id="raw-yaml">
+title: &#34;私域电商售前客服服务蓝图（As-Is 人工现状 · 承接③业务流程口径）&#34;
+config:
+  height:
+    customerLayer: 170
+    frontstageLayer: 200
+    backstageLayer: 160
+phases:
+  - name: 引流承接·加好友
+    customerLayer:
+      journeyStage: 直播种草后添加企微
+      actions:
+        - name: 深夜看完直播扫码添加客服询价
+          touchpoints: 抖音小风车/获客助手链接/企微名片
+          painPoints:
+            - 夜间添加后无人应答，热情冷却
+            - 次日才收到回复，已脱离直播冲动情境
+            - 不知道如何开场提问
+          expectations:
+            - 加上好友立刻有人回应
+            - 直接告诉我价格和活动
+          experienceScore: 4
+    frontstageLayer:
+      processStage: 客户接入与首响
+      activities:
+        - name: 上班后集中处理隔夜咨询
+          role: 售前客服（人工）
+          systemTouchpoints: 企微工作台
+          dataDependencies:
+            - 客户来源渠道
+            - 隔夜消息积压队列
+          painPoints:
+            - 夜间35%~45%咨询积压至次日，首响&gt;8小时
+            - 高峰期人均同时接待8-15人，漏回错回
+            - 开口黄金窗口（加粉后30分钟）大量错过
+          cognitiveLoad: high
+        - name: 发送欢迎语并手动打标
+          role: 售前客服（人工）
+          systemTouchpoints: 企微工作台/SCRM
+          dataDependencies:
+            - 渠道活码来源
+          painPoints:
+            - 手动打标易遗漏
+            - 欢迎语模板化，新人不熟悉话术边界
+          cognitiveLoad: low
+    backstageLayer:
+      supportProcess: 排班与流量错配
+      activities:
+        - name: 班次制排班管理
+          role: 客服主管
+          systemTouchpoints: 排班表/企微后台
+          painPoints:
+            - 全天候流量×班次制人力的结构性错位
+            - 补夜班需三班倒，至少加2-3个编制
+          cognitiveLoad: medium
+
+  - name: 询价·需求澄清
+    customerLayer:
+      journeyStage: 询价并求证正品与版本
+      actions:
+        - name: 问价格并求证是不是正品/什么版本
+          touchpoints: 企微聊天窗口
+          painPoints:
+            - 最关心是不是正品、是哪个版本/规格，回答含糊或版本说不清就流失
+            - 担心买到假货仿品，反复索要正品凭据
+            - 描述模糊反复被追问，体验差
+          expectations:
+            - 得到明确的正品凭据与版本/规格差异说明
+            - 被专业地引导确认适配版本与用法
+          experienceScore: 5
+    frontstageLayer:
+      processStage: 需求澄清与答疑
+      activities:
+        - name: 按经验应答正品求证与需求澄清
+          role: 售前客服（人工）
+          systemTouchpoints: 企微工作台/个人经验
+          dataDependencies:
+            - 正品凭据与版本说明话术（沉淀在老客服个人脑中）
+          painPoints:
+            - 正品求证/版本对比话术未标准化，新老客服水平参差
+            - 新客服培训30天才能独立上岗
+            - 经验沉淀在个人聊天记录，离职即流失
+          cognitiveLoad: high
+        - name: 应答功效/安全类长尾问题（低频但合规风险最高）
+          role: 售前客服（人工）
+          systemTouchpoints: 话术文档/群共享文件
+          dataDependencies:
+            - 合规话术库（散落文档，覆盖不全）
+          painPoints:
+            - 功效表述踩《广告法》红线风险靠自觉兜底（主动说功效拉单最易越界）
+            - 夜间和大促疲劳时段违规话术高发
+            - 话术文档更新不及时，检索靠翻聊天记录
+          cognitiveLoad: critical
+    backstageLayer:
+      supportProcess: 话术与培训支撑
+      activities:
+        - name: 话术库维护与新人培训
+          role: 运营/资深客服兼任
+          systemTouchpoints: 文档工具/培训材料
+          painPoints:
+            - 无专职编制，话术库覆盖率低
+            - 合规审核靠事后抽检，覆盖率低
+          cognitiveLoad: medium
+
+  - name: 商品对比
+    customerLayer:
+      journeyStage: 对比版本规格与渠道
+      actions:
+        - name: 询问版本/规格差异与真伪辨别
+          touchpoints: 企微聊天窗口/商品详情页
+          painPoints:
+            - 版本/规格差异说不清（标品只差在版本，如替西帕肽之孟版/日版）
+            - 等客服翻资料回复慢
+            - 担心比其他渠道买贵、买到非正规版本
+          expectations:
+            - 清晰的版本对比结论与正品凭据
+            - 回答专业一致，不前后矛盾
+          experienceScore: 5
+    frontstageLayer:
+      processStage: 对比讲解
+      activities:
+        - name: 手动整理版本/规格参数生成对比话术
+          role: 售前客服（人工）
+          systemTouchpoints: 商品资料文档/详情页
+          dataDependencies:
+            - SKU参数（版本/规格/价格/正品凭据）
+          painPoints:
+            - 手动翻资料复制粘贴，耗时且易错漏
+            - 不同客服讲法不一致，客户交叉验证后失去信任
+            - 涉及功效对比时易越界表述
+          cognitiveLoad: high
+    backstageLayer:
+      supportProcess: 商品资料管理
+      activities:
+        - name: SKU资料与资质维护
+          role: 运营
+          systemTouchpoints: 商品文档/资质文件
+          painPoints:
+            - 蓝帽子资质覆盖情况未系统化管理
+            - 新品资料更新滞后
+          cognitiveLoad: medium
+
+  - name: 促销算账
+    customerLayer:
+      journeyStage: 问优惠、算总价
+      actions:
+        - name: 询问活动优惠并反复调整组合
+          touchpoints: 企微聊天窗口
+          painPoints:
+            - 满减/赠品/组合价规则复杂算不清
+            - 客服算错价导致纠纷
+            - 高峰期算账等待久
+          expectations:
+            - 快速给出准确的到手价
+            - 报价前后一致、说到做到
+          experienceScore: 6
+    frontstageLayer:
+      processStage: 人工算账报价
+      activities:
+        - name: 手动计算促销组合价
+          role: 售前客服（人工）
+          systemTouchpoints: 促销规则文档/计算器
+          dataDependencies:
+            - 当期促销规则（文档/群通知）
+            - 客户拟购组合
+          painPoints:
+            - 规则叠加复杂，人工计算易错价
+            - 错价承诺引发客诉与赔付
+            - 客户反复改组合需反复重算，高峰期压力大
+          cognitiveLoad: critical
+    backstageLayer:
+      supportProcess: 促销规则发布
+      activities:
+        - name: 促销规则制定与同步
+          role: 运营
+          systemTouchpoints: 文档/群通知
+          painPoints:
+            - 规则以文档/口头同步，客服理解偏差
+            - 规则频繁变更难跟进
+          cognitiveLoad: medium
+
+  - name: 下单·发货跟进
+    customerLayer:
+      journeyStage: 下单支付与催发货
+      actions:
+        - name: 下单后询问发货与物流进度
+          touchpoints: 企微聊天窗口/订单页
+          painPoints:
+            - 何时发货说不准
+            - 物流查询要等客服上班
+          expectations:
+            - 随问随答的物流状态
+            - 靠谱的发货时效承诺
+          experienceScore: 6
+    frontstageLayer:
+      processStage: 订单与物流应答
+      activities:
+        - name: 手动查单回复物流状态
+          role: 售前客服（人工）
+          systemTouchpoints: 订单后台/物流查询页
+          dataDependencies:
+            - 订单状态
+            - 物流单号与轨迹
+          painPoints:
+            - 跨系统查询后手动复述，占用大量重复劳动
+            - 夜间物流咨询无人应答
+            - 发货时效凭感觉承诺，说错引发客诉
+          cognitiveLoad: medium
+    backstageLayer:
+      supportProcess: 订单履约支撑
+      activities:
+        - name: 订单与物流数据维护
+          role: 仓储/电商后台
+          systemTouchpoints: 订单系统/物流系统
+          painPoints:
+            - 数据未开放接口，客服只能人肉查询
+            - 大促期发货时效波动大
+          cognitiveLoad: medium
+
+    </script>
+
+    <script>
+      function copyYAML() {
+        const yaml = document.getElementById('raw-yaml').textContent.trim();
+        navigator.clipboard.writeText(yaml).then(() => {
+          const toast = document.getElementById('toast');
+          toast.style.display = 'block';
+          setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        });
+      }
+    </script>
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-业务流程.html"><div class="dir">← 上一步 · 分析</div><div class="t">③ 业务流程</div><div class="d">前承：L1 价值流×5 阶段×L2 流程解剖人工售前全链路，定位 11 个痛点（critical×4）</div></a><a class="navcard next" href="私域电商售前客服-AI机会场景地图.html"><div class="dir">下一步 · 分析 →</div><div class="t">⑤ AI场景地图</div><div class="d">后启：把流程痛点转成 16 个 RAG 自动回复价值落点，并划定兜底与守护边界</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

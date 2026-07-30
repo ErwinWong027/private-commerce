@@ -1,0 +1,202 @@
+title: "保健品私域电商售前客服 - 业务流程深度分析（As-Is 人工 1v1 售前）"
+company: "瘦身减肥类保健品私域电商（白牌/新锐品牌典型业态）"
+domain: "私域售前客服"
+description: "第 3 步 · 承接①业务现状分析与②北极星OSM，把人工售前 1v1 全流程解剖到流程级（L1 价值流 → 阶段 → L2 流程 → 痛点），为④服务蓝图与⑤AI场景地图定位 RAG 接管点。标品信任逻辑：客户主问正品/版本/渠道可信，功效认知已在直播间完成。"
+
+business_types:
+  - name: "瘦身保健品私域电商（售前场景）"
+    model: "抖音直播引流 × 企微 1v1 人工售前"
+    product_type: "功能性食品/保健品（中客单价 100~1000 元）"
+    market_type: "25~45 岁女性大众市场"
+    description: "抖音直播间引流添加企微，由人工客服 1v1 完成正品答疑、版本推荐、促销算账与下单撮合，服务边界止于发货跟进"
+
+l1_value_streams:
+  - name: "售前 1v1 服务价值流（加好友 → 下单 → 发货）"
+    description: "从客户添加企微首响，到正品版本确认、促销算账、下单撮合、发货移交的全链路售前服务过程"
+    business_type: "瘦身保健品私域电商（售前场景）"
+    stages:
+      - name: "引流承接与首次响应"
+        description: "客户经抖音直播引流添加企微后的首次触达与欢迎"
+        order: 1
+        type: "process"
+        l2_processes:
+          - name: "加好友与来源识别"
+            role: "客服/运营"
+            system: "企业微信 / 渠道活码"
+            inputs:
+              - "抖音直播引流点击"
+              - "好友添加请求"
+            outputs:
+              - "已通过好友 + 来源标签"
+            description: "通过好友申请，识别客户来自哪场直播/哪个投放，为后续话术与促销口径打标"
+            order: 1
+            pain_points:
+              - severity: "medium"
+                description: "来源打标依赖人工手动备注，高峰漏打标"
+                impact: "无法按直播场次匹配促销口径，算账口径混乱"
+                root_cause: "无自动渠道识别与打标，活码分流未系统化"
+          - name: "首次响应与欢迎"
+            role: "客服"
+            system: "企业微信"
+            inputs:
+              - "客户首条询价消息"
+            outputs:
+              - "首条应答"
+            description: "对客户首条消息作出响应，建立对话"
+            order: 2
+            pain_points:
+              - severity: "critical"
+                description: "全天候流量 × 班次制人力：白班首响 1~3 分钟、夜间 >8 小时；夜间咨询占 35%~45% 无人接待"
+                impact: "夜间直播后咨询高峰在等待中冷却流失，首响超时静默离开"
+                root_cause: "6-20 人团队不设夜班，人力与全天候流量结构性错位"
+
+      - name: "需求澄清与正品答疑"
+        description: "识别客户真实诉求，回应『是不是正品/什么版本/渠道可不可信』的核心信任问题"
+        order: 2
+        type: "process"
+        l2_processes:
+          - name: "正品溯源与渠道可信答疑"
+            role: "客服"
+            system: "企业微信 / 商品资质资料"
+            inputs:
+              - "客户正品/版本疑问"
+            outputs:
+              - "正品凭据与版本说明应答"
+            description: "标品信任逻辑下的首位高频问题——出示资质文号/授权链路/防伪验证，说明孟版/日版等版本区别"
+            order: 1
+            pain_points:
+              - severity: "critical"
+                description: "正品凭据、授权链路散落，新客服记不全，答复口径不一"
+                impact: "信任建立慢、口径参差影响转化；资深客服成瓶颈"
+                root_cause: "正品溯源知识未结构化沉淀，靠个人记忆与经验"
+          - name: "需求与版本澄清问题链"
+            role: "客服"
+            system: "企业微信"
+            inputs:
+              - "客户模糊需求"
+            outputs:
+              - "澄清后的需求画像"
+            description: "通过问题链澄清适用版本/规格/用法，收敛到可推荐的 SKU"
+            order: 2
+            pain_points:
+              - severity: "high"
+                description: "澄清问题链靠客服个人经验，新人易漏问关键条件"
+                impact: "推荐错版本、反复追问，会话轮次拉长（15~30 轮）"
+                root_cause: "澄清话术未沉淀为标准问题链知识"
+          - name: "功效/安全类长尾答疑（合规敏感）"
+            role: "客服"
+            system: "企业微信"
+            inputs:
+              - "低频功效/安全疑问"
+            outputs:
+              - "合规话术应答"
+            description: "功效认知已在直播间完成，此处为低频长尾，须严守《广告法》红线"
+            order: 3
+            pain_points:
+              - severity: "critical"
+                description: "合规靠培训+个人自觉，夜间/大促疲劳时段违规话术高发"
+                impact: "触碰功效宣称红线，虚假广告最高罚 100 万~200 万元"
+                root_cause: "无预审核合规语料库，语义级违规敏感词挡不住"
+
+      - name: "商品版本对比与推荐"
+        description: "基于澄清后的需求给出版本对比与适配推荐"
+        order: 3
+        type: "process"
+        l2_processes:
+          - name: "商品库检索与版本对比"
+            role: "客服"
+            system: "企业微信 / 商品资料表"
+            inputs:
+              - "澄清后的需求画像"
+            outputs:
+              - "版本对比说明"
+            description: "检索 SKU、规格、价格，向客户对比不同版本差异"
+            order: 1
+            pain_points:
+              - severity: "high"
+                description: "SKU/版本信息散落表格，检索靠翻找与记忆"
+                impact: "响应慢、易报错规格价格"
+                root_cause: "商品库未结构化可检索"
+          - name: "适配版本推荐"
+            role: "客服"
+            system: "企业微信"
+            inputs:
+              - "版本对比说明"
+            outputs:
+              - "推荐方案"
+            description: "结合客户诉求推荐适配版本与购买规格"
+            order: 2
+            pain_points:
+              - severity: "medium"
+                description: "推荐质量取决于客服个人水平，参差不齐"
+                impact: "转化受个人能力波动影响"
+                root_cause: "推荐逻辑未沉淀为知识规则"
+
+      - name: "价格促销算账与下单撮合"
+        description: "确定性算账 + 促单，完成从推荐到成交的临门一脚"
+        order: 4
+        type: "process"
+        l2_processes:
+          - name: "促销规则算账"
+            role: "客服"
+            system: "企业微信 / 促销规则（人工记忆）"
+            inputs:
+              - "推荐方案"
+              - "当场促销规则"
+            outputs:
+              - "精确到手价"
+            description: "按满减/赠品/组合价规则计算客户到手价"
+            order: 1
+            pain_points:
+              - severity: "critical"
+                description: "人工心算易错价，促销规则随场变动记不全"
+                impact: "错价引发纠纷/亏损，算账口径全渠道不一致"
+                root_cause: "促销规则未入库，无确定性计算工具"
+          - name: "下单撮合与促单"
+            role: "客服"
+            system: "企业微信 / 下单链接"
+            inputs:
+              - "精确到手价"
+            outputs:
+              - "已下单支付"
+            description: "推送下单链接、临门促单，完成成交（约 10% 转化）"
+            order: 2
+            pain_points:
+              - severity: "medium"
+                description: "促单节奏靠资深客服经验，新人成交话术弱"
+                impact: "转化率受客服个人能力波动"
+                root_cause: "真实成交话术未沉淀拟合"
+
+      - name: "物流发货答疑与移交"
+        description: "发货时效答疑、物流查询，服务边界止于发货"
+        order: 5
+        type: "process"
+        l2_processes:
+          - name: "发货时效与物流查询"
+            role: "客服"
+            system: "企业微信 / 订单物流系统"
+            inputs:
+              - "客户物流疑问"
+            outputs:
+              - "物流状态应答"
+            description: "回答何时发货、快递到哪了等确定性问题"
+            order: 1
+            pain_points:
+              - severity: "medium"
+                description: "物流状态需跨系统人工查询，重复问答占用人力"
+                impact: "大量重复咨询挤占售前有效服务时间"
+                root_cause: "物流数据未与对话打通，无自动查询"
+          - name: "未命中问题兜底移交"
+            role: "客服/主管"
+            system: "企业微信"
+            inputs:
+              - "非标/投诉/复杂诉求"
+            outputs:
+              - "转接或升级处理"
+            description: "标准知识未覆盖的问题转由资深客服/主管处理"
+            order: 2
+            pain_points:
+              - severity: "low"
+                description: "无未命中沉淀机制，同类问题反复消耗人力"
+                impact: "知识不积累，长期人效难提升"
+                root_cause: "缺少未命中回流补录知识库的闭环"
