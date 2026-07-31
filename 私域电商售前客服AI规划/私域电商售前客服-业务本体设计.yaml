@@ -1,0 +1,578 @@
+title: 私域电商售前AI助手-Agent本体设计
+domain: 私域电商售前
+scenario_description: "客户从抖音直播/投流进入企微 1v1 后，AI 售前助手完成秒级首响、意图分流、正品信任应答、确定性算账，遇敏感功效/低置信/点名人工即附摘要转人工，并以小流量试点看板守护转化率的端到端售前场景"
+target_agent_role: 企微 AI 售前助手（RAG 1v1 自动回复）
+
+entities:
+  - id: customer_session
+    name: 客户会话（Session）
+    type: core
+    description: "客户在企微发起的 1v1 售前会话，是所有意图识别、应答与转人工动作的载体"
+    attributes:
+      - name: status
+        type: enum
+        values: [incoming, ai_serving, handoff, closed]
+        description: 会话承接状态
+      - name: first_response_at
+        type: datetime
+        description: 首响时间（秒级首响考核口径）
+      - name: source_channel
+        type: string
+        description: 进线来源（直播/短视频/投流加粉）
+      - name: risk_signals
+        type: string
+        description: 风险信号（敏感功效词/点名人工/连续追问）
+    key_distinctions:
+      - "客户进线 ≠ 已完成首响，冷场即流失第一轮成交窗口"
+      - "AI 承接中 ≠ 全自动闭环，转人工是正常路径不是失败"
+      - "会话来源打标（C3）不在本期范围，不能假设来源已知"
+
+  - id: inquiry_intent
+    name: 咨询意图（Intent）
+    type: event
+    description: "对客户每轮问题的分类结果，决定路由到哪类应答（版本/正品/价格/风险/发货付款/转人工）"
+    attributes:
+      - name: category
+        type: enum
+        values: [version, authenticity, pricing, risk, fulfillment_payment, handoff]
+        description: 意图类别
+      - name: confidence
+        type: number
+        description: 意图识别置信度
+      - name: matched_keywords
+        type: string
+        description: 命中的分类词典关键词
+    key_distinctions:
+      - "意图识别成功 ≠ 知识库有答案，命中不足必须保守答复"
+      - "价格类意图 ≠ 可自由作答，必须走规则表输出"
+      - "风险类意图一旦命中，优先级高于其他所有意图"
+
+  - id: product_version
+    name: 商品版本（Version）
+    type: core
+    description: "在售三版本：日版礼来（一盒两支/自动笔）、孟版杰西卡（一盒一支/针剂）、珠峰（孟版低配版）"
+    attributes:
+      - name: version_name
+        type: enum
+        values: [日版礼来, 孟版杰西卡, 珠峰]
+        description: 版本名称
+      - name: package_desc
+        type: string
+        description: 包装形式（一盒两支/一盒一支）
+      - name: product_form
+        type: string
+        description: 剂型（原研自动笔/仿制针剂）
+      - name: usage_desc
+        type: string
+        description: 使用口径（一针管一个星期）
+      - name: storage_desc
+        type: string
+        description: "保存口径（未开封 2-8°C 冷藏；已开封 <30°C 存 21 天）"
+    key_distinctions:
+      - "珠峰=孟版杰西卡低配版，不是独立第四版本"
+      - "日版只能整盒购买，不能拆开卖"
+      - "替C = 替尔 = 替尔泊肽，是同一成分的不同叫法"
+      - "国版穆峰达需去医院开，本店不售，不能报价"
+
+  - id: sku_spec
+    name: 规格价格（SKU）
+    type: core
+    description: "版本×剂量档的权威价格表（孟版 6 档 / 日版 6 档含 1 档缺货 / 珠峰 4 档，共 16 条）"
+    attributes:
+      - name: dose
+        type: enum
+        values: ["2.5", "5.0", "7.5", "10", "12.5", "15"]
+        description: 剂量档位
+      - name: list_price
+        type: number
+        description: 表价（价格表图口径）
+      - name: stock_status
+        type: enum
+        values: [in_stock, out_of_stock]
+        description: 库存状态（日版 15 暂缺货）
+    key_distinctions:
+      - "表价 ≠ 会话浮动报价（日版 2.5 表价 498，会话出现过 548）"
+      - "珠峰仅 2.5/5.0/7.5/10 四档，无 12.5/15 档"
+      - "缺货档位不能报价成交，只能说明缺货"
+
+  - id: promo_rule
+    name: 促销规则（Promo）
+    type: reference
+    description: "结构化优惠规则：618 孟版单支减 20、日版一盒减 20；到手价只能由规则表算出"
+    attributes:
+      - name: condition
+        type: string
+        description: 触发条件（版本/件数/活动场次）
+      - name: result
+        type: string
+        description: 优惠结果（减免金额）
+      - name: validity
+        type: enum
+        values: [active, expired, manual_only]
+        description: 规则状态
+    key_distinctions:
+      - "人工议价口径（优惠10/1200-80）≠ 可自动执行的规则"
+      - "活动口径有场次有效期，过期规则不能继续报"
+      - "赠品/优惠条件必须明确表述，不能模糊表达"
+
+  - id: authenticity_proof
+    name: 正品凭据（Proof）
+    type: reference
+    description: "支撑正品信任应答的凭据集：验真流程（扫码/官网/三码合一）、包装图、假货退款承诺"
+    attributes:
+      - name: proof_type
+        type: enum
+        values: [验真流程卡, 包装图, 版本对比卡, 退款承诺口径]
+        description: 凭据类型
+      - name: is_real_collected
+        type: boolean
+        description: 是否真实采集（补充样例须显式标注）
+      - name: display_content
+        type: string
+        description: 可公开展示的凭据内容
+    key_distinctions:
+      - "正品凭据只能来自知识库，不允许模型自由编造"
+      - "禁止伪造批准文号、注册证书编号、质检结论、蓝帽子编号"
+      - "样例凭据卡 ≠ 真实业务承诺，演示时必须标注"
+
+  - id: compliance_whitelist
+    name: 合规话术白名单（Whitelist）
+    type: reference
+    description: "预审核的风险问答话术库：效果/治疗/副作用禁忌等敏感问题只能走白名单语料"
+    attributes:
+      - name: intent
+        type: enum
+        values: [效果承诺, 疾病治疗, 副作用与禁忌]
+        description: 覆盖的敏感意图
+      - name: trigger_words
+        type: string
+        description: 触发词（瘦多少/治疗/孕妇/甲状腺等）
+      - name: response_mode
+        type: enum
+        values: [safe_reply, transfer]
+        description: 应答模式（保守回复/直接转人工）
+      - name: reply
+        type: string
+        description: 预审核的白名单回复文本
+    key_distinctions:
+      - "白名单外的风险问题一律保守回复或转人工，不允许即兴发挥"
+      - "点对点交流受众特定 ≠ 可放松合规标准，仍按广告高标准执行"
+      - "禁忌人群说明只能按固定口径回复，不做个体医疗建议"
+
+  - id: handoff_ticket
+    name: 转人工工单（Handoff）
+    type: event
+    description: "AI 转人工的事件记录，含触发原因与供人工接手的上下文摘要"
+    attributes:
+      - name: trigger_type
+        type: enum
+        values: [敏感功效, 低置信度, 客户点名人工, 付款承接, 口径冲突]
+        description: 转人工触发原因
+      - name: summary
+        type: string
+        description: 上下文摘要（客户关注点+已答内容+未解决问题）
+      - name: status
+        type: enum
+        values: [pending, taken_over, resolved]
+        description: 人工接管状态
+    key_distinctions:
+      - "转人工 ≠ AI 回答失败，是设计内的兜底路径"
+      - "工单创建 ≠ 人工已接管，未接管前客户仍在等待"
+      - "摘要缺失的转接会让人工重新问一遍，等于二次伤害体验"
+
+  - id: order_intake
+    name: 下单承接（Order Intake）
+    type: event
+    description: "客户确认购买后的承接记录：付款截图 → 收货信息 → 客服复述核对 → 晚点发单号"
+    attributes:
+      - name: payment_method
+        type: enum
+        values: [微信扫码, 微信红包, 支付宝]
+        description: 支付方式（企微未开通转账收款）
+      - name: payment_screenshot
+        type: boolean
+        description: 是否已收到付款截图
+      - name: address_confirmed
+        type: boolean
+        description: 订单要素是否已人工复述核对
+      - name: shipping_desc
+        type: string
+        description: "发货口径（深圳发/48h 内发出/冷链到付约 20）"
+    key_distinctions:
+      - "收到付款截图 ≠ 订单完成，必须人工复述订单要素核对"
+      - "发货时效口径（揽收后 1-3 天）≠ 承诺具体到货日期"
+      - "AI 只做支付/发货口径说明，不能自动确认收款成功"
+
+  - id: pilot_metric
+    name: 试点守护指标（Metric）
+    type: reference
+    description: "小流量试点看板：首响时长、自动接待率、转人工率、错价次数、首单转化率"
+    attributes:
+      - name: conversion_rate
+        type: number
+        description: 高意向客户首单转化率（NSM，健康区间 9%~10%）
+      - name: auto_serve_rate
+        type: number
+        description: RAG 自动接待率（目标 ≥80%）
+      - name: wrong_price_count
+        type: number
+        description: 错价事件次数（硬红线指标）
+      - name: observation_weeks
+        type: number
+        description: 连续观察周数（回滚判定窗口）
+    key_distinctions:
+      - "单日转化波动 ≠ 试点失败，回滚判定看连续两周口径"
+      - "自动接待率高 ≠ 试点成功，转化率不掉才是守护底线"
+      - "错价一次即需复盘，不能等汇总周期"
+
+relationships:
+  - from: customer_session
+    to: inquiry_intent
+    label: 触发
+    cardinality: "1:N"
+    description: "一次会话中客户会连续抛出多轮不同类别的问题"
+  - from: inquiry_intent
+    to: product_version
+    label: 涉及
+    cardinality: "N:N"
+    description: "版本/正品/价格类意图都会落到具体商品版本上"
+  - from: product_version
+    to: sku_spec
+    label: 包含
+    cardinality: "1:N"
+    description: "一个版本包含多个剂量档位的规格价格"
+  - from: promo_rule
+    to: sku_spec
+    label: 约束
+    cardinality: "N:N"
+    description: "促销规则按版本/件数作用于规格表价，算出到手价"
+  - from: authenticity_proof
+    to: product_version
+    label: 证明
+    cardinality: "N:N"
+    description: "验真流程、包装图等凭据支撑各版本的正品信任应答"
+  - from: compliance_whitelist
+    to: inquiry_intent
+    label: 约束
+    cardinality: "N:N"
+    description: "风险类意图必须匹配白名单话术才能作答"
+  - from: inquiry_intent
+    to: handoff_ticket
+    label: 触发
+    cardinality: "N:1"
+    description: "敏感功效/低置信/点名人工的意图触发转人工工单"
+  - from: customer_session
+    to: order_intake
+    label: 产生
+    cardinality: "1:N"
+    description: "会话内客户确认购买后产生下单承接记录"
+  - from: handoff_ticket
+    to: order_intake
+    label: 执行
+    cardinality: "1:1"
+    description: "付款承接类工单由人工接管完成订单要素核对"
+  - from: customer_session
+    to: pilot_metric
+    label: 汇入
+    cardinality: "N:1"
+    description: "所有试点会话的首响/转接/成交数据汇入守护看板"
+
+action_boundaries:
+  - id: ab_first_response
+    situation: 客户进线首响承接
+    situation_description: "客户从直播/投流进入企微发出第一句咨询（你好/在吗/7.5 什么价），首轮信任窗口只有秒级"
+    required_evidence:
+      - source: "企微 kf 消息回调"
+        checks: "确认收到客户首条消息及其文本内容"
+      - source: "欢迎语模板库"
+        checks: "统一欢迎语与首轮引导语模板已配置且为当前版本"
+    valid_actions:
+      - "秒级发送统一欢迎语完成首轮承接"
+      - "引导客户确认咨询主题（版本/正品/价格等）"
+      - "识别首条消息中已包含的意图并直接路由"
+    invalid_actions:
+      - action: "等待人工上线再回复客户首条消息"
+        reason: "夜间/高峰冷场直接导致第一轮信任未建立即流失"
+      - action: "在欢迎语中自由生成优惠或效果承诺"
+        reason: "欢迎语必须走预置模板，即兴承诺会踩价格与合规红线"
+    exception_triggers:
+      - condition: "客户首条消息即命中敏感功效词或点名人工"
+        action: "跳过常规分流，直接输出保守话术并创建转人工工单"
+
+  - id: ab_authenticity_reply
+    situation: 客户质疑正品或要求验真
+    situation_description: "客户问「是不是正品/能验吗/日版孟版什么区别」，是成交前最高频的信任决策点"
+    required_evidence:
+      - source: "正品溯源与商品库"
+        checks: "验真流程卡、包装图、版本对比卡在库且为真实采集内容"
+      - source: "退款承诺口径"
+        checks: "「验出假货可退」为真实会话中确认过的标准口径"
+    valid_actions:
+      - "检索并输出验真流程（扫码/官网/三码合一）"
+      - "展示真实包装图与版本差异说明"
+      - "按标准口径说明假货退款承诺"
+      - "凭据不足时保守答复并转人工"
+    invalid_actions:
+      - action: "编造批准文号、注册证书、质检结论等监管凭据"
+        reason: "伪造监管信息是合规硬红线，Demo 也不例外"
+      - action: "用「绝对正品/官方唯一授权」等绝对化背书作答"
+        reason: "绝对化表述违反广告法，凭据只能展示可验证路径"
+    exception_triggers:
+      - condition: "客户已收货并声称扫码验真失败"
+        action: "立即按退款承诺口径回应并转人工处理售后"
+
+  - id: ab_deterministic_pricing
+    situation: 客户询价议价或问多件优惠
+    situation_description: "客户问「一支多少/买两支优惠吗/运费怎么算」，错价是硬红线且直接产生客诉"
+    required_evidence:
+      - source: "规格价格表（16 条全规格）"
+        checks: "版本×剂量档的表价与库存状态（日版 15 缺货）"
+      - source: "促销规则库"
+        checks: "当前生效的活动规则与适用条件（618 减 20 等）"
+    valid_actions:
+      - "调用规则表计算到手价并附活动说明"
+      - "说明冷链到付运费约 20 的固定口径"
+      - "对缺货档位如实说明缺货，不引导成交"
+    invalid_actions:
+      - action: "让大模型脱离规则表自行心算或估算价格"
+        reason: "价格禁止大模型独立决策，防幻觉错价"
+      - action: "复用会话中的人工议价口径自动给客户减价"
+        reason: "人工口径（优惠10/1200-80）未结构化，自动执行会口径失控"
+      - action: "对表价与会话报价不一致的档位直接二选一作答"
+        reason: "日版 2.5 存在 498/548 双口径，未统一前作答即错价风险"
+    exception_triggers:
+      - condition: "命中表价与会话口径不一致的档位（如日版 2.5）"
+        action: "输出保守话术并创建口径冲突工单，升级运营统一价格"
+      - condition: "客户提出规则库外的议价或组合优惠诉求"
+        action: "不承诺任何减免，附摘要转人工由客服决定"
+
+  - id: ab_risk_compliance
+    situation: 客户问效果副作用禁忌或治疗
+    situation_description: "客户问「能瘦多少/能治病吗/孕妇能用吗」，是最容易踩广告法红线的环节"
+    required_evidence:
+      - source: "合规话术白名单库"
+        checks: "触发词命中情况与对应 response_mode（safe_reply/transfer）"
+      - source: "禁忌人群固定口径"
+        checks: "甲状腺病史/胰岛素用药/孕产期等禁忌说明为预审核版本"
+    valid_actions:
+      - "按白名单输出预审核的保守话术"
+      - "按固定口径说明常见反应与禁忌慎用人群"
+      - "白名单未覆盖时输出保守答复并附摘要转人工"
+    invalid_actions:
+      - action: "对效果作出断言或保证（保证瘦/多久见效）"
+        reason: "广告法禁止效果承诺，保健品语境零容忍"
+      - action: "回应疾病预防治疗类问题（降血糖/替代药物）"
+        reason: "涉及治疗功能是绝对红线，只能转人工"
+      - action: "对禁忌人群给出个体化使用建议"
+        reason: "超出白名单的医疗判断必须由人工承接"
+    exception_triggers:
+      - condition: "命中疾病治疗类触发词（治疗/降血糖/治好）"
+        action: "response_mode=transfer，立即保守回复并转人工"
+      - condition: "客户自述属禁忌人群仍坚持购买"
+        action: "不推进成交流程，附完整摘要转人工处理"
+
+  - id: ab_order_handoff
+    situation: 客户确认购买进入付款发货
+    situation_description: "客户问「怎么付款/从哪发/多久到」并发出付款截图，进入 AI 说明+人工承接的交界点"
+    required_evidence:
+      - source: "支付与发货口径库"
+        checks: "支付方式（微信/支付宝）、48h 发出、揽收后 1-3 天口径"
+      - source: "会话中的付款截图与收货信息"
+        checks: "客户是否已发付款截图及姓名电话地址"
+    valid_actions:
+      - "说明支付方式与冷链到付运费口径"
+      - "按口径说明发货时效，不承诺具体到货日"
+      - "收到付款截图后立即创建付款承接工单转人工"
+      - "提示客户等待客服复述订单要素核对"
+    invalid_actions:
+      - action: "自动向客户确认收款成功或订单已生效"
+        reason: "AI 无支付系统对账能力，误确认会造成资损纠纷"
+      - action: "跳过人工复述核对直接承诺发货"
+        reason: "订单要素核对是真实流程的固定动作，不可省略"
+    exception_triggers:
+      - condition: "客户已付款但超时无人工接管工单"
+        action: "升级提醒值班客服，并向客户发送安抚话术"
+
+workstreams:
+  - id: ws_presales_reply
+    name: 售前应答流
+    description: "从客户进线到 AI 完成应答或转人工的核心执行流，覆盖首响、分流、知识应答三段"
+    anchor_objects:
+      - customer_session
+      - inquiry_intent
+      - compliance_whitelist
+      - handoff_ticket
+    states:
+      - id: s_incoming
+        name: 进线待首响
+        description: "kf 回调收到客户首条消息，欢迎语尚未发出，首轮信任窗口计时中"
+        transitions:
+          - to_state: s_intent_routing
+            trigger_action: 发送欢迎语并完成首轮承接
+            required_evidence: "首响消息已发出，first_response_at 已记录且在秒级"
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 识别首条消息即命中风险信号
+            required_evidence: "敏感功效词或「转人工」关键词命中记录"
+            type: exception
+      - id: s_intent_routing
+        name: 意图分流中
+        description: "对客户问题做分类，决定走版本/正品/价格/风险哪条应答路径"
+        transitions:
+          - to_state: s_kb_answering
+            trigger_action: 意图识别成功并路由到对应知识库
+            required_evidence: "intent.category 已判定且 confidence 达阈值"
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 低置信度或客户点名人工
+            required_evidence: "confidence 低于阈值，或命中转人工触发词"
+            type: exception
+      - id: s_kb_answering
+        name: 知识库应答中
+        description: "按意图检索正品凭据/价格规则/白名单话术，大模型只做话术组织"
+        transitions:
+          - to_state: s_answered
+            trigger_action: 输出知识库支撑的应答
+            required_evidence: "应答内容全部可溯源到凭据库/规则表/白名单"
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 知识库命中不足输出保守答复
+            required_evidence: "检索无命中或命中低于置信阈值的记录"
+            type: exception
+      - id: s_answered
+        name: 应答完成
+        description: "本轮问题已答复，会话回到等待客户下一轮输入或进入下单承接"
+        transitions:
+          - to_state: s_intent_routing
+            trigger_action: 客户发起下一轮问题
+            required_evidence: "kf 回调收到客户新消息"
+            type: normal
+      - id: s_handoff
+        name: 已转人工
+        description: "转人工工单已创建并附上下文摘要，等待人工接管，AI 停止实质作答"
+        transitions:
+          - to_state: s_answered
+            trigger_action: 人工处理完毕交回 AI 继续接待
+            required_evidence: "handoff_ticket.status = resolved"
+            type: recovery
+    guardrails:
+      - "价格只能来自规则表，正品凭据只能来自知识库，禁止模型编造"
+      - "敏感功效问题只能走预审核白名单，白名单外一律保守+转人工"
+      - "知识库无命中时不允许硬答，保守答复并转人工"
+      - "转人工必须附「关注点+已答内容+未解决问题」摘要"
+    dependency_mapping:
+      - workstream: ws_order_intake
+        condition: "会话在 s_answered 状态且客户表达购买意向"
+        impact: "下单承接流启动，价格口径以本流规则表输出为准"
+      - workstream: ws_pilot_guard
+        condition: "本流产生首响超时、错价或转人工事件"
+        impact: "事件实时汇入试点看板，影响放量/回滚判定"
+
+  - id: ws_order_intake
+    name: 下单承接流
+    description: "从客户确认购买到人工完成订单要素核对的承接流，AI 只做说明、人工完成闭环"
+    anchor_objects:
+      - order_intake
+      - handoff_ticket
+      - sku_spec
+    states:
+      - id: o_price_confirmed
+        name: 价格已确认
+        description: "客户认可规则表输出的到手价，询问支付与发货方式"
+        transitions:
+          - to_state: o_awaiting_payment
+            trigger_action: 说明支付方式与发货口径
+            required_evidence: "支付/发货说明消息已按口径库发出"
+            type: normal
+      - id: o_awaiting_payment
+        name: 待客户付款
+        description: "客户已获支付路径（微信/支付宝），等待付款动作"
+        transitions:
+          - to_state: o_screenshot_received
+            trigger_action: 接收客户付款截图与收货信息
+            required_evidence: "会话中收到付款截图消息"
+            type: normal
+      - id: o_screenshot_received
+        name: 付款截图待核对
+        description: "已收到截图但订单未成立，必须由人工复述订单要素核对"
+        transitions:
+          - to_state: o_manual_verified
+            trigger_action: 创建付款承接工单并由人工复述核对
+            required_evidence: "handoff_ticket(付款承接) 已被人工接管并完成复述"
+            type: normal
+          - to_state: o_intake_stalled
+            trigger_action: 检测人工接管超时
+            required_evidence: "工单创建后超时无 taken_over 记录"
+            type: exception
+      - id: o_manual_verified
+        name: 人工核对完成
+        description: "订单要素（姓名/电话/地址/规格/金额）经人工复述确认，待发单号"
+        transitions: []
+      - id: o_intake_stalled
+        name: 承接搁置
+        description: "客户已付款但人工未及时接管，存在客诉与信任受损风险"
+        transitions:
+          - to_state: o_manual_verified
+            trigger_action: 升级值班客服完成补接管与核对
+            required_evidence: "升级提醒已发出且工单最终被人工接管"
+            type: recovery
+    guardrails:
+      - "AI 不得确认收款成功或宣布订单生效，只有人工核对后订单才成立"
+      - "订单要素必须经人工复述核对，AI 不能替客户跳过该动作"
+      - "发货只说时效口径（48h 发出/揽收后 1-3 天），不承诺具体到货日"
+      - "缺货档位（日版 15）不得进入承接流程"
+    dependency_mapping:
+      - workstream: ws_presales_reply
+        condition: "承接中客户追问价格/正品/风险类问题"
+        impact: "问题路由回售前应答流处理，承接流保持当前状态等待"
+      - workstream: ws_pilot_guard
+        condition: "本流完成人工核对（视为首单成交口径）"
+        impact: "成交数据汇入看板，支撑首单转化率计算"
+
+  - id: ws_pilot_guard
+    name: 试点守护流
+    description: "小流量试点下持续观察首响/转人工/错价/转化指标，决定放量或回滚的守护流"
+    anchor_objects:
+      - pilot_metric
+      - customer_session
+    states:
+      - id: p_piloting
+        name: 小流量试点中
+        description: "AI 仅承接小流量会话，看板按周汇总首响、自动接待率、错价与转化数据"
+        transitions:
+          - to_state: p_scale_up
+            trigger_action: 确认连续观察期指标达标后放量
+            required_evidence: "转化率稳定于 9%~10% 健康区间且错价为零"
+            type: normal
+          - to_state: p_rollback
+            trigger_action: 触发回滚判定
+            required_evidence: "转化率连续两周低于健康区间，或出现错价事故"
+            type: exception
+      - id: p_scale_up
+        name: 已放量
+        description: "试点验证通过，扩大 AI 承接流量比例，看板继续按周守护"
+        transitions:
+          - to_state: p_rollback
+            trigger_action: 放量后触发回滚判定
+            required_evidence: "放量期转化率连续两周低于健康区间"
+            type: exception
+      - id: p_rollback
+        name: 已回滚
+        description: "AI 承接比例回退至人工为主，复盘错价/流失根因后再评估重启"
+        transitions:
+          - to_state: p_piloting
+            trigger_action: 完成根因修复后重启小流量试点
+            required_evidence: "复盘报告与知识库/规则表修复记录"
+            type: recovery
+    guardrails:
+      - "转化率连续两周低于健康区间（9%~10%）必须回滚，不得侥幸续跑"
+      - "指标未经连续观察期验证不得放量"
+      - "出现错价事故须当日复盘，不等周度汇总"
+      - "回滚决策以看板口径为准，不接受个案好评作为放量依据"
+    dependency_mapping:
+      - workstream: ws_presales_reply
+        condition: "守护流进入 p_rollback 状态"
+        impact: "售前应答流 AI 承接范围收缩，会话优先路由人工"
+      - workstream: ws_order_intake
+        condition: "守护流进入 p_scale_up 状态"
+        impact: "承接流会话量随放量上升，需同步扩充人工核对班次"

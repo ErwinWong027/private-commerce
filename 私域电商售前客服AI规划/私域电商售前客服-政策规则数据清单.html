@@ -286,6 +286,31 @@
   </style>
 </head>
 <body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
+
+
   <div class="nav">
     <a href="私域电商售前客服-导航索引.html">返回导航索引</a>
     <span style="color:#94a3b8;"> / </span>
@@ -303,7 +328,7 @@
         原始会话中的姓名、电话、地址等隐私字段均不纳入本清单；不足项以“补充样例”方式补齐，并显式标注。
       </p>
       <div class="meta">
-        <span class="tag">分析来源：真实业务场景记录.docx + 现有规划文件</span>
+        <span class="tag">分析来源：真实业务场景记录 + context/聊天记录.pdf（19 位客户）+ context/规格.png（全规格价格表）</span>
         <span class="tag">适用目标：最小售前转化闭环 Demo</span>
         <span class="tag">数据原则：不收集隐私，不伪造监管编号</span>
       </div>
@@ -454,38 +479,39 @@
           <tr>
             <td>版本与包装</td>
             <td>
-              1. 日版一盒两支；孟版通常一盒一支<br>
-              2. 日版是自动笔，孟版是针剂版本<br>
+              1. 日版礼来一盒两支；孟版杰西卡、珠峰均一盒一支<br>
+              2. 日版是原研药自动笔，孟版/印版是仿制药针剂<br>
               3. “日版只能整盒购买，不能拆开卖”<br>
-              4. 珠峰也被客户问到，但当前真实说明较少
+              4. 珠峰定位口径：“珠峰是孟版杰西卡的低配版”<br>
+              5. 所有版本都是一针管一个星期；国版穆峰达一支打四次、需去医院开（本店不售国版）<br>
+              6. 名称口径：替C = 替尔 = 替尔泊肽（Tirzepatide），成分同一
             </td>
-            <td>真实会话</td>
-            <td>回答“版本区别”“一盒和一支怎么理解”“能不能拆卖”</td>
+            <td>真实会话 + 价格表图</td>
+            <td>回答“版本区别”“一盒和一支怎么理解”“能不能拆卖”“珠峰和孟版什么关系”</td>
           </tr>
           <tr>
             <td>正品与验真</td>
             <td>
               1. 标准口径：“保证是正品的，到货你可以验”<br>
-              2. 已出现验真动作：让客户上官网验、发送验真视频、展示包装图<br>
-              3. 有客户明确问到“如果扫码不是正品是否退货退款”
+              2. 验真规则（价格表图原文）：“扫码验真官网查验三码合一保真保活”“只卖正品官网唯一网址诚信不做一锤子买卖”<br>
+              3. 已出现验真动作：让客户上官网验、发送验真视频、展示包装图<br>
+              4. 兜底承诺口径：“到货了要是验到是假的我给你退”（真实会话中多次出现）<br>
+              5. 有客户明确问到“如果扫码不是正品是否退货退款”，客服承诺退
             </td>
-            <td>真实会话</td>
-            <td>演示“正品说明 + 验真步骤 + 不确定时转人工”</td>
+            <td>真实会话 + 价格表图</td>
+            <td>演示“正品说明 + 验真步骤 + 假货退款承诺 + 不确定时转人工”</td>
           </tr>
           <tr>
-            <td>价格与活动</td>
+            <td>价格与活动（三版本全规格）</td>
             <td>
-              1. 日版 2.5：548/盒（1 盒 2 支）<br>
-              2. 日版 5.0：698/盒（1 盒 2 支）<br>
-              3. 日版 10：1190/盒（1 盒 2 支）<br>
-              4. 孟版 2.5：230/支；618 活动减 20 后为 210<br>
-              5. 孟版 5.0：270/支<br>
-              6. 孟版 10：340/支<br>
-              7. 孟版 12.5：370/支<br>
-              8. 真实会话中存在“1200-80=1120”“优惠 20”等人工优惠口径
+              <b>孟版杰西卡（一盒一支）</b>：2.5→230 / 5.0→270 / 7.5→300 / 10→340 / 12.5→370 / 15→400<br>
+              <b>日版礼来（一盒两支）</b>：2.5→498 / 5.0→698 / 7.5→998 / 10→1190 / 12.5→1590 / 15→暂时缺货<br>
+              <b>珠峰（一盒一支）</b>：2.5→240 / 5.0→300 / 7.5→330 / 10→360（仅 4 档）<br>
+              优惠口径：618 活动孟版一支减 20、日版一盒减 20；平日议价存在“优惠 10”口径；多件口径出现过“1200-80=1120”（孟版 7.5×4）<br>
+              会话中亦出现“日版 2.5 报 548”的浮动报价（与表价 498 不一致，正式上线前需统一口径）
             </td>
-            <td>真实会话</td>
-            <td>可直接做成价格表与优惠规则表</td>
+            <td>价格表图（完整）+ 真实会话</td>
+            <td>直接作为价格表与优惠规则表；三版本×规格是本体“商品/规格/价格”实体的权威数据源</td>
           </tr>
           <tr>
             <td>副作用与禁忌</td>
@@ -511,13 +537,14 @@
           <tr>
             <td>支付与发货</td>
             <td>
-              1. 发货地高频口径：深圳发货<br>
-              2. 发货时效高频口径：付款后 48 小时内发出；部分对话里说明 2-3 天到<br>
-              3. 顺丰冷链口径出现过<br>
-              4. 运费口径出现过：运费到付约 20 左右<br>
-              5. 支付方式出现过：微信、支付宝、扫码；企微未开通收款功能
+              1. 发货地口径：一般深圳发货，深圳无货时其他仓库发<br>
+              2. 发货时效口径：出单号后 48 小时内发出；小哥揽收后 1-3 天到（多数说 2-3 天）<br>
+              3. 冷链规则（价格表图原文）：“不包邮顺丰冷链到付快递时效 2-3 天”“冷链运输：泡沫箱+保温袋+冰袋”<br>
+              4. 运费口径：不包邮，运费到付约 20 左右（仓库发货设置不到包邮）<br>
+              5. 支付方式：微信扫码/红包、支付宝；企微未开通转账收款功能<br>
+              6. 下单固定动作：付款后截图 → 发姓名电话地址 → 客服复述订单要素让客户“核对一下” → 晚点发单号
             </td>
-            <td>真实会话</td>
+            <td>真实会话 + 价格表图</td>
             <td>回答“从哪里发”“多久能到”“怎么付款”，并转人工确认收货信息</td>
           </tr>
         </tbody>
@@ -624,13 +651,14 @@
         <div class="card">
           <h3>真实已收集数据</h3>
           <ul>
-            <li>欢迎语 1 份</li>
-            <li>版本数据 2-3 组：日版 / 孟版 / 珠峰（珠峰信息较少）</li>
-            <li>价格数据 7 条以上：2.5 / 5.0 / 10 / 12.5 等剂量口径</li>
+            <li>欢迎语 1 份 + 新手六条标准科普话术 1 套（适用人群/起始剂量/版本说明/名称口径等）</li>
+            <li>版本数据 3 组齐全：日版礼来 / 孟版杰西卡 / 珠峰（含定位关系：珠峰=孟版低配版）</li>
+            <li>价格数据 16 条全规格：孟版 6 档 + 日版 6 档（含 1 档缺货态）+ 珠峰 4 档</li>
+            <li>验真规则 1 套：扫码/官网/三码合一 + 假货退款承诺</li>
             <li>副作用与禁忌说明 1 份</li>
             <li>保存与使用说明 1 份</li>
-            <li>发货与支付口径 1 份</li>
-            <li>匿名化真实问法可继续从会话中扩展</li>
+            <li>发货与支付口径 1 份（含冷链规则：泡沫箱+保温袋+冰袋、到付约 20）</li>
+            <li>匿名化真实问法已覆盖 19 位客户完整会话，可继续扩展</li>
           </ul>
         </div>
         <div class="card">
@@ -663,7 +691,7 @@
       "package_desc": "1盒2支",
       "usage_desc": "每周使用一次",
       "storage_desc": "2-8°C冷藏，已开封按说明保存",
-      "price_desc": "548/盒",
+      "price_desc": "498/盒（表价；会话中出现过 548 浮动报价，需统一）",
       "version_compare": "自动笔，操作更方便",
       "proof_cards": ["包装图", "验真步骤图", "版本说明卡"]
     },
@@ -693,11 +721,22 @@
       "demo_id": "VER-004",
       "display_name": "孟版 10",
       "dose": "10",
-      "package_desc": "1支",
+      "package_desc": "1盒1支",
       "usage_desc": "每周使用一次",
       "storage_desc": "按冷链与保存说明执行",
       "price_desc": "340/支",
       "version_compare": "高剂量版本，建议结合既往使用情况说明",
+      "proof_cards": ["包装图", "版本说明卡"]
+    },
+    {
+      "demo_id": "VER-005",
+      "display_name": "珠峰 2.5",
+      "dose": "2.5",
+      "package_desc": "1盒1支",
+      "usage_desc": "每周使用一次",
+      "storage_desc": "按冷链与保存说明执行",
+      "price_desc": "240/支（仅 2.5/5.0/7.5/10 四档）",
+      "version_compare": "孟版杰西卡的低配版，入门价格带",
       "proof_cards": ["包装图", "版本说明卡"]
     }
   ],
@@ -878,5 +917,8 @@
       生成说明：本文件依据真实业务场景记录、现有业务流程与产品画布整理而成。隐私类原始数据未纳入；补充样例内容需在实际演示时明确标注为测试样例数据。
     </div>
   </div>
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-产品画布.html"><div class="dir">← 上一步 · 附录</div><div class="t">⊕ 产品画布</div><div class="d">前承：最小售前转化闭环 Demo：首响 + 正品信任 + 促销算账 + 转人工兜底 + 转化守护</div></a><a class="navcard next" href="私域电商售前客服-业务本体设计.html"><div class="dir">下一步 · 附录 →</div><div class="t">⊕ 本体设计</div><div class="d">后启：Agent 三层本体：10 实体对象关系 + 5 个行动边界 + 3 条执行流状态迁移</div></a></div></div><!-- ai4pm-nav-bottom-end -->
 </body>
 </html>

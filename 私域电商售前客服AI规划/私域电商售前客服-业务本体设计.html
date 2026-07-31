@@ -1,0 +1,3882 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私域电商售前AI助手-Agent本体设计 - Agent 本体设计 | Inspire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #10213E;
+      --color-accent: #5DB2E2;
+      --color-secondary: #625D9C;
+      --color-success: #00524C;
+      --color-warning: #F59E0B;
+      --color-destructive: #EF4444;
+      --color-background: #FFFFFF;
+      --color-bg-alt: #F5F5F6;
+      --color-foreground: #10213E;
+      --color-text-muted: #64748B;
+      --color-border: #E2E8F0;
+      --shadow-sm: 0 2px 8px rgba(16,33,62,0.08);
+      --shadow-md: 0 10px 15px -3px rgba(16,33,62,0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --transition: 0.15s ease-out;
+
+      /* Entity type colours */
+      --entity-core-bg: #EFF6FF;
+      --entity-core-border: #3B82F6;
+      --entity-core-badge: #1D4ED8;
+      --entity-reference-bg: #F5F3FF;
+      --entity-reference-border: #7C3AED;
+      --entity-reference-badge: #5B21B6;
+      --entity-event-bg: #FFF7ED;
+      --entity-event-border: #EA580C;
+      --entity-event-badge: #C2410C;
+
+      /* Transition type colours */
+      --transition-normal: #10B981;
+      --transition-exception: #F59E0B;
+      --transition-recovery: #6366F1;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg-alt);
+      color: var(--color-foreground);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page wrap ── */
+    .page-wrap {
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      width: 85%;
+      margin: 48px auto;
+      border: 1px solid var(--color-border);
+      min-height: calc(100vh - 96px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .header-left { display: flex; flex-direction: column; gap: 6px; }
+    .page-header h1 {
+      font-size: 26px; font-weight: 700; color: var(--color-primary);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .page-header h1::before {
+      content: ""; display: block; width: 4px; height: 24px;
+      background: var(--color-accent); border-radius: 2px; flex-shrink: 0;
+    }
+    .header-meta {
+      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+      padding-left: 16px; margin-top: 4px;
+    }
+    .meta-badge {
+      font-size: 12px; font-weight: 600; padding: 3px 10px;
+      border-radius: 999px; border: 1px solid;
+    }
+    .meta-badge.domain  { background:#EFF6FF; border-color:#93C5FD; color:#1D4ED8; }
+    .meta-badge.role    { background:#F5F3FF; border-color:#C4B5FD; color:#5B21B6; }
+    .meta-scenario {
+      font-size: 13px; color: var(--color-text-muted);
+      padding-left: 16px; max-width: 600px; line-height: 1.5;
+    }
+    .header-right {
+      text-align: right; display: flex; flex-direction: column;
+      gap: 8px; flex-shrink: 0;
+    }
+    .meta-info { font-size: 12px; color: var(--color-text-muted); }
+    .btn-group { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-primary {
+      background: var(--color-primary); color: white; padding: 8px 14px;
+      border-radius: 6px; font-size: 12px; font-weight: 600; border: none;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-secondary {
+      background: white; color: var(--color-primary);
+      border: 1px solid var(--color-border); padding: 8px 14px;
+      border-radius: 6px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+
+    /* ── Tabs ── */
+    .tab-nav {
+      display: flex; gap: 0; border-bottom: 2px solid var(--color-border);
+      margin-bottom: 32px;
+    }
+    .tab-btn {
+      padding: 12px 24px; font-size: 14px; font-weight: 600;
+      color: var(--color-text-muted); background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      cursor: pointer; transition: var(--transition);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn:hover { color: var(--color-primary); }
+    .tab-btn.active {
+      color: var(--color-primary); border-bottom-color: var(--color-accent);
+    }
+    .tab-count {
+      font-size: 11px; background: var(--color-bg-alt); color: var(--color-text-muted);
+      border-radius: 999px; padding: 2px 7px; font-weight: 500;
+    }
+    .tab-btn.active .tab-count {
+      background: var(--color-accent); color: white;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 13px; font-weight: 700; color: var(--color-text-muted);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 16px; margin-top: 28px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ════════════════════════════════════════
+       TAB 1 · OBJECT RELATIONS
+       ════════════════════════════════════════ */
+
+    .entity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .entity-card {
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1.5px solid;
+      position: relative;
+      transition: var(--transition);
+    }
+    .entity-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .entity-card.entity-core      { background: var(--entity-core-bg);      border-color: var(--entity-core-border); }
+    .entity-card.entity-reference { background: var(--entity-reference-bg); border-color: var(--entity-reference-border); }
+    .entity-card.entity-event     { background: var(--entity-event-bg);     border-color: var(--entity-event-border); }
+
+    .entity-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .entity-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px;
+      border-radius: 999px; color: white; flex-shrink: 0; margin-top: 2px;
+    }
+    .entity-core      .entity-badge { background: var(--entity-core-badge); }
+    .entity-reference .entity-badge { background: var(--entity-reference-badge); }
+    .entity-event     .entity-badge { background: var(--entity-event-badge); }
+
+    .entity-name { font-size: 15px; font-weight: 700; color: var(--color-primary); line-height: 1.3; }
+    .entity-desc { font-size: 12px; color: var(--color-text-muted); margin-bottom: 12px; line-height: 1.5; }
+
+    .entity-attrs { margin-bottom: 12px; }
+    .attr-row {
+      display: flex; gap: 6px; align-items: flex-start;
+      font-size: 11px; padding: 4px 0;
+      border-top: 1px solid rgba(0,0,0,0.06);
+    }
+    .attr-name { font-weight: 600; color: var(--color-foreground); min-width: 80px; flex-shrink: 0; }
+    .attr-type {
+      font-size: 10px; padding: 1px 6px; border-radius: 4px;
+      background: rgba(0,0,0,0.06); color: var(--color-text-muted);
+      font-family: monospace; flex-shrink: 0;
+    }
+    .attr-desc { color: var(--color-text-muted); line-height: 1.4; }
+    .attr-values { color: var(--color-text-muted); font-style: italic; }
+
+    .entity-distinctions { margin-top: 8px; }
+    .distinction-label {
+      font-size: 10px; font-weight: 700; color: #B45309;
+      text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px;
+    }
+    .distinction-item {
+      display: flex; gap: 6px; align-items: flex-start;
+      font-size: 11px; color: #92400E; line-height: 1.45;
+      background: rgba(217,119,6,0.08); border-radius: 4px;
+      padding: 4px 8px; margin-bottom: 4px;
+    }
+    .distinction-icon { flex-shrink: 0; }
+
+    /* Relationships table */
+    .rel-table-wrap {
+      border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+    }
+    .rel-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rel-table th {
+      background: var(--color-bg-alt); font-size: 11px; font-weight: 700;
+      color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .05em;
+      padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--color-border);
+    }
+    .rel-table td { padding: 10px 14px; border-bottom: 1px solid var(--color-border); }
+    .rel-table tr:last-child td { border-bottom: none; }
+    .rel-table tr:hover td { background: var(--color-bg-alt); }
+    .rel-from { font-weight: 600; color: var(--color-primary); }
+    .rel-arrow { color: var(--color-accent); font-weight: 700; text-align: center; }
+    .rel-label {
+      display: inline-block; background: var(--color-secondary);
+      color: white; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 999px;
+    }
+    .rel-card { font-size: 11px; color: var(--color-text-muted); font-family: monospace; }
+    .rel-desc { color: var(--color-text-muted); font-size: 12px; }
+
+    /* ════════════════════════════════════════
+       TAB 2 · ACTION BOUNDARIES
+       ════════════════════════════════════════ */
+
+    .ab-card {
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      overflow: hidden; margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .ab-card:hover { box-shadow: var(--shadow-md); }
+
+    .ab-header {
+      background: var(--color-primary); color: white;
+      padding: 14px 20px; display: flex; align-items: flex-start; gap: 12px;
+    }
+    .ab-situation-num {
+      font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2);
+      border-radius: 999px; padding: 2px 10px; flex-shrink: 0; margin-top: 2px;
+    }
+    .ab-situation-name { font-size: 16px; font-weight: 700; line-height: 1.3; }
+    .ab-situation-desc { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 4px; line-height: 1.5; }
+
+    .ab-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-top: none;
+    }
+    .ab-quadrant {
+      padding: 16px 18px;
+      border-right: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .ab-quadrant:nth-child(2)  { border-right: none; }
+    .ab-quadrant:nth-child(3)  { border-bottom: none; }
+    .ab-quadrant:nth-child(4)  { border-right: none; border-bottom: none; }
+
+    .quadrant-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .ql-evidence  { color: #1D4ED8; }
+    .ql-valid     { color: #065F46; }
+    .ql-invalid   { color: #991B1B; }
+    .ql-exception { color: #92400E; }
+
+    .ab-item {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 12px; line-height: 1.5; margin-bottom: 8px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--color-bg-alt);
+    }
+    .ab-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .ab-item-dot { flex-shrink: 0; margin-top: 3px; }
+    .ab-item-content { color: var(--color-foreground); }
+    .ab-item-source  { font-size: 11px; font-weight: 600; color: #1D4ED8; margin-bottom: 2px; }
+    .ab-item-reason  { font-size: 11px; color: var(--color-text-muted); margin-top: 3px; font-style: italic; }
+    .ab-item-condition { font-size: 11px; color: #92400E; font-weight: 600; }
+    .ab-item-action    { font-size: 12px; color: var(--color-foreground); margin-top: 2px; }
+
+    /* ════════════════════════════════════════
+       TAB 3 · STATE TRANSITIONS
+       ════════════════════════════════════════ */
+
+    .ws-block {
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      overflow: hidden; margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ws-header {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #1B3A6B 100%);
+      color: white; padding: 14px 20px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .ws-name { font-size: 17px; font-weight: 700; }
+    .ws-desc { font-size: 13px; color: rgba(255,255,255,0.72); margin-top: 4px; line-height: 1.5; }
+    .ws-anchors { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .ws-anchor-chip {
+      font-size: 11px; background: rgba(255,255,255,0.15); color: white;
+      border-radius: 999px; padding: 2px 10px; font-weight: 500;
+    }
+
+    /* State flow diagram */
+    .ws-flow {
+      padding: 24px 20px;
+      overflow-x: auto;
+      background: white;
+    }
+    .states-row {
+      display: flex; gap: 0; align-items: flex-start;
+      min-width: max-content;
+    }
+    .state-col {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; min-width: 130px; max-width: 160px;
+    }
+    .state-node {
+      width: 130px; padding: 10px 12px; text-align: center;
+      border: 2px solid var(--color-border); border-radius: var(--radius-md);
+      background: var(--color-bg-alt); cursor: default;
+      transition: var(--transition);
+      position: relative;
+    }
+    .state-node:hover { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(93,178,226,0.15); }
+    .state-node.terminal { border-color: var(--color-success); background: #ECFDF5; }
+    .state-node.exception { border-color: var(--color-warning); background: #FFFBEB; }
+    .state-name { font-size: 12px; font-weight: 700; color: var(--color-primary); line-height: 1.3; }
+    .state-desc { font-size: 10px; color: var(--color-text-muted); margin-top: 4px; line-height: 1.4; }
+
+    .transition-arrow {
+      display: flex; align-items: center; flex-shrink: 0;
+      padding: 0 4px; margin-top: 18px;
+    }
+    .arrow-line {
+      position: relative; height: 2px; width: 48px;
+      background: #CBD5E1;
+    }
+    .arrow-line.solid    { background: var(--transition-normal); }
+    .arrow-line.dashed   { background: transparent; border-top: 2px dashed var(--transition-exception); }
+    .arrow-line.dotted   { background: transparent; border-top: 2px dotted var(--transition-recovery); }
+    .arrow-head {
+      width: 0; height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 8px solid #CBD5E1;
+      flex-shrink: 0;
+    }
+    .arrow-head.solid    { border-left-color: var(--transition-normal); }
+    .arrow-head.dashed   { border-left-color: var(--transition-exception); }
+    .arrow-head.dotted   { border-left-color: var(--transition-recovery); }
+
+    .trans-label {
+      font-size: 9px; color: var(--color-text-muted); text-align: center;
+      max-width: 130px; line-height: 1.3; margin-top: 4px;
+    }
+
+    /* Transition details list below flow */
+    .ws-transitions-detail {
+      padding: 16px 20px;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg-alt);
+    }
+    .trans-detail-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--color-text-muted); margin-bottom: 10px;
+    }
+    .trans-detail-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 12px; padding: 8px 10px; background: white;
+      border-radius: var(--radius-sm); margin-bottom: 6px;
+      border: 1px solid var(--color-border);
+    }
+    .trans-type-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px;
+    }
+    .trans-type-dot.normal    { background: var(--transition-normal); }
+    .trans-type-dot.exception { background: var(--transition-exception); }
+    .trans-type-dot.recovery  { background: var(--transition-recovery); }
+    .trans-detail-content { flex: 1; }
+    .trans-route { font-weight: 600; color: var(--color-primary); }
+    .trans-trigger { color: var(--color-text-muted); font-size: 11px; margin-top: 2px; }
+    .trans-evidence { font-size: 11px; color: #1D4ED8; margin-top: 2px; }
+
+    /* Guardrails */
+    .ws-guardrails {
+      padding: 16px 20px;
+      border-top: 1px solid var(--color-border);
+    }
+    .guardrail-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: #991B1B; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .guardrail-item {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 12px; color: #7F1D1D; line-height: 1.5;
+      background: #FEF2F2; border: 1px solid #FECACA;
+      border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 6px;
+    }
+    .guardrail-icon { flex-shrink: 0; }
+
+    /* Dependency mapping */
+    .ws-deps { padding: 16px 20px; border-top: 1px solid var(--color-border); }
+    .dep-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--color-text-muted); margin-bottom: 10px;
+    }
+    .dep-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 12px; line-height: 1.5; padding: 8px 10px;
+      background: #F0F9FF; border: 1px solid #BAE6FD;
+      border-radius: var(--radius-sm); margin-bottom: 6px;
+    }
+    .dep-ws-name { font-weight: 600; color: #0369A1; }
+    .dep-condition { color: var(--color-text-muted); font-size: 11px; margin-top: 2px; }
+    .dep-impact { color: var(--color-foreground); }
+
+    /* ── Agent Prompt Panel ── */
+    .prompt-panel {
+      margin-top: 12px;
+      border: 1px solid var(--color-border); border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .prompt-header {
+      background: var(--color-bg-alt); padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .prompt-header-title { font-size: 13px; font-weight: 700; color: var(--color-primary); }
+    .prompt-hint { font-size: 11px; color: var(--color-text-muted); }
+    .prompt-body {
+      padding: 16px; font-family: 'Courier New', Courier, monospace;
+      font-size: 12px; line-height: 1.6; color: #1E293B;
+      background: #0F172A; color: #E2E8F0;
+      white-space: pre-wrap; word-break: break-all;
+      max-height: 400px; overflow-y: auto;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      padding: 12px 16px; background: var(--color-bg-alt);
+      border-radius: var(--radius-md); margin-bottom: 20px;
+      font-size: 12px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .legend-line {
+      width: 28px; height: 2px; flex-shrink: 0;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      display: none; position: fixed; bottom: 32px; right: 32px;
+      background: var(--color-primary); color: white;
+      padding: 12px 20px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; box-shadow: var(--shadow-md);
+      z-index: 1000; animation: slideUp 0.2s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(8px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ── Mermaid Diagram Overrides ── */
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      background: white;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      margin-top: 16px;
+    }
+    .mermaid svg {
+      max-height: 480px;
+      width: 100%;
+      height: auto;
+    }
+    .mermaid .edgePath .path {
+      stroke: var(--color-text-muted) !important;
+      stroke-width: 1.5px !important;
+      fill: none !important;
+    }
+    .mermaid .marker {
+      fill: var(--color-text-muted) !important;
+      stroke: var(--color-text-muted) !important;
+    }
+    /* Edge styles mapped to normal, exception and recovery styles */
+    .mermaid .edge-thickness-normal .path {
+      stroke: var(--transition-normal) !important;
+      stroke-width: 2px !important;
+      fill: none !important;
+    }
+    .mermaid .edge-pattern-dashed .path {
+      stroke: var(--transition-exception) !important;
+      stroke-width: 2px !important;
+      fill: none !important;
+    }
+    .mermaid .edge-thickness-thick .path {
+      stroke: var(--transition-recovery) !important;
+      stroke-width: 3px !important;
+      fill: none !important;
+    }
+    .mermaid .edgeLabel rect {
+      fill: white !important;
+      opacity: 0.9;
+    }
+    .mermaid .edgeLabel {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: var(--color-text-muted) !important;
+      font-family: var(--font-family) !important;
+    }
+    .mermaid .node rect {
+      rx: var(--radius-md) !important;
+      ry: var(--radius-md) !important;
+      stroke-width: 2px !important;
+      filter: drop-shadow(0 2px 4px rgba(16,33,62,0.04));
+    }
+    .mermaid .node .label {
+      font-family: var(--font-family) !important;
+      color: var(--color-primary) !important;
+      font-size: 12px !important;
+    }
+    .mermaid .node b {
+      font-size: 13px !important;
+      color: var(--color-primary) !important;
+    }
+  </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{color:#E2E8F0;}
+.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+<div class="page-wrap">
+  <!-- ── Header ── -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1>私域电商售前AI助手-Agent本体设计</h1>
+      <div class="header-meta">
+        <span class="meta-badge domain">私域电商售前</span>
+        <span class="meta-badge role">🤖 企微 AI 售前助手（RAG 1v1 自动回复）</span>
+      </div>
+      
+      <p class="meta-scenario">客户从抖音直播/投流进入企微 1v1 后，AI 售前助手完成秒级首响、意图分流、正品信任应答、确定性算账，遇敏感功效/低置信/点名人工即附摘要转人工，并以小流量试点看板守护转化率的端到端售前场景</p>
+      
+    </div>
+    <div class="header-right">
+      <div class="meta-info">Generated by agent-ontology-designer</div>
+      <div class="meta-info">2026-07-30 18:26</div>
+      <div class="btn-group">
+        <button class="btn-secondary" onclick="window.print()">导出 PDF</button>
+        <button class="btn-primary" onclick="copyYAML()">复制 YAML</button>
+        <button class="btn-primary" onclick="copyPrompt()">复制 Prompt</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Tabs ── -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-objects" onclick="switchTab('objects')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      对象关系
+      <span class="tab-count">10</span>
+    </button>
+    <button class="tab-btn" id="tab-btn-actions" onclick="switchTab('actions')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      行动边界
+      <span class="tab-count">5</span>
+    </button>
+    <button class="tab-btn" id="tab-btn-states" onclick="switchTab('states')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 19.07a10 10 0 0 1 0-14.14"/></svg>
+      状态迁移
+      <span class="tab-count">3</span>
+    </button>
+    <button class="tab-btn" id="tab-btn-prompt" onclick="switchTab('prompt')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Agent Prompt
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════
+       TAB 1 · 对象关系
+       ══════════════════════════ -->
+  <div class="tab-panel active" id="tab-objects">
+
+    <p class="section-title">实体（Entities）</p>
+
+    <!-- Entity type legend -->
+    <div class="legend">
+      <span style="font-weight:600; color:var(--color-text-muted);">实体类型：</span>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--entity-core-badge)"></div>
+        核心对象（core）— Agent 直接操作或判断的实体
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--entity-reference-badge)"></div>
+        参考对象（reference）— 提供上下文或约束
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--entity-event-badge)"></div>
+        事件对象（event）— 记录业务发生的事件
+      </div>
+    </div>
+
+    <div class="entity-grid">
+      
+      <div class="entity-card entity-core">
+        <div class="entity-header">
+          <span class="entity-badge">核心对象</span>
+          <div class="entity-name">客户会话（Session）</div>
+        </div>
+        <p class="entity-desc">客户在企微发起的 1v1 售前会话，是所有意图识别、应答与转人工动作的载体</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">status</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">incoming / ai_serving / handoff / closed</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">first_response_at</span>
+            <span class="attr-type">datetime</span>
+            <div>
+              
+                <span class="attr-desc">首响时间（秒级首响考核口径）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">source_channel</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">进线来源（直播/短视频/投流加粉）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">risk_signals</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">风险信号（敏感功效词/点名人工/连续追问）</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>客户进线 ≠ 已完成首响，冷场即流失第一轮成交窗口</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>AI 承接中 ≠ 全自动闭环，转人工是正常路径不是失败</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>会话来源打标（C3）不在本期范围，不能假设来源已知</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-event">
+        <div class="entity-header">
+          <span class="entity-badge">事件对象</span>
+          <div class="entity-name">咨询意图（Intent）</div>
+        </div>
+        <p class="entity-desc">对客户每轮问题的分类结果，决定路由到哪类应答（版本/正品/价格/风险/发货付款/转人工）</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">category</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">version / authenticity / pricing / risk / fulfillment_payment / handoff</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">confidence</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">意图识别置信度</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">matched_keywords</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">命中的分类词典关键词</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>意图识别成功 ≠ 知识库有答案，命中不足必须保守答复</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>价格类意图 ≠ 可自由作答，必须走规则表输出</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>风险类意图一旦命中，优先级高于其他所有意图</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-core">
+        <div class="entity-header">
+          <span class="entity-badge">核心对象</span>
+          <div class="entity-name">商品版本（Version）</div>
+        </div>
+        <p class="entity-desc">在售三版本：日版礼来（一盒两支/自动笔）、孟版杰西卡（一盒一支/针剂）、珠峰（孟版低配版）</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">version_name</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">日版礼来 / 孟版杰西卡 / 珠峰</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">package_desc</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">包装形式（一盒两支/一盒一支）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">product_form</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">剂型（原研自动笔/仿制针剂）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">usage_desc</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">使用口径（一针管一个星期）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">storage_desc</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">保存口径（未开封 2-8°C 冷藏；已开封 &lt;30°C 存 21 天）</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>珠峰=孟版杰西卡低配版，不是独立第四版本</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>日版只能整盒购买，不能拆开卖</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>替C = 替尔 = 替尔泊肽，是同一成分的不同叫法</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>国版穆峰达需去医院开，本店不售，不能报价</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-core">
+        <div class="entity-header">
+          <span class="entity-badge">核心对象</span>
+          <div class="entity-name">规格价格（SKU）</div>
+        </div>
+        <p class="entity-desc">版本×剂量档的权威价格表（孟版 6 档 / 日版 6 档含 1 档缺货 / 珠峰 4 档，共 16 条）</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">dose</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">2.5 / 5.0 / 7.5 / 10 / 12.5 / 15</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">list_price</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">表价（价格表图口径）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">stock_status</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">in_stock / out_of_stock</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>表价 ≠ 会话浮动报价（日版 2.5 表价 498，会话出现过 548）</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>珠峰仅 2.5/5.0/7.5/10 四档，无 12.5/15 档</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>缺货档位不能报价成交，只能说明缺货</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-reference">
+        <div class="entity-header">
+          <span class="entity-badge">参考对象</span>
+          <div class="entity-name">促销规则（Promo）</div>
+        </div>
+        <p class="entity-desc">结构化优惠规则：618 孟版单支减 20、日版一盒减 20；到手价只能由规则表算出</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">condition</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">触发条件（版本/件数/活动场次）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">result</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">优惠结果（减免金额）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">validity</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">active / expired / manual_only</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>人工议价口径（优惠10/1200-80）≠ 可自动执行的规则</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>活动口径有场次有效期，过期规则不能继续报</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>赠品/优惠条件必须明确表述，不能模糊表达</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-reference">
+        <div class="entity-header">
+          <span class="entity-badge">参考对象</span>
+          <div class="entity-name">正品凭据（Proof）</div>
+        </div>
+        <p class="entity-desc">支撑正品信任应答的凭据集：验真流程（扫码/官网/三码合一）、包装图、假货退款承诺</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">proof_type</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">验真流程卡 / 包装图 / 版本对比卡 / 退款承诺口径</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">is_real_collected</span>
+            <span class="attr-type">boolean</span>
+            <div>
+              
+                <span class="attr-desc">是否真实采集（补充样例须显式标注）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">display_content</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">可公开展示的凭据内容</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>正品凭据只能来自知识库，不允许模型自由编造</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>禁止伪造批准文号、注册证书编号、质检结论、蓝帽子编号</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>样例凭据卡 ≠ 真实业务承诺，演示时必须标注</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-reference">
+        <div class="entity-header">
+          <span class="entity-badge">参考对象</span>
+          <div class="entity-name">合规话术白名单（Whitelist）</div>
+        </div>
+        <p class="entity-desc">预审核的风险问答话术库：效果/治疗/副作用禁忌等敏感问题只能走白名单语料</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">intent</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">效果承诺 / 疾病治疗 / 副作用与禁忌</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">trigger_words</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">触发词（瘦多少/治疗/孕妇/甲状腺等）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">response_mode</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">safe_reply / transfer</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">reply</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">预审核的白名单回复文本</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>白名单外的风险问题一律保守回复或转人工，不允许即兴发挥</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>点对点交流受众特定 ≠ 可放松合规标准，仍按广告高标准执行</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>禁忌人群说明只能按固定口径回复，不做个体医疗建议</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-event">
+        <div class="entity-header">
+          <span class="entity-badge">事件对象</span>
+          <div class="entity-name">转人工工单（Handoff）</div>
+        </div>
+        <p class="entity-desc">AI 转人工的事件记录，含触发原因与供人工接手的上下文摘要</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">trigger_type</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">敏感功效 / 低置信度 / 客户点名人工 / 付款承接 / 口径冲突</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">summary</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">上下文摘要（客户关注点+已答内容+未解决问题）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">status</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">pending / taken_over / resolved</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>转人工 ≠ AI 回答失败，是设计内的兜底路径</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>工单创建 ≠ 人工已接管，未接管前客户仍在等待</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>摘要缺失的转接会让人工重新问一遍，等于二次伤害体验</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-event">
+        <div class="entity-header">
+          <span class="entity-badge">事件对象</span>
+          <div class="entity-name">下单承接（Order Intake）</div>
+        </div>
+        <p class="entity-desc">客户确认购买后的承接记录：付款截图 → 收货信息 → 客服复述核对 → 晚点发单号</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">payment_method</span>
+            <span class="attr-type">enum</span>
+            <div>
+              
+                <span class="attr-values">微信扫码 / 微信红包 / 支付宝</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">payment_screenshot</span>
+            <span class="attr-type">boolean</span>
+            <div>
+              
+                <span class="attr-desc">是否已收到付款截图</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">address_confirmed</span>
+            <span class="attr-type">boolean</span>
+            <div>
+              
+                <span class="attr-desc">订单要素是否已人工复述核对</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">shipping_desc</span>
+            <span class="attr-type">string</span>
+            <div>
+              
+                <span class="attr-desc">发货口径（深圳发/48h 内发出/冷链到付约 20）</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>收到付款截图 ≠ 订单完成，必须人工复述订单要素核对</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>发货时效口径（揽收后 1-3 天）≠ 承诺具体到货日期</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>AI 只做支付/发货口径说明，不能自动确认收款成功</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <div class="entity-card entity-reference">
+        <div class="entity-header">
+          <span class="entity-badge">参考对象</span>
+          <div class="entity-name">试点守护指标（Metric）</div>
+        </div>
+        <p class="entity-desc">小流量试点看板：首响时长、自动接待率、转人工率、错价次数、首单转化率</p>
+
+        
+        <div class="entity-attrs">
+          
+          <div class="attr-row">
+            <span class="attr-name">conversion_rate</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">高意向客户首单转化率（NSM，健康区间 9%~10%）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">auto_serve_rate</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">RAG 自动接待率（目标 ≥80%）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">wrong_price_count</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">错价事件次数（硬红线指标）</span>
+              
+            </div>
+          </div>
+          
+          <div class="attr-row">
+            <span class="attr-name">observation_weeks</span>
+            <span class="attr-type">number</span>
+            <div>
+              
+                <span class="attr-desc">连续观察周数（回滚判定窗口）</span>
+              
+            </div>
+          </div>
+          
+        </div>
+        
+
+        
+        <div class="entity-distinctions">
+          <div class="distinction-label">⚠️ 概念边界</div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>单日转化波动 ≠ 试点失败，回滚判定看连续两周口径</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>自动接待率高 ≠ 试点成功，转化率不掉才是守护底线</span>
+          </div>
+          
+          <div class="distinction-item">
+            <span class="distinction-icon">≠</span>
+            <span>错价一次即需复盘，不能等汇总周期</span>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+    </div>
+
+    
+    <p class="section-title">对象关系拓扑图（Relationships Graph）</p>
+    <div class="ws-flow" style="margin-bottom: 24px;">
+      <div class="mermaid" id="mermaid-relationships" style="width: 100%; max-width: 960px; margin: 0 auto;">
+        graph TD
+          %% Styling classes
+          classDef core fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1D4ED8;
+          classDef reference fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px,color:#5B21B6;
+          classDef event fill:#FFF7ED,stroke:#EA580C,stroke-width:2px,color:#C2410C;
+
+          %% Nodes definition
+          
+            customer_session["<b>客户会话（Session）</b><br/><span style='font-size:10px;color:#64748B;'>核心对象</span>"]
+            class customer_session core;
+          
+            inquiry_intent["<b>咨询意图（Intent）</b><br/><span style='font-size:10px;color:#64748B;'>事件对象</span>"]
+            class inquiry_intent event;
+          
+            product_version["<b>商品版本（Version）</b><br/><span style='font-size:10px;color:#64748B;'>核心对象</span>"]
+            class product_version core;
+          
+            sku_spec["<b>规格价格（SKU）</b><br/><span style='font-size:10px;color:#64748B;'>核心对象</span>"]
+            class sku_spec core;
+          
+            promo_rule["<b>促销规则（Promo）</b><br/><span style='font-size:10px;color:#64748B;'>参考对象</span>"]
+            class promo_rule reference;
+          
+            authenticity_proof["<b>正品凭据（Proof）</b><br/><span style='font-size:10px;color:#64748B;'>参考对象</span>"]
+            class authenticity_proof reference;
+          
+            compliance_whitelist["<b>合规话术白名单（Whitelist）</b><br/><span style='font-size:10px;color:#64748B;'>参考对象</span>"]
+            class compliance_whitelist reference;
+          
+            handoff_ticket["<b>转人工工单（Handoff）</b><br/><span style='font-size:10px;color:#64748B;'>事件对象</span>"]
+            class handoff_ticket event;
+          
+            order_intake["<b>下单承接（Order Intake）</b><br/><span style='font-size:10px;color:#64748B;'>事件对象</span>"]
+            class order_intake event;
+          
+            pilot_metric["<b>试点守护指标（Metric）</b><br/><span style='font-size:10px;color:#64748B;'>参考对象</span>"]
+            class pilot_metric reference;
+          
+
+          %% Relationships definition
+          
+            customer_session -->|触发 1:N| inquiry_intent
+          
+            inquiry_intent -->|涉及 N:N| product_version
+          
+            product_version -->|包含 1:N| sku_spec
+          
+            promo_rule -->|约束 N:N| sku_spec
+          
+            authenticity_proof -->|证明 N:N| product_version
+          
+            compliance_whitelist -->|约束 N:N| inquiry_intent
+          
+            inquiry_intent -->|触发 N:1| handoff_ticket
+          
+            customer_session -->|产生 1:N| order_intake
+          
+            handoff_ticket -->|执行 1:1| order_intake
+          
+            customer_session -->|汇入 N:1| pilot_metric
+          
+      </div>
+    </div>
+
+    <p class="section-title">对象关系详情（Relationships Detail）</p>
+    <div class="rel-table-wrap">
+      <table class="rel-table">
+        <thead>
+          <tr>
+            <th>从 (From)</th>
+            <th style="text-align:center;">关系</th>
+            <th>到 (To)</th>
+            <th style="text-align:center;">基数</th>
+            <th>业务含义</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td class="rel-from">客户会话（Session）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">触发</span>
+            </td>
+            <td class="rel-from">咨询意图（Intent）</td>
+            <td class="rel-card" style="text-align:center;">1:N</td>
+            <td class="rel-desc">一次会话中客户会连续抛出多轮不同类别的问题</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">咨询意图（Intent）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">涉及</span>
+            </td>
+            <td class="rel-from">商品版本（Version）</td>
+            <td class="rel-card" style="text-align:center;">N:N</td>
+            <td class="rel-desc">版本/正品/价格类意图都会落到具体商品版本上</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">商品版本（Version）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">包含</span>
+            </td>
+            <td class="rel-from">规格价格（SKU）</td>
+            <td class="rel-card" style="text-align:center;">1:N</td>
+            <td class="rel-desc">一个版本包含多个剂量档位的规格价格</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">促销规则（Promo）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">约束</span>
+            </td>
+            <td class="rel-from">规格价格（SKU）</td>
+            <td class="rel-card" style="text-align:center;">N:N</td>
+            <td class="rel-desc">促销规则按版本/件数作用于规格表价，算出到手价</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">正品凭据（Proof）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">证明</span>
+            </td>
+            <td class="rel-from">商品版本（Version）</td>
+            <td class="rel-card" style="text-align:center;">N:N</td>
+            <td class="rel-desc">验真流程、包装图等凭据支撑各版本的正品信任应答</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">合规话术白名单（Whitelist）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">约束</span>
+            </td>
+            <td class="rel-from">咨询意图（Intent）</td>
+            <td class="rel-card" style="text-align:center;">N:N</td>
+            <td class="rel-desc">风险类意图必须匹配白名单话术才能作答</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">咨询意图（Intent）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">触发</span>
+            </td>
+            <td class="rel-from">转人工工单（Handoff）</td>
+            <td class="rel-card" style="text-align:center;">N:1</td>
+            <td class="rel-desc">敏感功效/低置信/点名人工的意图触发转人工工单</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">客户会话（Session）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">产生</span>
+            </td>
+            <td class="rel-from">下单承接（Order Intake）</td>
+            <td class="rel-card" style="text-align:center;">1:N</td>
+            <td class="rel-desc">会话内客户确认购买后产生下单承接记录</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">转人工工单（Handoff）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">执行</span>
+            </td>
+            <td class="rel-from">下单承接（Order Intake）</td>
+            <td class="rel-card" style="text-align:center;">1:1</td>
+            <td class="rel-desc">付款承接类工单由人工接管完成订单要素核对</td>
+          </tr>
+          
+          <tr>
+            <td class="rel-from">客户会话（Session）</td>
+            <td class="rel-arrow">
+              <span class="rel-label">汇入</span>
+            </td>
+            <td class="rel-from">试点守护指标（Metric）</td>
+            <td class="rel-card" style="text-align:center;">N:1</td>
+            <td class="rel-desc">所有试点会话的首响/转接/成交数据汇入守护看板</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </div>
+    
+
+  </div><!-- /tab-objects -->
+
+
+  <!-- ══════════════════════════
+       TAB 2 · 行动边界
+       ══════════════════════════ -->
+  <div class="tab-panel" id="tab-actions">
+
+    <div class="legend">
+      <div class="legend-item"><span style="font-size:16px">📋</span> Required Evidence — 做判断前必须核实的门店可见证据</div>
+      <div class="legend-item"><span style="font-size:16px">✅</span> Valid Actions — 当前情境下可以执行的合法动作</div>
+      <div class="legend-item"><span style="font-size:16px">❌</span> Invalid Actions — 不应该执行（会产生错误假设）的动作</div>
+      <div class="legend-item"><span style="font-size:16px">⚠️</span> Exception Triggers — 需要标记风险或升级的触发条件</div>
+    </div>
+
+    
+    <div class="ab-card">
+      <div class="ab-header">
+        <span class="ab-situation-num">情境 1</span>
+        <div>
+          <div class="ab-situation-name">客户进线首响承接</div>
+          
+          <div class="ab-situation-desc">客户从直播/投流进入企微发出第一句咨询（你好/在吗/7.5 什么价），首轮信任窗口只有秒级</div>
+          
+        </div>
+      </div>
+      <div class="ab-body">
+
+        <!-- Q1: Required Evidence -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-evidence">📋 Required Evidence</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">企微 kf 消息回调</div>
+                <div>确认收到客户首条消息及其文本内容</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">欢迎语模板库</div>
+                <div>统一欢迎语与首轮引导语模板已配置且为当前版本</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q2: Valid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-valid">✅ Valid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">秒级发送统一欢迎语完成首轮承接</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">引导客户确认咨询主题（版本/正品/价格等）</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">识别首条消息中已包含的意图并直接路由</div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q3: Invalid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-invalid">❌ Invalid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>等待人工上线再回复客户首条消息</div>
+                <div class="ab-item-reason">原因：夜间/高峰冷场直接导致第一轮信任未建立即流失</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>在欢迎语中自由生成优惠或效果承诺</div>
+                <div class="ab-item-reason">原因：欢迎语必须走预置模板，即兴承诺会踩价格与合规红线</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q4: Exception Triggers -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-exception">⚠️ Exception Triggers</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：客户首条消息即命中敏感功效词或点名人工</div>
+                <div class="ab-item-action">→ 跳过常规分流，直接输出保守话术并创建转人工工单</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="ab-card">
+      <div class="ab-header">
+        <span class="ab-situation-num">情境 2</span>
+        <div>
+          <div class="ab-situation-name">客户质疑正品或要求验真</div>
+          
+          <div class="ab-situation-desc">客户问「是不是正品/能验吗/日版孟版什么区别」，是成交前最高频的信任决策点</div>
+          
+        </div>
+      </div>
+      <div class="ab-body">
+
+        <!-- Q1: Required Evidence -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-evidence">📋 Required Evidence</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">正品溯源与商品库</div>
+                <div>验真流程卡、包装图、版本对比卡在库且为真实采集内容</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">退款承诺口径</div>
+                <div>「验出假货可退」为真实会话中确认过的标准口径</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q2: Valid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-valid">✅ Valid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">检索并输出验真流程（扫码/官网/三码合一）</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">展示真实包装图与版本差异说明</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">按标准口径说明假货退款承诺</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">凭据不足时保守答复并转人工</div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q3: Invalid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-invalid">❌ Invalid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>编造批准文号、注册证书、质检结论等监管凭据</div>
+                <div class="ab-item-reason">原因：伪造监管信息是合规硬红线，Demo 也不例外</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>用「绝对正品/官方唯一授权」等绝对化背书作答</div>
+                <div class="ab-item-reason">原因：绝对化表述违反广告法，凭据只能展示可验证路径</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q4: Exception Triggers -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-exception">⚠️ Exception Triggers</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：客户已收货并声称扫码验真失败</div>
+                <div class="ab-item-action">→ 立即按退款承诺口径回应并转人工处理售后</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="ab-card">
+      <div class="ab-header">
+        <span class="ab-situation-num">情境 3</span>
+        <div>
+          <div class="ab-situation-name">客户询价议价或问多件优惠</div>
+          
+          <div class="ab-situation-desc">客户问「一支多少/买两支优惠吗/运费怎么算」，错价是硬红线且直接产生客诉</div>
+          
+        </div>
+      </div>
+      <div class="ab-body">
+
+        <!-- Q1: Required Evidence -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-evidence">📋 Required Evidence</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">规格价格表（16 条全规格）</div>
+                <div>版本×剂量档的表价与库存状态（日版 15 缺货）</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">促销规则库</div>
+                <div>当前生效的活动规则与适用条件（618 减 20 等）</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q2: Valid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-valid">✅ Valid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">调用规则表计算到手价并附活动说明</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">说明冷链到付运费约 20 的固定口径</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">对缺货档位如实说明缺货，不引导成交</div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q3: Invalid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-invalid">❌ Invalid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>让大模型脱离规则表自行心算或估算价格</div>
+                <div class="ab-item-reason">原因：价格禁止大模型独立决策，防幻觉错价</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>复用会话中的人工议价口径自动给客户减价</div>
+                <div class="ab-item-reason">原因：人工口径（优惠10/1200-80）未结构化，自动执行会口径失控</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>对表价与会话报价不一致的档位直接二选一作答</div>
+                <div class="ab-item-reason">原因：日版 2.5 存在 498/548 双口径，未统一前作答即错价风险</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q4: Exception Triggers -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-exception">⚠️ Exception Triggers</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：命中表价与会话口径不一致的档位（如日版 2.5）</div>
+                <div class="ab-item-action">→ 输出保守话术并创建口径冲突工单，升级运营统一价格</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：客户提出规则库外的议价或组合优惠诉求</div>
+                <div class="ab-item-action">→ 不承诺任何减免，附摘要转人工由客服决定</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="ab-card">
+      <div class="ab-header">
+        <span class="ab-situation-num">情境 4</span>
+        <div>
+          <div class="ab-situation-name">客户问效果副作用禁忌或治疗</div>
+          
+          <div class="ab-situation-desc">客户问「能瘦多少/能治病吗/孕妇能用吗」，是最容易踩广告法红线的环节</div>
+          
+        </div>
+      </div>
+      <div class="ab-body">
+
+        <!-- Q1: Required Evidence -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-evidence">📋 Required Evidence</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">合规话术白名单库</div>
+                <div>触发词命中情况与对应 response_mode（safe_reply/transfer）</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">禁忌人群固定口径</div>
+                <div>甲状腺病史/胰岛素用药/孕产期等禁忌说明为预审核版本</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q2: Valid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-valid">✅ Valid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">按白名单输出预审核的保守话术</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">按固定口径说明常见反应与禁忌慎用人群</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">白名单未覆盖时输出保守答复并附摘要转人工</div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q3: Invalid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-invalid">❌ Invalid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>对效果作出断言或保证（保证瘦/多久见效）</div>
+                <div class="ab-item-reason">原因：广告法禁止效果承诺，保健品语境零容忍</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>回应疾病预防治疗类问题（降血糖/替代药物）</div>
+                <div class="ab-item-reason">原因：涉及治疗功能是绝对红线，只能转人工</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>对禁忌人群给出个体化使用建议</div>
+                <div class="ab-item-reason">原因：超出白名单的医疗判断必须由人工承接</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q4: Exception Triggers -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-exception">⚠️ Exception Triggers</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：命中疾病治疗类触发词（治疗/降血糖/治好）</div>
+                <div class="ab-item-action">→ response_mode=transfer，立即保守回复并转人工</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：客户自述属禁忌人群仍坚持购买</div>
+                <div class="ab-item-action">→ 不推进成交流程，附完整摘要转人工处理</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="ab-card">
+      <div class="ab-header">
+        <span class="ab-situation-num">情境 5</span>
+        <div>
+          <div class="ab-situation-name">客户确认购买进入付款发货</div>
+          
+          <div class="ab-situation-desc">客户问「怎么付款/从哪发/多久到」并发出付款截图，进入 AI 说明+人工承接的交界点</div>
+          
+        </div>
+      </div>
+      <div class="ab-body">
+
+        <!-- Q1: Required Evidence -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-evidence">📋 Required Evidence</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">支付与发货口径库</div>
+                <div>支付方式（微信/支付宝）、48h 发出、揽收后 1-3 天口径</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-source">会话中的付款截图与收货信息</div>
+                <div>客户是否已发付款截图及姓名电话地址</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q2: Valid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-valid">✅ Valid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">说明支付方式与冷链到付运费口径</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">按口径说明发货时效，不承诺具体到货日</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">收到付款截图后立即创建付款承接工单转人工</div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="ab-item-content">提示客户等待客服复述订单要素核对</div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q3: Invalid Actions -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-invalid">❌ Invalid Actions</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>自动向客户确认收款成功或订单已生效</div>
+                <div class="ab-item-reason">原因：AI 无支付系统对账能力，误确认会造成资损纠纷</div>
+              </div>
+            </div>
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <div class="ab-item-content">
+                <div>跳过人工复述核对直接承诺发货</div>
+                <div class="ab-item-reason">原因：订单要素核对是真实流程的固定动作，不可省略</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+        <!-- Q4: Exception Triggers -->
+        <div class="ab-quadrant">
+          <div class="quadrant-label ql-exception">⚠️ Exception Triggers</div>
+          
+            
+            <div class="ab-item">
+              <svg class="ab-item-dot" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div class="ab-item-content">
+                <div class="ab-item-condition">当：客户已付款但超时无人工接管工单</div>
+                <div class="ab-item-action">→ 升级提醒值班客服，并向客户发送安抚话术</div>
+              </div>
+            </div>
+            
+          
+        </div>
+
+      </div>
+    </div>
+    
+
+  </div><!-- /tab-actions -->
+
+
+  <!-- ══════════════════════════
+       TAB 3 · 状态迁移
+       ══════════════════════════ -->
+  <div class="tab-panel" id="tab-states">
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--transition-normal);"></div>
+        正常迁移
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:transparent; border-top: 2px dashed var(--transition-exception); height:0;"></div>
+        异常分支
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:transparent; border-top: 2px dotted var(--transition-recovery); height:0;"></div>
+        异常恢复
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--color-success); border-radius:3px; width:16px; height:12px;"></div>
+        终态节点
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#FEF3C7; border:2px solid var(--color-warning); border-radius:3px; width:16px; height:12px;"></div>
+        异常态节点
+      </div>
+    </div>
+
+    
+    <div class="ws-block">
+      <!-- Workstream Header -->
+      <div class="ws-header">
+        <div style="flex:1;">
+          <div class="ws-name">⚙️ 售前应答流</div>
+          <div class="ws-desc">从客户进线到 AI 完成应答或转人工的核心执行流，覆盖首响、分流、知识应答三段</div>
+          
+          <div class="ws-anchors">
+            <span style="font-size:11px;color:rgba(255,255,255,0.55);flex-shrink:0;margin-top:2px;">锚点对象：</span>
+            
+            <span class="ws-anchor-chip">customer_session</span>
+            
+            <span class="ws-anchor-chip">inquiry_intent</span>
+            
+            <span class="ws-anchor-chip">compliance_whitelist</span>
+            
+            <span class="ws-anchor-chip">handoff_ticket</span>
+            
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- State Flow -->
+      
+      <div class="ws-flow">
+        <div class="mermaid" id="mermaid-ws_presales_reply">
+          graph LR
+            %% Styling classes
+            classDef default fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1D4ED8;
+            classDef terminal fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#065F46;
+            classDef exception fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E;
+
+            %% Nodes definition
+            
+              
+              
+              s_incoming["<b>进线待首响</b><br/><span style='font-size:10px;color:#64748B;'>kf 回调收到客户首条消息，欢迎语尚未发出，首轮信任窗口计时中</span>"]
+              
+                class s_incoming default;
+              
+            
+              
+              
+              s_intent_routing["<b>意图分流中</b><br/><span style='font-size:10px;color:#64748B;'>对客户问题做分类，决定走版本/正品/价格/风险哪条应答路径</span>"]
+              
+                class s_intent_routing default;
+              
+            
+              
+              
+              s_kb_answering["<b>知识库应答中</b><br/><span style='font-size:10px;color:#64748B;'>按意图检索正品凭据/价格规则/白名单话术，大模型只做话术组织</span>"]
+              
+                class s_kb_answering default;
+              
+            
+              
+              
+              s_answered["<b>应答完成</b><br/><span style='font-size:10px;color:#64748B;'>本轮问题已答复，会话回到等待客户下一轮输入或进入下单承接</span>"]
+              
+                class s_answered default;
+              
+            
+              
+              
+              s_handoff["<b>已转人工</b><br/><span style='font-size:10px;color:#64748B;'>转人工工单已创建并附上下文摘要，等待人工接管，AI 停止实质作答</span>"]
+              
+                class s_handoff default;
+              
+            
+
+            %% Transitions definition
+            
+              
+                
+                  s_incoming -->|发送欢迎语并完成首轮承接| s_intent_routing
+                
+              
+                
+                  s_incoming -.->|识别首条消息即命中风险信号| s_handoff
+                
+              
+            
+              
+                
+                  s_intent_routing -->|意图识别成功并路由到对应知识库| s_kb_answering
+                
+              
+                
+                  s_intent_routing -.->|低置信度或客户点名人工| s_handoff
+                
+              
+            
+              
+                
+                  s_kb_answering -->|输出知识库支撑的应答| s_answered
+                
+              
+                
+                  s_kb_answering -.->|知识库命中不足输出保守答复| s_handoff
+                
+              
+            
+              
+                
+                  s_answered -->|客户发起下一轮问题| s_intent_routing
+                
+              
+            
+              
+                
+                  s_handoff ==>|人工处理完毕交回 AI 继续接待| s_answered
+                
+              
+            
+        </div>
+      </div>
+
+      <!-- Transition Details -->
+      <div class="ws-transitions-detail">
+        <div class="trans-detail-title">迁移路径详情</div>
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">进线待首响 → s_intent_routing</div>
+              <div class="trans-trigger">动作：发送欢迎语并完成首轮承接</div>
+              
+              <div class="trans-evidence">证据：首响消息已发出，first_response_at 已记录且在秒级</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">进线待首响 → s_handoff</div>
+              <div class="trans-trigger">动作：识别首条消息即命中风险信号</div>
+              
+              <div class="trans-evidence">证据：敏感功效词或「转人工」关键词命中记录</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">意图分流中 → s_kb_answering</div>
+              <div class="trans-trigger">动作：意图识别成功并路由到对应知识库</div>
+              
+              <div class="trans-evidence">证据：intent.category 已判定且 confidence 达阈值</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">意图分流中 → s_handoff</div>
+              <div class="trans-trigger">动作：低置信度或客户点名人工</div>
+              
+              <div class="trans-evidence">证据：confidence 低于阈值，或命中转人工触发词</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">知识库应答中 → s_answered</div>
+              <div class="trans-trigger">动作：输出知识库支撑的应答</div>
+              
+              <div class="trans-evidence">证据：应答内容全部可溯源到凭据库/规则表/白名单</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">知识库应答中 → s_handoff</div>
+              <div class="trans-trigger">动作：知识库命中不足输出保守答复</div>
+              
+              <div class="trans-evidence">证据：检索无命中或命中低于置信阈值的记录</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">应答完成 → s_intent_routing</div>
+              <div class="trans-trigger">动作：客户发起下一轮问题</div>
+              
+              <div class="trans-evidence">证据：kf 回调收到客户新消息</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot recovery"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">已转人工 → s_answered</div>
+              <div class="trans-trigger">动作：人工处理完毕交回 AI 继续接待</div>
+              
+              <div class="trans-evidence">证据：handoff_ticket.status = resolved</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常恢复</div>
+            </div>
+          </div>
+          
+        
+      </div>
+      
+
+      <!-- Guardrails -->
+      
+      <div class="ws-guardrails">
+        <div class="guardrail-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          全局护栏（不可绕过）
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>价格只能来自规则表，正品凭据只能来自知识库，禁止模型编造</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>敏感功效问题只能走预审核白名单，白名单外一律保守+转人工</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>知识库无命中时不允许硬答，保守答复并转人工</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>转人工必须附「关注点+已答内容+未解决问题」摘要</span>
+        </div>
+        
+      </div>
+      
+
+      <!-- Dependency Mapping -->
+      
+      <div class="ws-deps">
+        <div class="dep-title">跨流依赖（Dependency Mapping）</div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 下单承接流</div>
+            <div class="dep-condition">条件：会话在 s_answered 状态且客户表达购买意向</div>
+            <div class="dep-impact">影响：下单承接流启动，价格口径以本流规则表输出为准</div>
+          </div>
+        </div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 试点守护流</div>
+            <div class="dep-condition">条件：本流产生首响超时、错价或转人工事件</div>
+            <div class="dep-impact">影响：事件实时汇入试点看板，影响放量/回滚判定</div>
+          </div>
+        </div>
+        
+      </div>
+      
+
+    </div><!-- /ws-block -->
+    
+    <div class="ws-block">
+      <!-- Workstream Header -->
+      <div class="ws-header">
+        <div style="flex:1;">
+          <div class="ws-name">⚙️ 下单承接流</div>
+          <div class="ws-desc">从客户确认购买到人工完成订单要素核对的承接流，AI 只做说明、人工完成闭环</div>
+          
+          <div class="ws-anchors">
+            <span style="font-size:11px;color:rgba(255,255,255,0.55);flex-shrink:0;margin-top:2px;">锚点对象：</span>
+            
+            <span class="ws-anchor-chip">order_intake</span>
+            
+            <span class="ws-anchor-chip">handoff_ticket</span>
+            
+            <span class="ws-anchor-chip">sku_spec</span>
+            
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- State Flow -->
+      
+      <div class="ws-flow">
+        <div class="mermaid" id="mermaid-ws_order_intake">
+          graph LR
+            %% Styling classes
+            classDef default fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1D4ED8;
+            classDef terminal fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#065F46;
+            classDef exception fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E;
+
+            %% Nodes definition
+            
+              
+              
+              o_price_confirmed["<b>价格已确认</b><br/><span style='font-size:10px;color:#64748B;'>客户认可规则表输出的到手价，询问支付与发货方式</span>"]
+              
+                class o_price_confirmed default;
+              
+            
+              
+              
+              o_awaiting_payment["<b>待客户付款</b><br/><span style='font-size:10px;color:#64748B;'>客户已获支付路径（微信/支付宝），等待付款动作</span>"]
+              
+                class o_awaiting_payment default;
+              
+            
+              
+              
+              o_screenshot_received["<b>付款截图待核对</b><br/><span style='font-size:10px;color:#64748B;'>已收到截图但订单未成立，必须由人工复述订单要素核对</span>"]
+              
+                class o_screenshot_received default;
+              
+            
+              
+              
+              o_manual_verified["<b>人工核对完成</b><br/><span style='font-size:10px;color:#64748B;'>订单要素（姓名/电话/地址/规格/金额）经人工复述确认，待发单号</span>"]
+              
+                class o_manual_verified terminal;
+              
+            
+              
+              
+              o_intake_stalled["<b>承接搁置</b><br/><span style='font-size:10px;color:#64748B;'>客户已付款但人工未及时接管，存在客诉与信任受损风险</span>"]
+              
+                class o_intake_stalled default;
+              
+            
+
+            %% Transitions definition
+            
+              
+                
+                  o_price_confirmed -->|说明支付方式与发货口径| o_awaiting_payment
+                
+              
+            
+              
+                
+                  o_awaiting_payment -->|接收客户付款截图与收货信息| o_screenshot_received
+                
+              
+            
+              
+                
+                  o_screenshot_received -->|创建付款承接工单并由人工复述核对| o_manual_verified
+                
+              
+                
+                  o_screenshot_received -.->|检测人工接管超时| o_intake_stalled
+                
+              
+            
+              
+            
+              
+                
+                  o_intake_stalled ==>|升级值班客服完成补接管与核对| o_manual_verified
+                
+              
+            
+        </div>
+      </div>
+
+      <!-- Transition Details -->
+      <div class="ws-transitions-detail">
+        <div class="trans-detail-title">迁移路径详情</div>
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">价格已确认 → o_awaiting_payment</div>
+              <div class="trans-trigger">动作：说明支付方式与发货口径</div>
+              
+              <div class="trans-evidence">证据：支付/发货说明消息已按口径库发出</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">待客户付款 → o_screenshot_received</div>
+              <div class="trans-trigger">动作：接收客户付款截图与收货信息</div>
+              
+              <div class="trans-evidence">证据：会话中收到付款截图消息</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">付款截图待核对 → o_manual_verified</div>
+              <div class="trans-trigger">动作：创建付款承接工单并由人工复述核对</div>
+              
+              <div class="trans-evidence">证据：handoff_ticket(付款承接) 已被人工接管并完成复述</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">付款截图待核对 → o_intake_stalled</div>
+              <div class="trans-trigger">动作：检测人工接管超时</div>
+              
+              <div class="trans-evidence">证据：工单创建后超时无 taken_over 记录</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot recovery"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">承接搁置 → o_manual_verified</div>
+              <div class="trans-trigger">动作：升级值班客服完成补接管与核对</div>
+              
+              <div class="trans-evidence">证据：升级提醒已发出且工单最终被人工接管</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常恢复</div>
+            </div>
+          </div>
+          
+        
+      </div>
+      
+
+      <!-- Guardrails -->
+      
+      <div class="ws-guardrails">
+        <div class="guardrail-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          全局护栏（不可绕过）
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>AI 不得确认收款成功或宣布订单生效，只有人工核对后订单才成立</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>订单要素必须经人工复述核对，AI 不能替客户跳过该动作</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>发货只说时效口径（48h 发出/揽收后 1-3 天），不承诺具体到货日</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>缺货档位（日版 15）不得进入承接流程</span>
+        </div>
+        
+      </div>
+      
+
+      <!-- Dependency Mapping -->
+      
+      <div class="ws-deps">
+        <div class="dep-title">跨流依赖（Dependency Mapping）</div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 售前应答流</div>
+            <div class="dep-condition">条件：承接中客户追问价格/正品/风险类问题</div>
+            <div class="dep-impact">影响：问题路由回售前应答流处理，承接流保持当前状态等待</div>
+          </div>
+        </div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 试点守护流</div>
+            <div class="dep-condition">条件：本流完成人工核对（视为首单成交口径）</div>
+            <div class="dep-impact">影响：成交数据汇入看板，支撑首单转化率计算</div>
+          </div>
+        </div>
+        
+      </div>
+      
+
+    </div><!-- /ws-block -->
+    
+    <div class="ws-block">
+      <!-- Workstream Header -->
+      <div class="ws-header">
+        <div style="flex:1;">
+          <div class="ws-name">⚙️ 试点守护流</div>
+          <div class="ws-desc">小流量试点下持续观察首响/转人工/错价/转化指标，决定放量或回滚的守护流</div>
+          
+          <div class="ws-anchors">
+            <span style="font-size:11px;color:rgba(255,255,255,0.55);flex-shrink:0;margin-top:2px;">锚点对象：</span>
+            
+            <span class="ws-anchor-chip">pilot_metric</span>
+            
+            <span class="ws-anchor-chip">customer_session</span>
+            
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- State Flow -->
+      
+      <div class="ws-flow">
+        <div class="mermaid" id="mermaid-ws_pilot_guard">
+          graph LR
+            %% Styling classes
+            classDef default fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1D4ED8;
+            classDef terminal fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#065F46;
+            classDef exception fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E;
+
+            %% Nodes definition
+            
+              
+              
+              p_piloting["<b>小流量试点中</b><br/><span style='font-size:10px;color:#64748B;'>AI 仅承接小流量会话，看板按周汇总首响、自动接待率、错价与转化数据</span>"]
+              
+                class p_piloting default;
+              
+            
+              
+              
+              p_scale_up["<b>已放量</b><br/><span style='font-size:10px;color:#64748B;'>试点验证通过，扩大 AI 承接流量比例，看板继续按周守护</span>"]
+              
+                class p_scale_up default;
+              
+            
+              
+              
+              p_rollback["<b>已回滚</b><br/><span style='font-size:10px;color:#64748B;'>AI 承接比例回退至人工为主，复盘错价/流失根因后再评估重启</span>"]
+              
+                class p_rollback default;
+              
+            
+
+            %% Transitions definition
+            
+              
+                
+                  p_piloting -->|确认连续观察期指标达标后放量| p_scale_up
+                
+              
+                
+                  p_piloting -.->|触发回滚判定| p_rollback
+                
+              
+            
+              
+                
+                  p_scale_up -.->|放量后触发回滚判定| p_rollback
+                
+              
+            
+              
+                
+                  p_rollback ==>|完成根因修复后重启小流量试点| p_piloting
+                
+              
+            
+        </div>
+      </div>
+
+      <!-- Transition Details -->
+      <div class="ws-transitions-detail">
+        <div class="trans-detail-title">迁移路径详情</div>
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot normal"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">小流量试点中 → p_scale_up</div>
+              <div class="trans-trigger">动作：确认连续观察期指标达标后放量</div>
+              
+              <div class="trans-evidence">证据：转化率稳定于 9%~10% 健康区间且错价为零</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">正常迁移</div>
+            </div>
+          </div>
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">小流量试点中 → p_rollback</div>
+              <div class="trans-trigger">动作：触发回滚判定</div>
+              
+              <div class="trans-evidence">证据：转化率连续两周低于健康区间，或出现错价事故</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot exception"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">已放量 → p_rollback</div>
+              <div class="trans-trigger">动作：放量后触发回滚判定</div>
+              
+              <div class="trans-evidence">证据：放量期转化率连续两周低于健康区间</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常分支</div>
+            </div>
+          </div>
+          
+        
+          
+          <div class="trans-detail-row">
+            <div class="trans-type-dot recovery"></div>
+            <div class="trans-detail-content">
+              <div class="trans-route">已回滚 → p_piloting</div>
+              <div class="trans-trigger">动作：完成根因修复后重启小流量试点</div>
+              
+              <div class="trans-evidence">证据：复盘报告与知识库/规则表修复记录</div>
+              
+              <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">异常恢复</div>
+            </div>
+          </div>
+          
+        
+      </div>
+      
+
+      <!-- Guardrails -->
+      
+      <div class="ws-guardrails">
+        <div class="guardrail-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          全局护栏（不可绕过）
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>转化率连续两周低于健康区间（9%~10%）必须回滚，不得侥幸续跑</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>指标未经连续观察期验证不得放量</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>出现错价事故须当日复盘，不等周度汇总</span>
+        </div>
+        
+        <div class="guardrail-item">
+          <span class="guardrail-icon">🔒</span>
+          <span>回滚决策以看板口径为准，不接受个案好评作为放量依据</span>
+        </div>
+        
+      </div>
+      
+
+      <!-- Dependency Mapping -->
+      
+      <div class="ws-deps">
+        <div class="dep-title">跨流依赖（Dependency Mapping）</div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 售前应答流</div>
+            <div class="dep-condition">条件：守护流进入 p_rollback 状态</div>
+            <div class="dep-impact">影响：售前应答流 AI 承接范围收缩，会话优先路由人工</div>
+          </div>
+        </div>
+        
+        <div class="dep-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369A1" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div>
+            <div class="dep-ws-name">→ 下单承接流</div>
+            <div class="dep-condition">条件：守护流进入 p_scale_up 状态</div>
+            <div class="dep-impact">影响：承接流会话量随放量上升，需同步扩充人工核对班次</div>
+          </div>
+        </div>
+        
+      </div>
+      
+
+    </div><!-- /ws-block -->
+    
+
+  </div><!-- /tab-states -->
+
+
+  <!-- ══════════════════════════
+       TAB 4 · Agent Prompt
+       ══════════════════════════ -->
+  <div class="tab-panel" id="tab-prompt">
+
+    <div style="margin-bottom:16px; font-size:13px; color:var(--color-text-muted); line-height:1.6;">
+      以下是从本体结构自动生成的 Agent System Prompt 片段。
+      可直接复制并注入到 Agent 的系统提示词或知识库中，
+      让 Agent 掌握当前场景的业务对象边界、行动约束和状态护栏。
+    </div>
+
+    <div class="prompt-panel">
+      <div class="prompt-header">
+        <span class="prompt-header-title">🤖 Agent Prompt 片段</span>
+        <span class="prompt-hint">点击右上角「复制 Prompt」按钮一键复制</span>
+      </div>
+      <pre class="prompt-body" id="agent-prompt-content"># 业务本体：私域电商售前AI助手-Agent本体设计
+领域：私域电商售前
+Agent 角色：企微 AI 售前助手（RAG 1v1 自动回复）
+场景：客户从抖音直播/投流进入企微 1v1 后，AI 售前助手完成秒级首响、意图分流、正品信任应答、确定性算账，遇敏感功效/低置信/点名人工即附摘要转人工，并以小流量试点看板守护转化率的端到端售前场景
+
+## 1. 核心业务对象与概念边界
+### 客户会话（Session） [核心对象]
+- 定义：客户在企微发起的 1v1 售前会话，是所有意图识别、应答与转人工动作的载体
+- 属性定义：
+  * status (enum)（可选值：incoming / ai_serving / handoff / closed） - 会话承接状态
+  * first_response_at (datetime) - 首响时间（秒级首响考核口径）
+  * source_channel (string) - 进线来源（直播/短视频/投流加粉）
+  * risk_signals (string) - 风险信号（敏感功效词/点名人工/连续追问）
+- 关键概念边界（不可混淆）：
+  ⚠️ 客户进线 ≠ 已完成首响，冷场即流失第一轮成交窗口
+  ⚠️ AI 承接中 ≠ 全自动闭环，转人工是正常路径不是失败
+  ⚠️ 会话来源打标（C3）不在本期范围，不能假设来源已知
+### 咨询意图（Intent） [事件对象]
+- 定义：对客户每轮问题的分类结果，决定路由到哪类应答（版本/正品/价格/风险/发货付款/转人工）
+- 属性定义：
+  * category (enum)（可选值：version / authenticity / pricing / risk / fulfillment_payment / handoff） - 意图类别
+  * confidence (number) - 意图识别置信度
+  * matched_keywords (string) - 命中的分类词典关键词
+- 关键概念边界（不可混淆）：
+  ⚠️ 意图识别成功 ≠ 知识库有答案，命中不足必须保守答复
+  ⚠️ 价格类意图 ≠ 可自由作答，必须走规则表输出
+  ⚠️ 风险类意图一旦命中，优先级高于其他所有意图
+### 商品版本（Version） [核心对象]
+- 定义：在售三版本：日版礼来（一盒两支/自动笔）、孟版杰西卡（一盒一支/针剂）、珠峰（孟版低配版）
+- 属性定义：
+  * version_name (enum)（可选值：日版礼来 / 孟版杰西卡 / 珠峰） - 版本名称
+  * package_desc (string) - 包装形式（一盒两支/一盒一支）
+  * product_form (string) - 剂型（原研自动笔/仿制针剂）
+  * usage_desc (string) - 使用口径（一针管一个星期）
+  * storage_desc (string) - 保存口径（未开封 2-8°C 冷藏；已开封 &lt;30°C 存 21 天）
+- 关键概念边界（不可混淆）：
+  ⚠️ 珠峰=孟版杰西卡低配版，不是独立第四版本
+  ⚠️ 日版只能整盒购买，不能拆开卖
+  ⚠️ 替C = 替尔 = 替尔泊肽，是同一成分的不同叫法
+  ⚠️ 国版穆峰达需去医院开，本店不售，不能报价
+### 规格价格（SKU） [核心对象]
+- 定义：版本×剂量档的权威价格表（孟版 6 档 / 日版 6 档含 1 档缺货 / 珠峰 4 档，共 16 条）
+- 属性定义：
+  * dose (enum)（可选值：2.5 / 5.0 / 7.5 / 10 / 12.5 / 15） - 剂量档位
+  * list_price (number) - 表价（价格表图口径）
+  * stock_status (enum)（可选值：in_stock / out_of_stock） - 库存状态（日版 15 暂缺货）
+- 关键概念边界（不可混淆）：
+  ⚠️ 表价 ≠ 会话浮动报价（日版 2.5 表价 498，会话出现过 548）
+  ⚠️ 珠峰仅 2.5/5.0/7.5/10 四档，无 12.5/15 档
+  ⚠️ 缺货档位不能报价成交，只能说明缺货
+### 促销规则（Promo） [参考对象]
+- 定义：结构化优惠规则：618 孟版单支减 20、日版一盒减 20；到手价只能由规则表算出
+- 属性定义：
+  * condition (string) - 触发条件（版本/件数/活动场次）
+  * result (string) - 优惠结果（减免金额）
+  * validity (enum)（可选值：active / expired / manual_only） - 规则状态
+- 关键概念边界（不可混淆）：
+  ⚠️ 人工议价口径（优惠10/1200-80）≠ 可自动执行的规则
+  ⚠️ 活动口径有场次有效期，过期规则不能继续报
+  ⚠️ 赠品/优惠条件必须明确表述，不能模糊表达
+### 正品凭据（Proof） [参考对象]
+- 定义：支撑正品信任应答的凭据集：验真流程（扫码/官网/三码合一）、包装图、假货退款承诺
+- 属性定义：
+  * proof_type (enum)（可选值：验真流程卡 / 包装图 / 版本对比卡 / 退款承诺口径） - 凭据类型
+  * is_real_collected (boolean) - 是否真实采集（补充样例须显式标注）
+  * display_content (string) - 可公开展示的凭据内容
+- 关键概念边界（不可混淆）：
+  ⚠️ 正品凭据只能来自知识库，不允许模型自由编造
+  ⚠️ 禁止伪造批准文号、注册证书编号、质检结论、蓝帽子编号
+  ⚠️ 样例凭据卡 ≠ 真实业务承诺，演示时必须标注
+### 合规话术白名单（Whitelist） [参考对象]
+- 定义：预审核的风险问答话术库：效果/治疗/副作用禁忌等敏感问题只能走白名单语料
+- 属性定义：
+  * intent (enum)（可选值：效果承诺 / 疾病治疗 / 副作用与禁忌） - 覆盖的敏感意图
+  * trigger_words (string) - 触发词（瘦多少/治疗/孕妇/甲状腺等）
+  * response_mode (enum)（可选值：safe_reply / transfer） - 应答模式（保守回复/直接转人工）
+  * reply (string) - 预审核的白名单回复文本
+- 关键概念边界（不可混淆）：
+  ⚠️ 白名单外的风险问题一律保守回复或转人工，不允许即兴发挥
+  ⚠️ 点对点交流受众特定 ≠ 可放松合规标准，仍按广告高标准执行
+  ⚠️ 禁忌人群说明只能按固定口径回复，不做个体医疗建议
+### 转人工工单（Handoff） [事件对象]
+- 定义：AI 转人工的事件记录，含触发原因与供人工接手的上下文摘要
+- 属性定义：
+  * trigger_type (enum)（可选值：敏感功效 / 低置信度 / 客户点名人工 / 付款承接 / 口径冲突） - 转人工触发原因
+  * summary (string) - 上下文摘要（客户关注点+已答内容+未解决问题）
+  * status (enum)（可选值：pending / taken_over / resolved） - 人工接管状态
+- 关键概念边界（不可混淆）：
+  ⚠️ 转人工 ≠ AI 回答失败，是设计内的兜底路径
+  ⚠️ 工单创建 ≠ 人工已接管，未接管前客户仍在等待
+  ⚠️ 摘要缺失的转接会让人工重新问一遍，等于二次伤害体验
+### 下单承接（Order Intake） [事件对象]
+- 定义：客户确认购买后的承接记录：付款截图 → 收货信息 → 客服复述核对 → 晚点发单号
+- 属性定义：
+  * payment_method (enum)（可选值：微信扫码 / 微信红包 / 支付宝） - 支付方式（企微未开通转账收款）
+  * payment_screenshot (boolean) - 是否已收到付款截图
+  * address_confirmed (boolean) - 订单要素是否已人工复述核对
+  * shipping_desc (string) - 发货口径（深圳发/48h 内发出/冷链到付约 20）
+- 关键概念边界（不可混淆）：
+  ⚠️ 收到付款截图 ≠ 订单完成，必须人工复述订单要素核对
+  ⚠️ 发货时效口径（揽收后 1-3 天）≠ 承诺具体到货日期
+  ⚠️ AI 只做支付/发货口径说明，不能自动确认收款成功
+### 试点守护指标（Metric） [参考对象]
+- 定义：小流量试点看板：首响时长、自动接待率、转人工率、错价次数、首单转化率
+- 属性定义：
+  * conversion_rate (number) - 高意向客户首单转化率（NSM，健康区间 9%~10%）
+  * auto_serve_rate (number) - RAG 自动接待率（目标 ≥80%）
+  * wrong_price_count (number) - 错价事件次数（硬红线指标）
+  * observation_weeks (number) - 连续观察周数（回滚判定窗口）
+- 关键概念边界（不可混淆）：
+  ⚠️ 单日转化波动 ≠ 试点失败，回滚判定看连续两周口径
+  ⚠️ 自动接待率高 ≠ 试点成功，转化率不掉才是守护底线
+  ⚠️ 错价一次即需复盘，不能等汇总周期
+
+## 2. 对象关系依赖（Relationships）
+- 【客户会话（Session）】 --(触发, 基数 1:N)--&gt; 【咨询意图（Intent）】
+  说明：一次会话中客户会连续抛出多轮不同类别的问题
+- 【咨询意图（Intent）】 --(涉及, 基数 N:N)--&gt; 【商品版本（Version）】
+  说明：版本/正品/价格类意图都会落到具体商品版本上
+- 【商品版本（Version）】 --(包含, 基数 1:N)--&gt; 【规格价格（SKU）】
+  说明：一个版本包含多个剂量档位的规格价格
+- 【促销规则（Promo）】 --(约束, 基数 N:N)--&gt; 【规格价格（SKU）】
+  说明：促销规则按版本/件数作用于规格表价，算出到手价
+- 【正品凭据（Proof）】 --(证明, 基数 N:N)--&gt; 【商品版本（Version）】
+  说明：验真流程、包装图等凭据支撑各版本的正品信任应答
+- 【合规话术白名单（Whitelist）】 --(约束, 基数 N:N)--&gt; 【咨询意图（Intent）】
+  说明：风险类意图必须匹配白名单话术才能作答
+- 【咨询意图（Intent）】 --(触发, 基数 N:1)--&gt; 【转人工工单（Handoff）】
+  说明：敏感功效/低置信/点名人工的意图触发转人工工单
+- 【客户会话（Session）】 --(产生, 基数 1:N)--&gt; 【下单承接（Order Intake）】
+  说明：会话内客户确认购买后产生下单承接记录
+- 【转人工工单（Handoff）】 --(执行, 基数 1:1)--&gt; 【下单承接（Order Intake）】
+  说明：付款承接类工单由人工接管完成订单要素核对
+- 【客户会话（Session）】 --(汇入, 基数 N:1)--&gt; 【试点守护指标（Metric）】
+  说明：所有试点会话的首响/转接/成交数据汇入守护看板
+
+## 3. 行动边界限制（情境 - 证据 - 合法/禁止动作）
+### 情境：客户进线首响承接
+描述：客户从直播/投流进入企微发出第一句咨询（你好/在吗/7.5 什么价），首轮信任窗口只有秒级
+必须核实的证据：
+  - [企微 kf 消息回调] 确认收到客户首条消息及其文本内容
+  - [欢迎语模板库] 统一欢迎语与首轮引导语模板已配置且为当前版本
+✅ 合法动作（允许执行）：
+  - 秒级发送统一欢迎语完成首轮承接
+  - 引导客户确认咨询主题（版本/正品/价格等）
+  - 识别首条消息中已包含的意图并直接路由
+❌ 禁止动作（严禁执行，防范错误假设）：
+  - 等待人工上线再回复客户首条消息 （禁止原因：夜间/高峰冷场直接导致第一轮信任未建立即流失）
+  - 在欢迎语中自由生成优惠或效果承诺 （禁止原因：欢迎语必须走预置模板，即兴承诺会踩价格与合规红线）
+⚠️ 异常触发规则：
+  - 当满足条件【客户首条消息即命中敏感功效词或点名人工】 → 必须执行：跳过常规分流，直接输出保守话术并创建转人工工单
+### 情境：客户质疑正品或要求验真
+描述：客户问「是不是正品/能验吗/日版孟版什么区别」，是成交前最高频的信任决策点
+必须核实的证据：
+  - [正品溯源与商品库] 验真流程卡、包装图、版本对比卡在库且为真实采集内容
+  - [退款承诺口径] 「验出假货可退」为真实会话中确认过的标准口径
+✅ 合法动作（允许执行）：
+  - 检索并输出验真流程（扫码/官网/三码合一）
+  - 展示真实包装图与版本差异说明
+  - 按标准口径说明假货退款承诺
+  - 凭据不足时保守答复并转人工
+❌ 禁止动作（严禁执行，防范错误假设）：
+  - 编造批准文号、注册证书、质检结论等监管凭据 （禁止原因：伪造监管信息是合规硬红线，Demo 也不例外）
+  - 用「绝对正品/官方唯一授权」等绝对化背书作答 （禁止原因：绝对化表述违反广告法，凭据只能展示可验证路径）
+⚠️ 异常触发规则：
+  - 当满足条件【客户已收货并声称扫码验真失败】 → 必须执行：立即按退款承诺口径回应并转人工处理售后
+### 情境：客户询价议价或问多件优惠
+描述：客户问「一支多少/买两支优惠吗/运费怎么算」，错价是硬红线且直接产生客诉
+必须核实的证据：
+  - [规格价格表（16 条全规格）] 版本×剂量档的表价与库存状态（日版 15 缺货）
+  - [促销规则库] 当前生效的活动规则与适用条件（618 减 20 等）
+✅ 合法动作（允许执行）：
+  - 调用规则表计算到手价并附活动说明
+  - 说明冷链到付运费约 20 的固定口径
+  - 对缺货档位如实说明缺货，不引导成交
+❌ 禁止动作（严禁执行，防范错误假设）：
+  - 让大模型脱离规则表自行心算或估算价格 （禁止原因：价格禁止大模型独立决策，防幻觉错价）
+  - 复用会话中的人工议价口径自动给客户减价 （禁止原因：人工口径（优惠10/1200-80）未结构化，自动执行会口径失控）
+  - 对表价与会话报价不一致的档位直接二选一作答 （禁止原因：日版 2.5 存在 498/548 双口径，未统一前作答即错价风险）
+⚠️ 异常触发规则：
+  - 当满足条件【命中表价与会话口径不一致的档位（如日版 2.5）】 → 必须执行：输出保守话术并创建口径冲突工单，升级运营统一价格
+  - 当满足条件【客户提出规则库外的议价或组合优惠诉求】 → 必须执行：不承诺任何减免，附摘要转人工由客服决定
+### 情境：客户问效果副作用禁忌或治疗
+描述：客户问「能瘦多少/能治病吗/孕妇能用吗」，是最容易踩广告法红线的环节
+必须核实的证据：
+  - [合规话术白名单库] 触发词命中情况与对应 response_mode（safe_reply/transfer）
+  - [禁忌人群固定口径] 甲状腺病史/胰岛素用药/孕产期等禁忌说明为预审核版本
+✅ 合法动作（允许执行）：
+  - 按白名单输出预审核的保守话术
+  - 按固定口径说明常见反应与禁忌慎用人群
+  - 白名单未覆盖时输出保守答复并附摘要转人工
+❌ 禁止动作（严禁执行，防范错误假设）：
+  - 对效果作出断言或保证（保证瘦/多久见效） （禁止原因：广告法禁止效果承诺，保健品语境零容忍）
+  - 回应疾病预防治疗类问题（降血糖/替代药物） （禁止原因：涉及治疗功能是绝对红线，只能转人工）
+  - 对禁忌人群给出个体化使用建议 （禁止原因：超出白名单的医疗判断必须由人工承接）
+⚠️ 异常触发规则：
+  - 当满足条件【命中疾病治疗类触发词（治疗/降血糖/治好）】 → 必须执行：response_mode=transfer，立即保守回复并转人工
+  - 当满足条件【客户自述属禁忌人群仍坚持购买】 → 必须执行：不推进成交流程，附完整摘要转人工处理
+### 情境：客户确认购买进入付款发货
+描述：客户问「怎么付款/从哪发/多久到」并发出付款截图，进入 AI 说明+人工承接的交界点
+必须核实的证据：
+  - [支付与发货口径库] 支付方式（微信/支付宝）、48h 发出、揽收后 1-3 天口径
+  - [会话中的付款截图与收货信息] 客户是否已发付款截图及姓名电话地址
+✅ 合法动作（允许执行）：
+  - 说明支付方式与冷链到付运费口径
+  - 按口径说明发货时效，不承诺具体到货日
+  - 收到付款截图后立即创建付款承接工单转人工
+  - 提示客户等待客服复述订单要素核对
+❌ 禁止动作（严禁执行，防范错误假设）：
+  - 自动向客户确认收款成功或订单已生效 （禁止原因：AI 无支付系统对账能力，误确认会造成资损纠纷）
+  - 跳过人工复述核对直接承诺发货 （禁止原因：订单要素核对是真实流程的固定动作，不可省略）
+⚠️ 异常触发规则：
+  - 当满足条件【客户已付款但超时无人工接管工单】 → 必须执行：升级提醒值班客服，并向客户发送安抚话术
+
+## 4. 状态流转与全局护栏（Workstreams &amp; States）
+### 执行流（Workstream）：售前应答流
+描述：从客户进线到 AI 完成应答或转人工的核心执行流，覆盖首响、分流、知识应答三段
+状态节点及迁移路径：
+  - 状态：进线待首响 (s_incoming)
+    状态定义：kf 回调收到客户首条消息，欢迎语尚未发出，首轮信任窗口计时中
+    可用的状态转移路径：
+      * --[发送欢迎语并完成首轮承接] (核实证据: 首响消息已发出，first_response_at 已记录且在秒级)--&gt; 到达状态 s_intent_routing (性质: 正常迁移)
+      * --[识别首条消息即命中风险信号] (核实证据: 敏感功效词或「转人工」关键词命中记录)--&gt; 到达状态 s_handoff (性质: 异常分支)
+  - 状态：意图分流中 (s_intent_routing)
+    状态定义：对客户问题做分类，决定走版本/正品/价格/风险哪条应答路径
+    可用的状态转移路径：
+      * --[意图识别成功并路由到对应知识库] (核实证据: intent.category 已判定且 confidence 达阈值)--&gt; 到达状态 s_kb_answering (性质: 正常迁移)
+      * --[低置信度或客户点名人工] (核实证据: confidence 低于阈值，或命中转人工触发词)--&gt; 到达状态 s_handoff (性质: 异常分支)
+  - 状态：知识库应答中 (s_kb_answering)
+    状态定义：按意图检索正品凭据/价格规则/白名单话术，大模型只做话术组织
+    可用的状态转移路径：
+      * --[输出知识库支撑的应答] (核实证据: 应答内容全部可溯源到凭据库/规则表/白名单)--&gt; 到达状态 s_answered (性质: 正常迁移)
+      * --[知识库命中不足输出保守答复] (核实证据: 检索无命中或命中低于置信阈值的记录)--&gt; 到达状态 s_handoff (性质: 异常分支)
+  - 状态：应答完成 (s_answered)
+    状态定义：本轮问题已答复，会话回到等待客户下一轮输入或进入下单承接
+    可用的状态转移路径：
+      * --[客户发起下一轮问题] (核实证据: kf 回调收到客户新消息)--&gt; 到达状态 s_intent_routing (性质: 正常迁移)
+  - 状态：已转人工 (s_handoff)
+    状态定义：转人工工单已创建并附上下文摘要，等待人工接管，AI 停止实质作答
+    可用的状态转移路径：
+      * --[人工处理完毕交回 AI 继续接待] (核实证据: handoff_ticket.status = resolved)--&gt; 到达状态 s_answered (性质: 异常恢复)
+🔒 全局不可绕过护栏规则：
+  - 价格只能来自规则表，正品凭据只能来自知识库，禁止模型编造
+  - 敏感功效问题只能走预审核白名单，白名单外一律保守+转人工
+  - 知识库无命中时不允许硬答，保守答复并转人工
+  - 转人工必须附「关注点+已答内容+未解决问题」摘要
+🔗 跨流依赖关系：
+  - 自身在该工作流时，若另一执行流 【下单承接流】 满足条件【会话在 s_answered 状态且客户表达购买意向】，则受到影响：下单承接流启动，价格口径以本流规则表输出为准
+  - 自身在该工作流时，若另一执行流 【试点守护流】 满足条件【本流产生首响超时、错价或转人工事件】，则受到影响：事件实时汇入试点看板，影响放量/回滚判定
+### 执行流（Workstream）：下单承接流
+描述：从客户确认购买到人工完成订单要素核对的承接流，AI 只做说明、人工完成闭环
+状态节点及迁移路径：
+  - 状态：价格已确认 (o_price_confirmed)
+    状态定义：客户认可规则表输出的到手价，询问支付与发货方式
+    可用的状态转移路径：
+      * --[说明支付方式与发货口径] (核实证据: 支付/发货说明消息已按口径库发出)--&gt; 到达状态 o_awaiting_payment (性质: 正常迁移)
+  - 状态：待客户付款 (o_awaiting_payment)
+    状态定义：客户已获支付路径（微信/支付宝），等待付款动作
+    可用的状态转移路径：
+      * --[接收客户付款截图与收货信息] (核实证据: 会话中收到付款截图消息)--&gt; 到达状态 o_screenshot_received (性质: 正常迁移)
+  - 状态：付款截图待核对 (o_screenshot_received)
+    状态定义：已收到截图但订单未成立，必须由人工复述订单要素核对
+    可用的状态转移路径：
+      * --[创建付款承接工单并由人工复述核对] (核实证据: handoff_ticket(付款承接) 已被人工接管并完成复述)--&gt; 到达状态 o_manual_verified (性质: 正常迁移)
+      * --[检测人工接管超时] (核实证据: 工单创建后超时无 taken_over 记录)--&gt; 到达状态 o_intake_stalled (性质: 异常分支)
+  - 状态：人工核对完成 (o_manual_verified)
+    状态定义：订单要素（姓名/电话/地址/规格/金额）经人工复述确认，待发单号
+  - 状态：承接搁置 (o_intake_stalled)
+    状态定义：客户已付款但人工未及时接管，存在客诉与信任受损风险
+    可用的状态转移路径：
+      * --[升级值班客服完成补接管与核对] (核实证据: 升级提醒已发出且工单最终被人工接管)--&gt; 到达状态 o_manual_verified (性质: 异常恢复)
+🔒 全局不可绕过护栏规则：
+  - AI 不得确认收款成功或宣布订单生效，只有人工核对后订单才成立
+  - 订单要素必须经人工复述核对，AI 不能替客户跳过该动作
+  - 发货只说时效口径（48h 发出/揽收后 1-3 天），不承诺具体到货日
+  - 缺货档位（日版 15）不得进入承接流程
+🔗 跨流依赖关系：
+  - 自身在该工作流时，若另一执行流 【售前应答流】 满足条件【承接中客户追问价格/正品/风险类问题】，则受到影响：问题路由回售前应答流处理，承接流保持当前状态等待
+  - 自身在该工作流时，若另一执行流 【试点守护流】 满足条件【本流完成人工核对（视为首单成交口径）】，则受到影响：成交数据汇入看板，支撑首单转化率计算
+### 执行流（Workstream）：试点守护流
+描述：小流量试点下持续观察首响/转人工/错价/转化指标，决定放量或回滚的守护流
+状态节点及迁移路径：
+  - 状态：小流量试点中 (p_piloting)
+    状态定义：AI 仅承接小流量会话，看板按周汇总首响、自动接待率、错价与转化数据
+    可用的状态转移路径：
+      * --[确认连续观察期指标达标后放量] (核实证据: 转化率稳定于 9%~10% 健康区间且错价为零)--&gt; 到达状态 p_scale_up (性质: 正常迁移)
+      * --[触发回滚判定] (核实证据: 转化率连续两周低于健康区间，或出现错价事故)--&gt; 到达状态 p_rollback (性质: 异常分支)
+  - 状态：已放量 (p_scale_up)
+    状态定义：试点验证通过，扩大 AI 承接流量比例，看板继续按周守护
+    可用的状态转移路径：
+      * --[放量后触发回滚判定] (核实证据: 放量期转化率连续两周低于健康区间)--&gt; 到达状态 p_rollback (性质: 异常分支)
+  - 状态：已回滚 (p_rollback)
+    状态定义：AI 承接比例回退至人工为主，复盘错价/流失根因后再评估重启
+    可用的状态转移路径：
+      * --[完成根因修复后重启小流量试点] (核实证据: 复盘报告与知识库/规则表修复记录)--&gt; 到达状态 p_piloting (性质: 异常恢复)
+🔒 全局不可绕过护栏规则：
+  - 转化率连续两周低于健康区间（9%~10%）必须回滚，不得侥幸续跑
+  - 指标未经连续观察期验证不得放量
+  - 出现错价事故须当日复盘，不等周度汇总
+  - 回滚决策以看板口径为准，不接受个案好评作为放量依据
+🔗 跨流依赖关系：
+  - 自身在该工作流时，若另一执行流 【售前应答流】 满足条件【守护流进入 p_rollback 状态】，则受到影响：售前应答流 AI 承接范围收缩，会话优先路由人工
+  - 自身在该工作流时，若另一执行流 【下单承接流】 满足条件【守护流进入 p_scale_up 状态】，则受到影响：承接流会话量随放量上升，需同步扩充人工核对班次
+</pre>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <p class="section-title">原始 YAML 本体</p>
+      <div class="prompt-panel">
+        <div class="prompt-header">
+          <span class="prompt-header-title">📄 Source YAML</span>
+          <span class="prompt-hint">点击「复制 YAML」按钮一键复制</span>
+        </div>
+        <pre class="prompt-body" id="raw-yaml-content">title: 私域电商售前AI助手-Agent本体设计
+domain: 私域电商售前
+scenario_description: &#34;客户从抖音直播/投流进入企微 1v1 后，AI 售前助手完成秒级首响、意图分流、正品信任应答、确定性算账，遇敏感功效/低置信/点名人工即附摘要转人工，并以小流量试点看板守护转化率的端到端售前场景&#34;
+target_agent_role: 企微 AI 售前助手（RAG 1v1 自动回复）
+
+entities:
+  - id: customer_session
+    name: 客户会话（Session）
+    type: core
+    description: &#34;客户在企微发起的 1v1 售前会话，是所有意图识别、应答与转人工动作的载体&#34;
+    attributes:
+      - name: status
+        type: enum
+        values: [incoming, ai_serving, handoff, closed]
+        description: 会话承接状态
+      - name: first_response_at
+        type: datetime
+        description: 首响时间（秒级首响考核口径）
+      - name: source_channel
+        type: string
+        description: 进线来源（直播/短视频/投流加粉）
+      - name: risk_signals
+        type: string
+        description: 风险信号（敏感功效词/点名人工/连续追问）
+    key_distinctions:
+      - &#34;客户进线 ≠ 已完成首响，冷场即流失第一轮成交窗口&#34;
+      - &#34;AI 承接中 ≠ 全自动闭环，转人工是正常路径不是失败&#34;
+      - &#34;会话来源打标（C3）不在本期范围，不能假设来源已知&#34;
+
+  - id: inquiry_intent
+    name: 咨询意图（Intent）
+    type: event
+    description: &#34;对客户每轮问题的分类结果，决定路由到哪类应答（版本/正品/价格/风险/发货付款/转人工）&#34;
+    attributes:
+      - name: category
+        type: enum
+        values: [version, authenticity, pricing, risk, fulfillment_payment, handoff]
+        description: 意图类别
+      - name: confidence
+        type: number
+        description: 意图识别置信度
+      - name: matched_keywords
+        type: string
+        description: 命中的分类词典关键词
+    key_distinctions:
+      - &#34;意图识别成功 ≠ 知识库有答案，命中不足必须保守答复&#34;
+      - &#34;价格类意图 ≠ 可自由作答，必须走规则表输出&#34;
+      - &#34;风险类意图一旦命中，优先级高于其他所有意图&#34;
+
+  - id: product_version
+    name: 商品版本（Version）
+    type: core
+    description: &#34;在售三版本：日版礼来（一盒两支/自动笔）、孟版杰西卡（一盒一支/针剂）、珠峰（孟版低配版）&#34;
+    attributes:
+      - name: version_name
+        type: enum
+        values: [日版礼来, 孟版杰西卡, 珠峰]
+        description: 版本名称
+      - name: package_desc
+        type: string
+        description: 包装形式（一盒两支/一盒一支）
+      - name: product_form
+        type: string
+        description: 剂型（原研自动笔/仿制针剂）
+      - name: usage_desc
+        type: string
+        description: 使用口径（一针管一个星期）
+      - name: storage_desc
+        type: string
+        description: &#34;保存口径（未开封 2-8°C 冷藏；已开封 &lt;30°C 存 21 天）&#34;
+    key_distinctions:
+      - &#34;珠峰=孟版杰西卡低配版，不是独立第四版本&#34;
+      - &#34;日版只能整盒购买，不能拆开卖&#34;
+      - &#34;替C = 替尔 = 替尔泊肽，是同一成分的不同叫法&#34;
+      - &#34;国版穆峰达需去医院开，本店不售，不能报价&#34;
+
+  - id: sku_spec
+    name: 规格价格（SKU）
+    type: core
+    description: &#34;版本×剂量档的权威价格表（孟版 6 档 / 日版 6 档含 1 档缺货 / 珠峰 4 档，共 16 条）&#34;
+    attributes:
+      - name: dose
+        type: enum
+        values: [&#34;2.5&#34;, &#34;5.0&#34;, &#34;7.5&#34;, &#34;10&#34;, &#34;12.5&#34;, &#34;15&#34;]
+        description: 剂量档位
+      - name: list_price
+        type: number
+        description: 表价（价格表图口径）
+      - name: stock_status
+        type: enum
+        values: [in_stock, out_of_stock]
+        description: 库存状态（日版 15 暂缺货）
+    key_distinctions:
+      - &#34;表价 ≠ 会话浮动报价（日版 2.5 表价 498，会话出现过 548）&#34;
+      - &#34;珠峰仅 2.5/5.0/7.5/10 四档，无 12.5/15 档&#34;
+      - &#34;缺货档位不能报价成交，只能说明缺货&#34;
+
+  - id: promo_rule
+    name: 促销规则（Promo）
+    type: reference
+    description: &#34;结构化优惠规则：618 孟版单支减 20、日版一盒减 20；到手价只能由规则表算出&#34;
+    attributes:
+      - name: condition
+        type: string
+        description: 触发条件（版本/件数/活动场次）
+      - name: result
+        type: string
+        description: 优惠结果（减免金额）
+      - name: validity
+        type: enum
+        values: [active, expired, manual_only]
+        description: 规则状态
+    key_distinctions:
+      - &#34;人工议价口径（优惠10/1200-80）≠ 可自动执行的规则&#34;
+      - &#34;活动口径有场次有效期，过期规则不能继续报&#34;
+      - &#34;赠品/优惠条件必须明确表述，不能模糊表达&#34;
+
+  - id: authenticity_proof
+    name: 正品凭据（Proof）
+    type: reference
+    description: &#34;支撑正品信任应答的凭据集：验真流程（扫码/官网/三码合一）、包装图、假货退款承诺&#34;
+    attributes:
+      - name: proof_type
+        type: enum
+        values: [验真流程卡, 包装图, 版本对比卡, 退款承诺口径]
+        description: 凭据类型
+      - name: is_real_collected
+        type: boolean
+        description: 是否真实采集（补充样例须显式标注）
+      - name: display_content
+        type: string
+        description: 可公开展示的凭据内容
+    key_distinctions:
+      - &#34;正品凭据只能来自知识库，不允许模型自由编造&#34;
+      - &#34;禁止伪造批准文号、注册证书编号、质检结论、蓝帽子编号&#34;
+      - &#34;样例凭据卡 ≠ 真实业务承诺，演示时必须标注&#34;
+
+  - id: compliance_whitelist
+    name: 合规话术白名单（Whitelist）
+    type: reference
+    description: &#34;预审核的风险问答话术库：效果/治疗/副作用禁忌等敏感问题只能走白名单语料&#34;
+    attributes:
+      - name: intent
+        type: enum
+        values: [效果承诺, 疾病治疗, 副作用与禁忌]
+        description: 覆盖的敏感意图
+      - name: trigger_words
+        type: string
+        description: 触发词（瘦多少/治疗/孕妇/甲状腺等）
+      - name: response_mode
+        type: enum
+        values: [safe_reply, transfer]
+        description: 应答模式（保守回复/直接转人工）
+      - name: reply
+        type: string
+        description: 预审核的白名单回复文本
+    key_distinctions:
+      - &#34;白名单外的风险问题一律保守回复或转人工，不允许即兴发挥&#34;
+      - &#34;点对点交流受众特定 ≠ 可放松合规标准，仍按广告高标准执行&#34;
+      - &#34;禁忌人群说明只能按固定口径回复，不做个体医疗建议&#34;
+
+  - id: handoff_ticket
+    name: 转人工工单（Handoff）
+    type: event
+    description: &#34;AI 转人工的事件记录，含触发原因与供人工接手的上下文摘要&#34;
+    attributes:
+      - name: trigger_type
+        type: enum
+        values: [敏感功效, 低置信度, 客户点名人工, 付款承接, 口径冲突]
+        description: 转人工触发原因
+      - name: summary
+        type: string
+        description: 上下文摘要（客户关注点+已答内容+未解决问题）
+      - name: status
+        type: enum
+        values: [pending, taken_over, resolved]
+        description: 人工接管状态
+    key_distinctions:
+      - &#34;转人工 ≠ AI 回答失败，是设计内的兜底路径&#34;
+      - &#34;工单创建 ≠ 人工已接管，未接管前客户仍在等待&#34;
+      - &#34;摘要缺失的转接会让人工重新问一遍，等于二次伤害体验&#34;
+
+  - id: order_intake
+    name: 下单承接（Order Intake）
+    type: event
+    description: &#34;客户确认购买后的承接记录：付款截图 → 收货信息 → 客服复述核对 → 晚点发单号&#34;
+    attributes:
+      - name: payment_method
+        type: enum
+        values: [微信扫码, 微信红包, 支付宝]
+        description: 支付方式（企微未开通转账收款）
+      - name: payment_screenshot
+        type: boolean
+        description: 是否已收到付款截图
+      - name: address_confirmed
+        type: boolean
+        description: 订单要素是否已人工复述核对
+      - name: shipping_desc
+        type: string
+        description: &#34;发货口径（深圳发/48h 内发出/冷链到付约 20）&#34;
+    key_distinctions:
+      - &#34;收到付款截图 ≠ 订单完成，必须人工复述订单要素核对&#34;
+      - &#34;发货时效口径（揽收后 1-3 天）≠ 承诺具体到货日期&#34;
+      - &#34;AI 只做支付/发货口径说明，不能自动确认收款成功&#34;
+
+  - id: pilot_metric
+    name: 试点守护指标（Metric）
+    type: reference
+    description: &#34;小流量试点看板：首响时长、自动接待率、转人工率、错价次数、首单转化率&#34;
+    attributes:
+      - name: conversion_rate
+        type: number
+        description: 高意向客户首单转化率（NSM，健康区间 9%~10%）
+      - name: auto_serve_rate
+        type: number
+        description: RAG 自动接待率（目标 ≥80%）
+      - name: wrong_price_count
+        type: number
+        description: 错价事件次数（硬红线指标）
+      - name: observation_weeks
+        type: number
+        description: 连续观察周数（回滚判定窗口）
+    key_distinctions:
+      - &#34;单日转化波动 ≠ 试点失败，回滚判定看连续两周口径&#34;
+      - &#34;自动接待率高 ≠ 试点成功，转化率不掉才是守护底线&#34;
+      - &#34;错价一次即需复盘，不能等汇总周期&#34;
+
+relationships:
+  - from: customer_session
+    to: inquiry_intent
+    label: 触发
+    cardinality: &#34;1:N&#34;
+    description: &#34;一次会话中客户会连续抛出多轮不同类别的问题&#34;
+  - from: inquiry_intent
+    to: product_version
+    label: 涉及
+    cardinality: &#34;N:N&#34;
+    description: &#34;版本/正品/价格类意图都会落到具体商品版本上&#34;
+  - from: product_version
+    to: sku_spec
+    label: 包含
+    cardinality: &#34;1:N&#34;
+    description: &#34;一个版本包含多个剂量档位的规格价格&#34;
+  - from: promo_rule
+    to: sku_spec
+    label: 约束
+    cardinality: &#34;N:N&#34;
+    description: &#34;促销规则按版本/件数作用于规格表价，算出到手价&#34;
+  - from: authenticity_proof
+    to: product_version
+    label: 证明
+    cardinality: &#34;N:N&#34;
+    description: &#34;验真流程、包装图等凭据支撑各版本的正品信任应答&#34;
+  - from: compliance_whitelist
+    to: inquiry_intent
+    label: 约束
+    cardinality: &#34;N:N&#34;
+    description: &#34;风险类意图必须匹配白名单话术才能作答&#34;
+  - from: inquiry_intent
+    to: handoff_ticket
+    label: 触发
+    cardinality: &#34;N:1&#34;
+    description: &#34;敏感功效/低置信/点名人工的意图触发转人工工单&#34;
+  - from: customer_session
+    to: order_intake
+    label: 产生
+    cardinality: &#34;1:N&#34;
+    description: &#34;会话内客户确认购买后产生下单承接记录&#34;
+  - from: handoff_ticket
+    to: order_intake
+    label: 执行
+    cardinality: &#34;1:1&#34;
+    description: &#34;付款承接类工单由人工接管完成订单要素核对&#34;
+  - from: customer_session
+    to: pilot_metric
+    label: 汇入
+    cardinality: &#34;N:1&#34;
+    description: &#34;所有试点会话的首响/转接/成交数据汇入守护看板&#34;
+
+action_boundaries:
+  - id: ab_first_response
+    situation: 客户进线首响承接
+    situation_description: &#34;客户从直播/投流进入企微发出第一句咨询（你好/在吗/7.5 什么价），首轮信任窗口只有秒级&#34;
+    required_evidence:
+      - source: &#34;企微 kf 消息回调&#34;
+        checks: &#34;确认收到客户首条消息及其文本内容&#34;
+      - source: &#34;欢迎语模板库&#34;
+        checks: &#34;统一欢迎语与首轮引导语模板已配置且为当前版本&#34;
+    valid_actions:
+      - &#34;秒级发送统一欢迎语完成首轮承接&#34;
+      - &#34;引导客户确认咨询主题（版本/正品/价格等）&#34;
+      - &#34;识别首条消息中已包含的意图并直接路由&#34;
+    invalid_actions:
+      - action: &#34;等待人工上线再回复客户首条消息&#34;
+        reason: &#34;夜间/高峰冷场直接导致第一轮信任未建立即流失&#34;
+      - action: &#34;在欢迎语中自由生成优惠或效果承诺&#34;
+        reason: &#34;欢迎语必须走预置模板，即兴承诺会踩价格与合规红线&#34;
+    exception_triggers:
+      - condition: &#34;客户首条消息即命中敏感功效词或点名人工&#34;
+        action: &#34;跳过常规分流，直接输出保守话术并创建转人工工单&#34;
+
+  - id: ab_authenticity_reply
+    situation: 客户质疑正品或要求验真
+    situation_description: &#34;客户问「是不是正品/能验吗/日版孟版什么区别」，是成交前最高频的信任决策点&#34;
+    required_evidence:
+      - source: &#34;正品溯源与商品库&#34;
+        checks: &#34;验真流程卡、包装图、版本对比卡在库且为真实采集内容&#34;
+      - source: &#34;退款承诺口径&#34;
+        checks: &#34;「验出假货可退」为真实会话中确认过的标准口径&#34;
+    valid_actions:
+      - &#34;检索并输出验真流程（扫码/官网/三码合一）&#34;
+      - &#34;展示真实包装图与版本差异说明&#34;
+      - &#34;按标准口径说明假货退款承诺&#34;
+      - &#34;凭据不足时保守答复并转人工&#34;
+    invalid_actions:
+      - action: &#34;编造批准文号、注册证书、质检结论等监管凭据&#34;
+        reason: &#34;伪造监管信息是合规硬红线，Demo 也不例外&#34;
+      - action: &#34;用「绝对正品/官方唯一授权」等绝对化背书作答&#34;
+        reason: &#34;绝对化表述违反广告法，凭据只能展示可验证路径&#34;
+    exception_triggers:
+      - condition: &#34;客户已收货并声称扫码验真失败&#34;
+        action: &#34;立即按退款承诺口径回应并转人工处理售后&#34;
+
+  - id: ab_deterministic_pricing
+    situation: 客户询价议价或问多件优惠
+    situation_description: &#34;客户问「一支多少/买两支优惠吗/运费怎么算」，错价是硬红线且直接产生客诉&#34;
+    required_evidence:
+      - source: &#34;规格价格表（16 条全规格）&#34;
+        checks: &#34;版本×剂量档的表价与库存状态（日版 15 缺货）&#34;
+      - source: &#34;促销规则库&#34;
+        checks: &#34;当前生效的活动规则与适用条件（618 减 20 等）&#34;
+    valid_actions:
+      - &#34;调用规则表计算到手价并附活动说明&#34;
+      - &#34;说明冷链到付运费约 20 的固定口径&#34;
+      - &#34;对缺货档位如实说明缺货，不引导成交&#34;
+    invalid_actions:
+      - action: &#34;让大模型脱离规则表自行心算或估算价格&#34;
+        reason: &#34;价格禁止大模型独立决策，防幻觉错价&#34;
+      - action: &#34;复用会话中的人工议价口径自动给客户减价&#34;
+        reason: &#34;人工口径（优惠10/1200-80）未结构化，自动执行会口径失控&#34;
+      - action: &#34;对表价与会话报价不一致的档位直接二选一作答&#34;
+        reason: &#34;日版 2.5 存在 498/548 双口径，未统一前作答即错价风险&#34;
+    exception_triggers:
+      - condition: &#34;命中表价与会话口径不一致的档位（如日版 2.5）&#34;
+        action: &#34;输出保守话术并创建口径冲突工单，升级运营统一价格&#34;
+      - condition: &#34;客户提出规则库外的议价或组合优惠诉求&#34;
+        action: &#34;不承诺任何减免，附摘要转人工由客服决定&#34;
+
+  - id: ab_risk_compliance
+    situation: 客户问效果副作用禁忌或治疗
+    situation_description: &#34;客户问「能瘦多少/能治病吗/孕妇能用吗」，是最容易踩广告法红线的环节&#34;
+    required_evidence:
+      - source: &#34;合规话术白名单库&#34;
+        checks: &#34;触发词命中情况与对应 response_mode（safe_reply/transfer）&#34;
+      - source: &#34;禁忌人群固定口径&#34;
+        checks: &#34;甲状腺病史/胰岛素用药/孕产期等禁忌说明为预审核版本&#34;
+    valid_actions:
+      - &#34;按白名单输出预审核的保守话术&#34;
+      - &#34;按固定口径说明常见反应与禁忌慎用人群&#34;
+      - &#34;白名单未覆盖时输出保守答复并附摘要转人工&#34;
+    invalid_actions:
+      - action: &#34;对效果作出断言或保证（保证瘦/多久见效）&#34;
+        reason: &#34;广告法禁止效果承诺，保健品语境零容忍&#34;
+      - action: &#34;回应疾病预防治疗类问题（降血糖/替代药物）&#34;
+        reason: &#34;涉及治疗功能是绝对红线，只能转人工&#34;
+      - action: &#34;对禁忌人群给出个体化使用建议&#34;
+        reason: &#34;超出白名单的医疗判断必须由人工承接&#34;
+    exception_triggers:
+      - condition: &#34;命中疾病治疗类触发词（治疗/降血糖/治好）&#34;
+        action: &#34;response_mode=transfer，立即保守回复并转人工&#34;
+      - condition: &#34;客户自述属禁忌人群仍坚持购买&#34;
+        action: &#34;不推进成交流程，附完整摘要转人工处理&#34;
+
+  - id: ab_order_handoff
+    situation: 客户确认购买进入付款发货
+    situation_description: &#34;客户问「怎么付款/从哪发/多久到」并发出付款截图，进入 AI 说明+人工承接的交界点&#34;
+    required_evidence:
+      - source: &#34;支付与发货口径库&#34;
+        checks: &#34;支付方式（微信/支付宝）、48h 发出、揽收后 1-3 天口径&#34;
+      - source: &#34;会话中的付款截图与收货信息&#34;
+        checks: &#34;客户是否已发付款截图及姓名电话地址&#34;
+    valid_actions:
+      - &#34;说明支付方式与冷链到付运费口径&#34;
+      - &#34;按口径说明发货时效，不承诺具体到货日&#34;
+      - &#34;收到付款截图后立即创建付款承接工单转人工&#34;
+      - &#34;提示客户等待客服复述订单要素核对&#34;
+    invalid_actions:
+      - action: &#34;自动向客户确认收款成功或订单已生效&#34;
+        reason: &#34;AI 无支付系统对账能力，误确认会造成资损纠纷&#34;
+      - action: &#34;跳过人工复述核对直接承诺发货&#34;
+        reason: &#34;订单要素核对是真实流程的固定动作，不可省略&#34;
+    exception_triggers:
+      - condition: &#34;客户已付款但超时无人工接管工单&#34;
+        action: &#34;升级提醒值班客服，并向客户发送安抚话术&#34;
+
+workstreams:
+  - id: ws_presales_reply
+    name: 售前应答流
+    description: &#34;从客户进线到 AI 完成应答或转人工的核心执行流，覆盖首响、分流、知识应答三段&#34;
+    anchor_objects:
+      - customer_session
+      - inquiry_intent
+      - compliance_whitelist
+      - handoff_ticket
+    states:
+      - id: s_incoming
+        name: 进线待首响
+        description: &#34;kf 回调收到客户首条消息，欢迎语尚未发出，首轮信任窗口计时中&#34;
+        transitions:
+          - to_state: s_intent_routing
+            trigger_action: 发送欢迎语并完成首轮承接
+            required_evidence: &#34;首响消息已发出，first_response_at 已记录且在秒级&#34;
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 识别首条消息即命中风险信号
+            required_evidence: &#34;敏感功效词或「转人工」关键词命中记录&#34;
+            type: exception
+      - id: s_intent_routing
+        name: 意图分流中
+        description: &#34;对客户问题做分类，决定走版本/正品/价格/风险哪条应答路径&#34;
+        transitions:
+          - to_state: s_kb_answering
+            trigger_action: 意图识别成功并路由到对应知识库
+            required_evidence: &#34;intent.category 已判定且 confidence 达阈值&#34;
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 低置信度或客户点名人工
+            required_evidence: &#34;confidence 低于阈值，或命中转人工触发词&#34;
+            type: exception
+      - id: s_kb_answering
+        name: 知识库应答中
+        description: &#34;按意图检索正品凭据/价格规则/白名单话术，大模型只做话术组织&#34;
+        transitions:
+          - to_state: s_answered
+            trigger_action: 输出知识库支撑的应答
+            required_evidence: &#34;应答内容全部可溯源到凭据库/规则表/白名单&#34;
+            type: normal
+          - to_state: s_handoff
+            trigger_action: 知识库命中不足输出保守答复
+            required_evidence: &#34;检索无命中或命中低于置信阈值的记录&#34;
+            type: exception
+      - id: s_answered
+        name: 应答完成
+        description: &#34;本轮问题已答复，会话回到等待客户下一轮输入或进入下单承接&#34;
+        transitions:
+          - to_state: s_intent_routing
+            trigger_action: 客户发起下一轮问题
+            required_evidence: &#34;kf 回调收到客户新消息&#34;
+            type: normal
+      - id: s_handoff
+        name: 已转人工
+        description: &#34;转人工工单已创建并附上下文摘要，等待人工接管，AI 停止实质作答&#34;
+        transitions:
+          - to_state: s_answered
+            trigger_action: 人工处理完毕交回 AI 继续接待
+            required_evidence: &#34;handoff_ticket.status = resolved&#34;
+            type: recovery
+    guardrails:
+      - &#34;价格只能来自规则表，正品凭据只能来自知识库，禁止模型编造&#34;
+      - &#34;敏感功效问题只能走预审核白名单，白名单外一律保守+转人工&#34;
+      - &#34;知识库无命中时不允许硬答，保守答复并转人工&#34;
+      - &#34;转人工必须附「关注点+已答内容+未解决问题」摘要&#34;
+    dependency_mapping:
+      - workstream: ws_order_intake
+        condition: &#34;会话在 s_answered 状态且客户表达购买意向&#34;
+        impact: &#34;下单承接流启动，价格口径以本流规则表输出为准&#34;
+      - workstream: ws_pilot_guard
+        condition: &#34;本流产生首响超时、错价或转人工事件&#34;
+        impact: &#34;事件实时汇入试点看板，影响放量/回滚判定&#34;
+
+  - id: ws_order_intake
+    name: 下单承接流
+    description: &#34;从客户确认购买到人工完成订单要素核对的承接流，AI 只做说明、人工完成闭环&#34;
+    anchor_objects:
+      - order_intake
+      - handoff_ticket
+      - sku_spec
+    states:
+      - id: o_price_confirmed
+        name: 价格已确认
+        description: &#34;客户认可规则表输出的到手价，询问支付与发货方式&#34;
+        transitions:
+          - to_state: o_awaiting_payment
+            trigger_action: 说明支付方式与发货口径
+            required_evidence: &#34;支付/发货说明消息已按口径库发出&#34;
+            type: normal
+      - id: o_awaiting_payment
+        name: 待客户付款
+        description: &#34;客户已获支付路径（微信/支付宝），等待付款动作&#34;
+        transitions:
+          - to_state: o_screenshot_received
+            trigger_action: 接收客户付款截图与收货信息
+            required_evidence: &#34;会话中收到付款截图消息&#34;
+            type: normal
+      - id: o_screenshot_received
+        name: 付款截图待核对
+        description: &#34;已收到截图但订单未成立，必须由人工复述订单要素核对&#34;
+        transitions:
+          - to_state: o_manual_verified
+            trigger_action: 创建付款承接工单并由人工复述核对
+            required_evidence: &#34;handoff_ticket(付款承接) 已被人工接管并完成复述&#34;
+            type: normal
+          - to_state: o_intake_stalled
+            trigger_action: 检测人工接管超时
+            required_evidence: &#34;工单创建后超时无 taken_over 记录&#34;
+            type: exception
+      - id: o_manual_verified
+        name: 人工核对完成
+        description: &#34;订单要素（姓名/电话/地址/规格/金额）经人工复述确认，待发单号&#34;
+        transitions: []
+      - id: o_intake_stalled
+        name: 承接搁置
+        description: &#34;客户已付款但人工未及时接管，存在客诉与信任受损风险&#34;
+        transitions:
+          - to_state: o_manual_verified
+            trigger_action: 升级值班客服完成补接管与核对
+            required_evidence: &#34;升级提醒已发出且工单最终被人工接管&#34;
+            type: recovery
+    guardrails:
+      - &#34;AI 不得确认收款成功或宣布订单生效，只有人工核对后订单才成立&#34;
+      - &#34;订单要素必须经人工复述核对，AI 不能替客户跳过该动作&#34;
+      - &#34;发货只说时效口径（48h 发出/揽收后 1-3 天），不承诺具体到货日&#34;
+      - &#34;缺货档位（日版 15）不得进入承接流程&#34;
+    dependency_mapping:
+      - workstream: ws_presales_reply
+        condition: &#34;承接中客户追问价格/正品/风险类问题&#34;
+        impact: &#34;问题路由回售前应答流处理，承接流保持当前状态等待&#34;
+      - workstream: ws_pilot_guard
+        condition: &#34;本流完成人工核对（视为首单成交口径）&#34;
+        impact: &#34;成交数据汇入看板，支撑首单转化率计算&#34;
+
+  - id: ws_pilot_guard
+    name: 试点守护流
+    description: &#34;小流量试点下持续观察首响/转人工/错价/转化指标，决定放量或回滚的守护流&#34;
+    anchor_objects:
+      - pilot_metric
+      - customer_session
+    states:
+      - id: p_piloting
+        name: 小流量试点中
+        description: &#34;AI 仅承接小流量会话，看板按周汇总首响、自动接待率、错价与转化数据&#34;
+        transitions:
+          - to_state: p_scale_up
+            trigger_action: 确认连续观察期指标达标后放量
+            required_evidence: &#34;转化率稳定于 9%~10% 健康区间且错价为零&#34;
+            type: normal
+          - to_state: p_rollback
+            trigger_action: 触发回滚判定
+            required_evidence: &#34;转化率连续两周低于健康区间，或出现错价事故&#34;
+            type: exception
+      - id: p_scale_up
+        name: 已放量
+        description: &#34;试点验证通过，扩大 AI 承接流量比例，看板继续按周守护&#34;
+        transitions:
+          - to_state: p_rollback
+            trigger_action: 放量后触发回滚判定
+            required_evidence: &#34;放量期转化率连续两周低于健康区间&#34;
+            type: exception
+      - id: p_rollback
+        name: 已回滚
+        description: &#34;AI 承接比例回退至人工为主，复盘错价/流失根因后再评估重启&#34;
+        transitions:
+          - to_state: p_piloting
+            trigger_action: 完成根因修复后重启小流量试点
+            required_evidence: &#34;复盘报告与知识库/规则表修复记录&#34;
+            type: recovery
+    guardrails:
+      - &#34;转化率连续两周低于健康区间（9%~10%）必须回滚，不得侥幸续跑&#34;
+      - &#34;指标未经连续观察期验证不得放量&#34;
+      - &#34;出现错价事故须当日复盘，不等周度汇总&#34;
+      - &#34;回滚决策以看板口径为准，不接受个案好评作为放量依据&#34;
+    dependency_mapping:
+      - workstream: ws_presales_reply
+        condition: &#34;守护流进入 p_rollback 状态&#34;
+        impact: &#34;售前应答流 AI 承接范围收缩，会话优先路由人工&#34;
+      - workstream: ws_order_intake
+        condition: &#34;守护流进入 p_scale_up 状态&#34;
+        impact: &#34;承接流会话量随放量上升，需同步扩充人工核对班次&#34;
+</pre>
+      </div>
+    </div>
+
+  </div><!-- /tab-prompt -->
+
+</div><!-- /page-wrap -->
+
+<div class="toast" id="toast">已复制到剪贴板</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  // Initialize Mermaid with custom configuration
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'loose',
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'Plus Jakarta Sans, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      lineColor: '#CBD5E1',
+      primaryColor: '#EFF6FF',
+      primaryTextColor: '#1D4ED8',
+      primaryBorderColor: '#3B82F6',
+      secondaryColor: '#F5F3FF',
+      tertiaryColor: '#FFF7ED',
+      edgeLabelBackground: '#FFFFFF'
+    }
+  });
+
+  let mermaidInitialized = false;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Render objects relationship graph immediately on page load
+    mermaid.init(undefined, '#mermaid-relationships');
+  });
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('tab-btn-' + name).classList.add('active');
+
+    // Render Mermaid diagrams lazily when the tab becomes active and visible
+    if (name === 'states' && !mermaidInitialized) {
+      setTimeout(() => {
+        mermaid.init(undefined, '.tab-panel#tab-states .mermaid');
+        mermaidInitialized = true;
+      }, 50);
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2500);
+  }
+
+  function copyYAML() {
+    const text = document.getElementById('raw-yaml-content').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => showToast('✅ YAML 已复制'));
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById('agent-prompt-content').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => showToast('✅ Prompt 已复制'));
+  }
+</script>
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-政策规则数据清单.html"><div class="dir">← 上一步 · 附录</div><div class="t">⊕ 数据清单</div><div class="d">前承：真实业务数据底稿：19 位客户语料 + 16 档全规格价格 + 验真/物流/支付口径</div></a><a class="navcard next" href="私域电商售前客服-测试用例集.html"><div class="dir">下一步 · 附录 →</div><div class="t">⊕ 测试用例</div><div class="d">后启：三层三类 MVP 验证集：30 条用例（Golden 50% / Hard 30% / Edge 20%）+ 本体遗漏检查</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>
