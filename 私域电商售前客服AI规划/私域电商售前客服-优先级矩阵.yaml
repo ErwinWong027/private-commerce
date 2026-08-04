@@ -1,314 +1,107 @@
-title: "保健品私域电商售前客服 AI 优先级矩阵（收益 × 成本 · 16 个 RAG 机会评分）"
-
-# 第 6 步 · 承接⑤AI场景地图的 16 个机会，按「收益积 / 成本和」打分排序
+# 第 6 步 · 保健品私域电商全链路AI优先级矩阵（业务级 · 4个独立价值机会评分）
+# 承接⑤AI场景地图的4个独立AI机会，按「收益积 / 成本和」打分排序
 # 收益(1-5): userCount 覆盖客户面 × usageFrequency 使用频次 × businessValue 业务价值
 # 成本(1-5): dataComplexity 数据 + aiDesignComplexity AI设计 + integrationComplexity 集成 + knowledgeComplexity 知识工程
 # type 用于路线图分组：repetitive 重复性 / cognitive 认知性 / innovation 创新性
 # dependencies 供第 7 步里程碑做「被依赖者前置」排序
+#
+# 机会粒度铁律：每个机会 = 可独立立项、独立交付、独立完成业务闭环的增量价值单元，非功能点或约束
+# 结构变更（v7）：原O3合规话术库红线守护=O1的critical级合规护栏module；原O4真人话术拟合=O1的持续调优module。二者从属O1不单列。
+# 结构变更（v8）：移除原O1 AI引流钩子A/B测试优化（经审视属API+看板+数据分析，非AI机会）；
+#                原O2→O1, 原O3→O2, 原O4→O3, 原O5→O4。机会数量5→4。
+
+title: "保健品私域电商全链路AI优先级矩阵（业务级·4个独立价值机会）"
 
 useCases:
-  - id: "C1"
-    name: "7×24 秒级自动首响"
-    type: "repetitive"
-    business_stage: "引流承接·加好友"
-    pain_points: "夜间首响>8小时、加粉30分钟黄金窗口错过、流量在等待中冷却流失"
-    ai_capabilities: "企微 kf 通道消息回调 + RAG 秒级检索应答"
-    expected_value: "全时段首响≤10秒，夜间承接率100%"
+  - id: "O1"
+    name: "7×24 RAG自动接待（含合规护栏+持续调优）"
+    type: "innovation"
+    business_stage: "售前客服1v1咨询"
+    pain_points: "夜间35%~45%咨询积压首响>8小时；正品/版本/算账等标准化问题占75%~85%反复人工回答；新人培训30天；人工心算易错价；功效类长尾问题合规风险最高（最高罚100万~200万元）；自动回复机器感强影响转化"
+    ai_capabilities: "RAG秒级检索应答+确定性规则算账+问题链引导澄清+未命中兜底转人工+合规话术库红线守护（critical级约束module）+真人话术拟合与持续调优（上线后迭代module）+真实会话回流扩库"
+    expected_value: "首响≤10秒、接待成本降50%、零夜班覆盖全时段、新人培训30天→7天、守住10%转化水位、红线事件0起（规避100万~200万元罚款）、真人拟合度≥90%客户无机器感、自动接待率随交付周期持续爬升"
     userCount: 5
     usageFrequency: 5
     businessValue: 5
-    dataComplexity: 2
-    aiDesignComplexity: 3
-    integrationComplexity: 3
-    knowledgeComplexity: 2
-    dependencies: ["kf 通道接入与消息回调打通", "RAG 平台与基础知识库"]
-    key_assumptions: "员工号/ kf 通道风险已与客户确认并选定"
-    validation_needed: "kf 通道回调时延、首响达标率"
+    dataComplexity: 5
+    aiDesignComplexity: 5
+    integrationComplexity: 4
+    knowledgeComplexity: 5
+    dependencies: ["kf通道接入与消息回调", "RAG平台与基础知识库", "正品溯源库/商品库/促销规则库建设", "预审核合规话术库建设（法务参与，critical）", "会话存档API开通与合规取数（持续调优阶段）"]
+    key_assumptions: "kf通道风险已与客户确认并选定；合规语料可经法务预审核入库；会话存档已开通且可合规用于训练"
+    validation_needed: "首响达标率、自动接待率、转化率守护基线、错价事件数、功效红线事件数、双盲抽检拟合度评分"
+    risk_control: "价格/优惠结果禁止大模型独立计算；发货时效禁止推测；功效表述禁止自由生成，仅检索预审核合规语料"
+    scoring_note: "合并合规护栏+持续调优后成本升高（数据/AI设计/知识工程均满格），分数不高，但O1是售前客服AI化核心立项与全链路转化引擎，不纯按分数排期须最先具备"
 
-  - id: "C2"
-    name: "夜间咨询全自动接待"
+  - id: "O2"
+    name: "智能支付承接与订单自动核对"
     type: "repetitive"
-    business_stage: "引流承接·加好友"
-    pain_points: "夜间咨询占 35%~45%，现状零接待，次日集中回复已脱离冲动情境"
-    ai_capabilities: "RAG 全流程独立应答 + 未命中挂起次日跟进"
-    expected_value: "零夜班编制覆盖全部非工作时段流量"
-    userCount: 4
-    usageFrequency: 4
-    businessValue: 5
-    dataComplexity: 2
-    aiDesignComplexity: 3
-    integrationComplexity: 3
-    knowledgeComplexity: 3
-    dependencies: ["C1 7×24 秒级自动首响", "C4 正品溯源与版本应答"]
-    key_assumptions: "核心问答知识库已覆盖夜间高频问题"
-    validation_needed: "夜间自动接待完成率与转人工率"
-
-  - id: "C3"
-    name: "来源自动打标与个性化开场"
-    type: "repetitive"
-    business_stage: "引流承接·加好友"
-    pain_points: "手动打标高峰漏打，无法按直播场次匹配促销口径"
-    ai_capabilities: "渠道活码自动打标（采购 SCRM/企微原生，不自建）"
-    expected_value: "标签完整性 100%，开场口径与场次一致"
-    userCount: 5
-    usageFrequency: 5
-    businessValue: 2
-    dataComplexity: 2
-    aiDesignComplexity: 1
-    integrationComplexity: 2
-    knowledgeComplexity: 1
-    dependencies: ["渠道活码/SCRM 采购接入"]
-    key_assumptions: "企微原生/SCRM 打标能力可直接采购"
-    validation_needed: "打标准确率、场次口径映射正确率"
-
-  - id: "C4"
-    name: "正品溯源与版本应答"
-    type: "repetitive"
-    business_stage: "询价·需求澄清"
-    pain_points: "标品信任逻辑首位高频问题；正品凭据/授权链路散落，新客服口径不一"
-    ai_capabilities: "检索正品溯源库（资质文号/授权链路/防伪/版本差异）标准化应答"
-    expected_value: "统一正品信任口径，消除回答含糊导致的流失"
-    userCount: 5
-    usageFrequency: 5
-    businessValue: 5
-    dataComplexity: 3
-    aiDesignComplexity: 3
-    integrationComplexity: 2
-    knowledgeComplexity: 3
-    dependencies: ["正品溯源库/商品库建设", "RAG 平台与基础知识库"]
-    key_assumptions: "SKU 资质与授权链路资料可获取且合规"
-    validation_needed: "正品问答命中率与口径一致性"
-
-  - id: "C5"
-    name: "需求澄清问题链自动引导"
-    type: "cognitive"
-    business_stage: "询价·需求澄清"
-    pain_points: "澄清靠个人经验，新人漏问关键条件，会话轮次拉长"
-    ai_capabilities: "检索结构化问题链知识库逐步引导确认适配款"
-    expected_value: "老客服澄清经验产品化，消除水平参差"
+    business_stage: "下单支付"
+    pain_points: "支付方式引导不清导致最后一步流失；付款截图确认依赖人工高峰期漏接引发信任危机；地址核对易出错"
+    ai_capabilities: "标准化支付引导+付款截图自动识别+订单要素自动核对确认"
+    expected_value: "支付完成率提升、付款漏接率归零、订单核对错误率降为0"
     userCount: 4
     usageFrequency: 4
     businessValue: 4
     dataComplexity: 3
-    aiDesignComplexity: 4
-    integrationComplexity: 2
-    knowledgeComplexity: 4
-    dependencies: ["C4 正品溯源与版本应答", "问题链知识工程"]
-    key_assumptions: "老客服澄清逻辑可被结构化沉淀"
-    validation_needed: "澄清完成率、推荐准确率"
-
-  - id: "C6"
-    name: "合规话术库应答功效类长尾"
-    type: "cognitive"
-    business_stage: "询价·需求澄清"
-    pain_points: "低频长尾但合规风险最高；夜间/大促违规话术高发，最高罚 100 万~200 万元"
-    ai_capabilities: "仅检索预审核合规话术库生成回答，库内无答案即转人工"
-    expected_value: "回答合规稳定，功效红线事件 0 起"
-    userCount: 2
-    usageFrequency: 2
-    businessValue: 5
-    dataComplexity: 3
     aiDesignComplexity: 3
-    integrationComplexity: 2
-    knowledgeComplexity: 5
-    dependencies: ["预审核合规话术库建设", "C15 未命中兜底转人工机制"]
-    key_assumptions: "合规语料可经法务预审核入库"
-    validation_needed: "功效红线事件数、越界拦截率"
+    integrationComplexity: 4
+    knowledgeComplexity: 2
+    dependencies: ["订单系统API对接", "付款截图识别能力"]
+    key_assumptions: "订单系统提供可对接API"
+    validation_needed: "支付完成率、漏接率、核对准确率"
 
-  - id: "C7"
-    name: "真人话术拟合应答"
-    type: "innovation"
-    business_stage: "询价·需求澄清"
-    pain_points: "自动回复机器感强，卖货感不足影响转化"
-    ai_capabilities: "基于会话存档金牌客服语料调优应答风格"
-    expected_value: "真人拟合度≥90%，客户无明显机器感"
-    userCount: 5
-    usageFrequency: 5
+  - id: "O3"
+    name: "物流查询自动化与时效确定性承诺"
+    type: "repetitive"
+    business_stage: "物流发货履约"
+    pain_points: "物流状态跨系统人工查询手动复述重复劳动；夜间物流咨询无人应答；发货时效凭感觉承诺说错引发客诉"
+    ai_capabilities: "订单物流数据源实时查询+确定性时效承诺话术生成"
+    expected_value: "7×24即时应答替代人工查单复述、时效客诉消除、释放售前精力"
+    userCount: 4
+    usageFrequency: 4
     businessValue: 3
+    dataComplexity: 3
+    aiDesignComplexity: 2
+    integrationComplexity: 4
+    knowledgeComplexity: 2
+    dependencies: ["订单/物流数据源API对接"]
+    key_assumptions: "物流系统提供可对接API"
+    validation_needed: "查询成功率与时延、时效承诺一致率"
+    risk_control: "发货时效承诺禁止大模型推测，必须以订单系统返回值为准"
+
+  - id: "O4"
+    name: "AI复购周期预测与精准唤回"
+    type: "cognitive"
+    business_stage: "复购与私域运营"
+    pain_points: "复购靠人工经验无预测大量老客自然流失；沉睡客户无系统化唤回；复购率仅35%LTV主体增量流失"
+    ai_capabilities: "复购周期预测模型+沉睡客户分群+个性化唤回策略"
+    expected_value: "复购率35%→45%、月均复购频次1.8→2.5次、LTV主体增量（复购贡献占比60%+）"
+    userCount: 4
+    usageFrequency: 3
+    businessValue: 5
     dataComplexity: 5
     aiDesignComplexity: 5
     integrationComplexity: 3
     knowledgeComplexity: 4
-    dependencies: ["会话存档 API 开通与合规取数", "核心应答机会上线积累语料"]
-    key_assumptions: "会话存档已开通且可合规用于训练"
-    validation_needed: "双盲抽检拟合度评分"
-
-  - id: "C8"
-    name: "商品库检索版本对比应答"
-    type: "repetitive"
-    business_stage: "商品对比"
-    pain_points: "人工翻资料复制粘贴，耗时错漏，不同客服讲法不一致"
-    ai_capabilities: "检索商品库自动生成结构化版本对比结论"
-    expected_value: "秒级替代人工翻资料，全渠道口径一致"
-    userCount: 4
-    usageFrequency: 4
-    businessValue: 4
-    dataComplexity: 3
-    aiDesignComplexity: 2
-    integrationComplexity: 3
-    knowledgeComplexity: 3
-    dependencies: ["C4 正品溯源与版本应答", "商品库结构化"]
-    key_assumptions: "SKU/版本/规格/价格数据可结构化入库"
-    validation_needed: "对比结论准确率与口径一致性"
-
-  - id: "C9"
-    name: "适配版本推荐应答"
-    type: "cognitive"
-    business_stage: "商品对比"
-    pain_points: "推荐质量取决于客服个人水平，参差不齐"
-    ai_capabilities: "基于澄清信息检索商品库匹配适配版本，合规话术给推荐理由"
-    expected_value: "推荐口径与资质范围严格一致"
-    userCount: 3
-    usageFrequency: 3
-    businessValue: 4
-    dataComplexity: 3
-    aiDesignComplexity: 4
-    integrationComplexity: 2
-    knowledgeComplexity: 3
-    dependencies: ["C5 需求澄清问题链", "C8 商品库检索版本对比"]
-    key_assumptions: "澄清信息足以支撑适配推荐"
-    validation_needed: "推荐采纳率与合规性"
-
-  - id: "C10"
-    name: "促销规则库确定性算账"
-    type: "repetitive"
-    business_stage: "促销算账"
-    pain_points: "人工心算易错价，规则随场变动记不全，错价引发客诉赔付"
-    ai_capabilities: "检索结构化促销规则库确定性计算到手价，大模型仅润色"
-    expected_value: "秒级算账、杜绝错价、口径全渠道一致"
-    userCount: 4
-    usageFrequency: 4
-    businessValue: 5
-    dataComplexity: 3
-    aiDesignComplexity: 3
-    integrationComplexity: 3
-    knowledgeComplexity: 3
-    dependencies: ["促销规则库建设", "RAG 平台与基础知识库"]
-    key_assumptions: "促销规则可结构化入库并随场更新"
-    validation_needed: "算账准确率（须 100%）、错价事件数"
-
-  - id: "C11"
-    name: "合规凑单建议应答"
-    type: "cognitive"
-    business_stage: "促销算账"
-    pain_points: "凑单靠人工估算，高峰期压力大"
-    ai_capabilities: "基于满减门槛给凑单组合建议与到手价"
-    expected_value: "透明方案对比助客户自主决策，不做压迫式推销"
-    userCount: 3
-    usageFrequency: 3
-    businessValue: 3
-    dataComplexity: 2
-    aiDesignComplexity: 3
-    integrationComplexity: 2
-    knowledgeComplexity: 3
-    dependencies: ["C10 促销规则库确定性算账"]
-    key_assumptions: "凑单建议不构成误导性营销"
-    validation_needed: "凑单建议采纳率与合规性"
-
-  - id: "C12"
-    name: "物流状态自动查询应答"
-    type: "repetitive"
-    business_stage: "下单·发货跟进"
-    pain_points: "人工跨系统查单手动复述，夜间物流咨询无人应答"
-    ai_capabilities: "对接订单/物流数据源实时查询并自动回复轨迹"
-    expected_value: "7×24 即时应答替代人工查询复述"
-    userCount: 4
-    usageFrequency: 4
-    businessValue: 3
-    dataComplexity: 3
-    aiDesignComplexity: 2
-    integrationComplexity: 4
-    knowledgeComplexity: 2
-    dependencies: ["订单/物流数据源 API 对接"]
-    key_assumptions: "订单/物流系统提供可对接 API"
-    validation_needed: "查询成功率与时延"
-
-  - id: "C13"
-    name: "发货时效确定性承诺"
-    type: "cognitive"
-    business_stage: "下单·发货跟进"
-    pain_points: "发货时效凭感觉承诺，说错引发客诉"
-    ai_capabilities: "基于订单系统确定性时效数据生成承诺话术"
-    expected_value: "时效承诺与履约一致，消除凭感觉承诺客诉"
-    userCount: 3
-    usageFrequency: 3
-    businessValue: 3
-    dataComplexity: 3
-    aiDesignComplexity: 2
-    integrationComplexity: 4
-    knowledgeComplexity: 2
-    dependencies: ["C12 物流状态自动查询", "订单/物流数据源 API 对接"]
-    key_assumptions: "订单系统可返回确定性时效"
-    validation_needed: "承诺与实际履约一致率"
-
-  - id: "C14"
-    name: "转化率守护监测"
-    type: "innovation"
-    business_stage: "全流程·兜底与守护"
-    pain_points: "AI 接管可能拉低约 10% 的正常转化水位"
-    ai_capabilities: "按周监测 AI 接管组与人工对照组转化率差异，触发回滚"
-    expected_value: "守护约 10% 水位不下降，自动化收益不以转化为代价"
-    userCount: 5
-    usageFrequency: 2
-    businessValue: 5
-    dataComplexity: 3
-    aiDesignComplexity: 2
-    integrationComplexity: 3
-    knowledgeComplexity: 2
-    dependencies: ["C1/C4/C10 核心应答机会上线", "转化率数据看板"]
-    key_assumptions: "转化率统计口径已确认可对照"
-    validation_needed: "对照实验显著性、回滚触发准确率"
-
-  - id: "C15"
-    name: "未命中兜底转人工机制"
-    type: "innovation"
-    business_stage: "全流程·兜底与守护"
-    pain_points: "RAG 未命中/客户点名人工时接管摩擦大"
-    ai_capabilities: "低置信度自动转接人工并附上下文摘要，未命中入补录队列"
-    expected_value: "全流程唯一人工触点零摩擦——不设真人在环审核的成立前提"
-    userCount: 5
-    usageFrequency: 3
-    businessValue: 5
-    dataComplexity: 2
-    aiDesignComplexity: 3
-    integrationComplexity: 3
-    knowledgeComplexity: 2
-    dependencies: ["RAG 平台与基础知识库", "置信度阈值与转接链路"]
-    key_assumptions: "人工兜底坐席可承接转接量"
-    validation_needed: "转接准确率、上下文完整率"
-
-  - id: "C16"
-    name: "真实会话回流调优"
-    type: "cognitive"
-    business_stage: "全流程·兜底与守护"
-    pain_points: "知识不积累，同类未命中问题反复消耗人力"
-    ai_capabilities: "FDE 基于真实会话未命中与低拟合回答持续扩库调优"
-    expected_value: "自动接待率与真人拟合度随交付周期持续爬升"
-    userCount: 5
-    usageFrequency: 2
-    businessValue: 3
-    dataComplexity: 4
-    aiDesignComplexity: 3
-    integrationComplexity: 2
-    knowledgeComplexity: 4
-    dependencies: ["C15 未命中兜底转人工机制", "会话存档 API 开通与合规取数"]
-    key_assumptions: "未命中日志可回流并合规使用"
-    validation_needed: "知识库覆盖率增速、兜底率收敛趋势"
+    dependencies: ["CRM数据打通", "客户全生命周期数据", "会员体系与唤回策略设计"]
+    key_assumptions: "客户交易历史与行为数据可整合"
+    validation_needed: "复购率提升、唤回成交率、LTV增量"
 
 insights:
-  - "Quick Win（高收益低成本，优先落地）：C1 7×24秒级自动首响、C4 正品溯源与版本应答、C3 来源自动打标——三者构成『接得住 + 答得准正品 + 打得对标签』的自动接待地基"
-  - "标品信任逻辑决定优先级：C4 正品溯源与版本应答收益满格（客户只问正品/版本，是首位高频问题），应与首响同批上线"
-  - "确定性优先：C10 促销规则库算账与 C12 物流查询属确定性检索类，收益高且技术边界清晰，是重复性机会中的高性价比项"
-  - "合规特例：C6 合规话术库应答功效长尾优先级分数低（低频长尾），但业务价值满格且属合规 critical——不按分数排期，须与核心问答同批建库上线，作为红线守门"
-  - "成立前提先行：C15 未命中兜底转人工机制是『不设真人在环』的前提，几乎被所有机会依赖，必须最先具备（虽非最高分，但为依赖根节点）"
-  - "创新类后置：C7 真人话术拟合、C16 会话回流调优依赖会话存档语料与上线后数据积累，属持续调优阶段，不宜前置"
-  - "守护不可省：C14 转化率守护监测须在核心应答上线的同批部署，作为放量闸门，守住约 10% 正常水位"
+  - "核心转化引擎不纯按分数排期：O1 7×24 RAG自动接待（6.58分）合并合规护栏+持续调优后成本升高，但它是售前客服AI化核心立项与全链路转化引擎，须最先具备。其上线阶段（M2-M3）含合规护栏critical module，持续调优module（M4-M6）后置迭代"
+  - "售前客服环节1个独立机会：O1 RAG自动接待内含合规护栏（critical约束module，上线即具备）+真人话术拟合（持续调优module，上线后迭代），二者无独立用户场景与独立交付，从属O1不单列机会"
+  - "业务级优先级分布：售前客服环节1个机会O1（含合规护栏+持续调优）构成AI化核心；复购运营O4是LTV主体增量的第二切入群（远期）；支付O2与物流O3是下单履约环节扩面"
+  - "LTV全链路覆盖：4个机会覆盖LTV公式——O1守住首单贡献（含合规护栏规避罚款风险）、O2提升支付完成率、O3守护履约体验、O4放大复购贡献（主体增量）"
+  - "远期增量：O4复购周期预测是LTV主体增量机会，但数据与模型复杂度满格，属远期规划，不影响售前客服AI助手项目级交付"
+  - "成立前提先行：O1 RAG自动接待是全链路核心，其持续调优module依赖上线后语料积累，须分阶段交付（上线M2-M3 → 持续调优M4-M6）"
+  - "引流获客环节无AI机会：引流钩子A/B测试+转化归因属API+看板+数据分析（运营工具），非AI机会，不列入本矩阵"
 
-priority_recommendation: "第一梯队（地基）：C15 兜底机制 + C1 首响 + C4 正品应答 + C3 打标 + C10 促销算账 + C6 合规话术库 + C14 转化率守护；第二梯队（扩面）：C2 夜间接待 + C8 版本对比 + C5 需求澄清 + C12 物流查询；第三梯队（提质）：C9 适配推荐 + C11 凑单建议 + C13 发货时效 + C7 真人拟合 + C16 回流调优"
+priority_recommendation: "第一梯队（业务级地基）：O1 RAG自动接待（含合规护栏同批上线）；第二梯队（全链路扩面）：O2支付承接 + O3物流查询；远期（LTV增量）：O4复购周期预测。O1持续调优module（真人拟合+回流扩库）在O1上线后M4-M6迭代。⑧产品画布从第一梯队中选取售前客服环节O1作为项目级交付展开"
 
 scoring_criteria:
   benefit: "userCount 覆盖客户面 × usageFrequency 使用频次 × businessValue 业务价值，均为 1-5"
   cost: "dataComplexity + aiDesignComplexity + integrationComplexity + knowledgeComplexity，均为 1-5"
   priority: "priorityScore = 收益积 / 成本和，分数越高越优先"
 
-dependencies_summary: "依赖根节点：RAG 平台+基础知识库、kf 通道接入、C15 兜底机制；数据依赖：会话存档（C7/C16）、订单物流 API（C12/C13）、促销规则库（C10/C11）、正品溯源/商品库（C4/C8/C9）；被依赖者须前置——第 7 步里程碑据此排期"
+dependencies_summary: "依赖根节点：RAG平台+基础知识库、kf通道接入、四大知识库（正品/合规/促销/商品）、会话存档API（O1持续调优）；数据依赖：订单物流API（O2/O3）、CRM数据（O4）；被依赖者须前置——第7步里程碑据此排期"

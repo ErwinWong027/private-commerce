@@ -538,7 +538,7 @@ const msgInput = document.getElementById("msgInput");
 let turn = 0;
 
 function esc(s){ return String(s === null || s === undefined ? "" : s)
-  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  .replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">"); }
 
 function addBubble(role, text, isHuman){
   const wrap = document.createElement("div");

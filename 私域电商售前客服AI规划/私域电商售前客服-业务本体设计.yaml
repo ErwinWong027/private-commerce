@@ -210,7 +210,7 @@ entities:
     attributes:
       - name: conversion_rate
         type: number
-        description: 高意向客户首单转化率（NSM，健康区间 9%~10%）
+        description: 高意向客户首单转化率（售前守护指标，健康区间 9%~10%；业务级NSM为LTV）
       - name: auto_serve_rate
         type: number
         description: RAG 自动接待率（目标 ≥80%）

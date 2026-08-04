@@ -167,7 +167,6 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       flex: 1;
-      min-height: 0;
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow-sm);
@@ -229,21 +228,6 @@
       color: var(--color-foreground);
       line-height: 1.6;
       flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-    }
-
-    .card-body::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .card-body::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.35);
-      border-radius: 999px;
-    }
-
-    .card-body::-webkit-scrollbar-track {
-      background: transparent;
     }
 
     .card-body ul, .card-body ol {
@@ -294,7 +278,7 @@
 <body>
 <!-- ai4pm-nav-top-start -->
 <style>
-.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;align-self:center;}
 .ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
 .ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
 .ai4pm-nav-top .idx:hover{background:#1B2B47;}
@@ -303,7 +287,7 @@
 .ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
 .ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
 .ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
-.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;align-self:center;width:85%;}
 .ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
 .ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
 .ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
@@ -314,17 +298,7 @@
 .ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
 @media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
 </style>
-<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
-
-
-
-
-
-
-
-
-
-
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
 
   
   
@@ -370,9 +344,9 @@
             <ul>
               
                 <li><span class="bullet"></span>进入企微私域咨询的潜在下单客户（直播、短视频、投流加粉后进入 1v1）</li>
-
+              
                 <li><span class="bullet"></span>售前客服（从全程手工回复转为兜底接管与异常处理）</li>
-
+              
                 <li><span class="bullet"></span>运营/店长（负责活动口径、试点范围与转化守护）</li>
               
             </ul>
@@ -393,13 +367,13 @@
             <ul>
               
                 <li><span class="bullet"></span>客户刚进线时等回复太久，第一轮信任没有建立起来就流失</li>
-
+              
                 <li><span class="bullet"></span>客户最常卡在「是不是正品」「为什么这个版本更贵」「渠道靠不靠谱」这些成交前问题</li>
-
+              
                 <li><span class="bullet"></span>活动价、满减、赠品规则靠客服临时心算，容易错价、说错口径</li>
-
+              
                 <li><span class="bullet"></span>涉及功效、安全、适用人群时容易越界，踩广告合规红线</li>
-
+              
                 <li><span class="bullet"></span>AI 回答不确定时如果不能顺滑转人工，客户会觉得被机器人敷衍</li>
               
             </ul>
@@ -423,9 +397,9 @@
             <ul>
               
                 <li><span class="bullet"></span>客户在企微发出的高频售前问题（如「这是正品吗」「现在买多少钱」「有什么活动」「转人工」）</li>
-
+              
                 <li><span class="bullet"></span>客户提及的 SKU、版本、规格、活动场次或直播来源</li>
-
+              
                 <li><span class="bullet"></span>客户点名人工、敏感功效词、连续追问等风险信号</li>
               
             </ul>
@@ -445,11 +419,11 @@
             <ul>
               
                 <li><span class="bullet"></span>正品溯源与商品库：资质文号、授权链路、防伪方式、SKU/版本/规格差异</li>
-
+              
                 <li><span class="bullet"></span>促销规则库：满减、赠品、组合价、限购、有效期、不同场次口径</li>
-
-                <li><span class="bullet"></span>预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料</li>
-
+              
+                <li><span class="bullet"></span>预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料（O1合规护栏critical module的基石）</li>
+              
                 <li><span class="bullet"></span>转人工规则与试点看板口径：什么情况必须转人工、如何判断转化不下降</li>
               
             </ul>
@@ -473,15 +447,15 @@
             <ol>
               
                 <li><span class="number-bullet">1.</span>秒级首响：客户进入企微后先收到欢迎语与第一轮承接回复，避免冷场流失</li>
-
+              
                 <li><span class="number-bullet">2.</span>意图分流：识别是正品信任问题、价格促销问题，还是需要转人工/敏感问题</li>
-
+              
                 <li><span class="number-bullet">3.</span>正品信任应答：检索正品溯源与商品库，给出凭据、版本差异与验真指引</li>
-
+              
                 <li><span class="number-bullet">4.</span>确定性算账：命中促销问题时调用规则库输出到手价与活动说明，大模型只做话术组织</li>
-
-                <li><span class="number-bullet">5.</span>合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工</li>
-
+              
+                <li><span class="number-bullet">5.</span>合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工（O1合规护栏critical module）</li>
+              
                 <li><span class="number-bullet">6.</span>试点守护：记录首响、转人工、错价、转化等指标，按小流量试点判断是否继续放量</li>
               
             </ol>
@@ -501,7 +475,7 @@
             <ul>
               
                 <li><span class="bullet"></span>核心编排：通用大模型负责首响话术、意图识别、知识检索后的自然语言组织与转人工摘要</li>
-
+              
                 <li><span class="bullet"></span>硬约束：正品凭据只能来自知识库，价格只能来自规则库，敏感功效只能来自合规白名单，三类内容都不允许自由编造</li>
               
             </ul>
@@ -525,7 +499,7 @@
             <ul>
               
                 <li><span class="bullet"></span>企微对话中的欢迎语、正品凭据说明、版本差异说明、活动到手价与活动解释</li>
-
+              
                 <li><span class="bullet"></span>命中不足时的保守答复、转人工提示，以及供人工接手的上下文摘要</li>
               
             </ul>
@@ -545,11 +519,11 @@
             <ul>
               
                 <li><span class="bullet"></span>企微微信客服（kf 账号）API 消息回调、代发与人工接管</li>
-
+              
                 <li><span class="bullet"></span>RAG 平台与正品溯源/商品/合规话术知识库</li>
-
+              
                 <li><span class="bullet"></span>促销规则计算模块（可先用结构化规则表或 Mock 数据实现）</li>
-
+              
                 <li><span class="bullet"></span>基础埋点与试点看板（首响、转人工、错价、转化）</li>
               
             </ul>
@@ -573,9 +547,9 @@
             <ul>
               
                 <li><span class="bullet"></span>企微侧可直接演示的 AI 售前助手 Demo：先接待、再答疑、再算价，必要时转人工</li>
-
+              
                 <li><span class="bullet"></span>演示目标是跑通最小售前转化闭环，不追求一次性覆盖全部售前与售后场景</li>
-
+              
                 <li><span class="bullet"></span>风险边界：优先走 kf 官方通道；价格按规则表输出；敏感功效不自由生成；库内无答案即转人工</li>
               
             </ul>
@@ -595,13 +569,13 @@
             <ul>
               
                 <li><span class="bullet"></span>接得住：客户进入企微就能秒级收到回复，不错过第一轮成交窗口</li>
-
+              
                 <li><span class="bullet"></span>答得准：正品信任问题统一口径，减少因为解释含糊带来的流失</li>
-
+              
                 <li><span class="bullet"></span>算得清：活动价和到手价能快速说清楚，减少错价客诉与犹豫</li>
-
+              
                 <li><span class="bullet"></span>转得顺：AI 不确定时不会硬答，而是把上下文整理好交给人工</li>
-
+              
                 <li><span class="bullet"></span>守得住：通过小流量试点先验证转化不下降，再决定是否放量</li>
               
             </ul>
@@ -609,20 +583,6 @@
         </div>
       </div>
       
-    </div>
-
-    <div style="padding: 0 40px 32px 40px;">
-      <div style="border: 1px solid var(--color-border); border-left: 4px solid var(--color-warning); border-radius: var(--radius-md); background: #fffaf0; padding: 20px 24px;">
-        <div style="font-size: 18px; font-weight: 700; color: var(--color-primary); margin-bottom: 8px;">本次未做 / 后续开发</div>
-        <div style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px;">为了保证 Demo 聚焦“最小售前转化闭环”，以下内容本次明确不纳入演示范围：</div>
-        <ul style="list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--color-foreground); line-height: 1.7;">
-          <li>1. 夜间全自动接待（C2）与来源自动打标（C3）本次不作为演示闭环核心。</li>
-          <li>2. 需求澄清、适配推荐、凑单建议（C5 / C9 / C11）本次不做。</li>
-          <li>3. 物流查询与发货时效（C12 / C13）属于售后/履约侧，本次不纳入。</li>
-          <li>4. 真人话术拟合与会话回流调优（C7 / C16）留到后续优化阶段。</li>
-          <li>5. 多渠道全量上线、复杂后台运营台与长期数据治理本次不做。</li>
-        </ul>
-      </div>
     </div>
   </div>
 
@@ -633,8 +593,14 @@
   <div class="toast" id="toast">已成功复制 YAML 数据</div>
   
   <script type="application/yaml" id="raw-yaml">
+# 第 8 步 · 售前客服AI助手产品画布（项目级）
+# 本画布是项目级交付物，从业务级⑥优先级矩阵与⑦里程碑中选取售前客服环节展开。
+# 业务级④-⑦覆盖保健品私域电商全链路5环节4个独立AI机会（O1-O4）；
+# 本画布聚焦售前客服环节的O1（7×24 RAG自动接待）核心机会展开，
+# 包含O1的上线modules（正品答疑/版本对比/促销算账/需求澄清/转人工/合规护栏critical），
+# 是能完成售前转化业务闭环的最小演示产品。O1持续调优module（真人拟合+回流扩库）留到后续优化阶段。
 title: 售前转化闭环 Demo · 企微 AI 售前助手
-description: 面向保健品私域售前的最小演示闭环产品画布。客户进入企微后，AI 先完成秒级接待，再围绕「是不是正品 / 现在活动价怎么算 / 需不需要转人工」三类高频决策问题完成自动回复；一旦碰到敏感功效、低置信度或客户点名人工，即无摩擦转接，并用转化守护看板观察小流量试点是否稳定。
+description: 项目级产品画布——从业务级⑥⑦中选取售前客服环节O1展开。面向保健品私域售前的最小演示闭环。客户进入企微后，AI 先完成秒级接待，再围绕「是不是正品 / 现在活动价怎么算 / 需不需要转人工」三类高频决策问题完成自动回复；一旦碰到敏感功效、低置信度或客户点名人工，即无摩擦转接，并用转化守护看板观察小流量试点是否稳定。O1的合规护栏module（critical级）与上线同批，持续调优module（真人拟合）留到后续。
 userRoles:
   - 进入企微私域咨询的潜在下单客户（直播、短视频、投流加粉后进入 1v1）
   - 售前客服（从全程手工回复转为兜底接管与异常处理）
@@ -652,14 +618,14 @@ aiInput:
 dataKnowledge:
   - 正品溯源与商品库：资质文号、授权链路、防伪方式、SKU/版本/规格差异
   - 促销规则库：满减、赠品、组合价、限购、有效期、不同场次口径
-  - 预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料
+  - 预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料（O1合规护栏critical module的基石）
   - 转人工规则与试点看板口径：什么情况必须转人工、如何判断转化不下降
 workflow:
   - 秒级首响：客户进入企微后先收到欢迎语与第一轮承接回复，避免冷场流失
   - 意图分流：识别是正品信任问题、价格促销问题，还是需要转人工/敏感问题
   - 正品信任应答：检索正品溯源与商品库，给出凭据、版本差异与验真指引
   - 确定性算账：命中促销问题时调用规则库输出到手价与活动说明，大模型只做话术组织
-  - 合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工
+  - 合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工（O1合规护栏critical module）
   - 试点守护：记录首响、转人工、错价、转化等指标，按小流量试点判断是否继续放量
 modelUsage:
   - 核心编排：通用大模型负责首响话术、意图识别、知识检索后的自然语言组织与转人工摘要
@@ -683,10 +649,11 @@ userGains:
   - 转得顺：AI 不确定时不会硬答，而是把上下文整理好交给人工
   - 守得住：通过小流量试点先验证转化不下降，再决定是否放量
 notInScope:
-  - 夜间全自动接待（C2）与来源自动打标（C3）本次不作为演示闭环核心
-  - 需求澄清、适配推荐、凑单建议（C5/C9/C11）本次不做
-  - 物流查询与发货时效（C12/C13）属于售后/履约侧，本次不纳入
-  - 真人话术拟合与会话回流调优（C7/C16）留到后续优化阶段
+  - 夜间全自动接待全量上线与来源自动打标（采购SCRM能力）本次不作为演示闭环核心
+  - 需求澄清问题链、适配版本推荐、合规凑单建议（O1高级module）本次不做
+  - 物流查询与发货时效承诺（O3）属于履约侧，本次不纳入
+  - O1持续调优module（真人话术拟合+真实会话回流调优）留到后续优化阶段，本次不做
+  - 支付承接（O2）、复购预测（O4）属其他环节，本次不纳入
   - 多渠道全量上线、复杂后台运营台与长期数据治理本次不做
   </script>
 
@@ -700,16 +667,6 @@ notInScope:
       });
     }
   </script>
-
-
-
-
-
-
-
-
-
-
-<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-里程碑计划.html"><div class="dir">← 上一步 · 落地</div><div class="t">⑦ 里程碑计划</div><div class="d">前承：依赖驱动排期：被依赖机会前置，6 个月三阶段 FDE 交付甘特图</div></a><a class="navcard next" href="私域电商售前客服-政策规则数据清单.html"><div class="dir">下一步 · 附录 →</div><div class="t">⊕ 数据清单</div><div class="d">后启：真实业务数据底稿：19 位客户语料 + 16 档全规格价格 + 验真/物流/支付口径</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-里程碑计划.html"><div class="dir">← 上一页</div><div class="t">⑦ 里程碑计划</div><div class="d">9个月三阶段全链路AI排期</div></a><a class="navcard next" href="私域电商售前客服-政策规则数据清单.html"><div class="dir">下一页 →</div><div class="t">⊕ 数据清单</div><div class="d">政策规则数据清单</div></a></div></div><!-- ai4pm-nav-bottom-end -->
 </body>
 </html>

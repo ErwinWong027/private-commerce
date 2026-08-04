@@ -1,217 +1,322 @@
-title: "私域电商售前客服服务蓝图（As-Is 人工现状 · 承接③业务流程口径）"
+# 第 4 步 · 保健品私域电商全链路服务蓝图（业务级 · 5环节三层泳道）
+# 承接③业务流程的5环节L1价值流（引流→售前→下单→履约→复购），生成业务级服务蓝图。
+# 售前客服1v1咨询是5环节中的第2环（L1-2），也是本次AI规划的聚焦环节，但服务蓝图本身覆盖全链路。
+# 后启：⑤业务级AI场景地图 → ⑥业务级优先级矩阵 → ⑦业务级里程碑 → ⑧项目级产品画布（售前客服）
+title: 保健品私域电商全链路服务蓝图
 config:
   height:
     customerLayer: 170
     frontstageLayer: 200
     backstageLayer: 160
 phases:
-  - name: 引流承接·加好友
+  # ══════════════════════════════════════════════════════════════
+  # L1-1: 抖音直播引流获客
+  # ══════════════════════════════════════════════════════════════
+  - name: 引流获客
     customerLayer:
-      journeyStage: 直播种草后添加企微
+      journeyStage: 直播种草加企微
       actions:
-        - name: 深夜看完直播扫码添加客服询价
-          touchpoints: 抖音小风车/获客助手链接/企微名片
+        - name: 观看直播了解产品
+          touchpoints: 抖音直播间
           painPoints:
-            - 夜间添加后无人应答，热情冷却
-            - 次日才收到回复，已脱离直播冲动情境
-            - 不知道如何开场提问
+            - 流量波动大场次不稳定
+            - 产品版本差异讲不清
+          expectations:
+            - 清晰了解版本与优惠
+          experienceScore: 6
+        - name: 扫码添加企微客服
+          touchpoints: 小风车/获客助手
+          painPoints:
+            - 加粉后无人应答热情冷却
+            - 不知如何开口提问
           expectations:
             - 加上好友立刻有人回应
-            - 直接告诉我价格和活动
           experienceScore: 4
     frontstageLayer:
-      processStage: 客户接入与首响
+      processStage: 直播引流与加粉承接
       activities:
-        - name: 上班后集中处理隔夜咨询
-          role: 售前客服（人工）
-          systemTouchpoints: 企微工作台
+        - name: 直播间种草与引流
+          role: 主播/运营
+          systemTouchpoints: 抖音直播/巨量千川
           dataDependencies:
-            - 客户来源渠道
-            - 隔夜消息积压队列
+            - 直播流量与投放数据
+            - 产品卖点脚本
           painPoints:
-            - 夜间35%~45%咨询积压至次日，首响>8小时
-            - 高峰期人均同时接待8-15人，漏回错回
-            - 开口黄金窗口（加粉后30分钟）大量错过
-          cognitiveLoad: high
-        - name: 发送欢迎语并手动打标
-          role: 售前客服（人工）
-          systemTouchpoints: 企微工作台/SCRM
+            - 引流钩子转化率不稳定
+            - 加粉后30分钟黄金窗口易错过
+          cognitiveLoad: medium
+        - name: 企微加粉承接与打标
+          role: 运营/客服
+          systemTouchpoints: 企微/渠道活码/SCRM
           dataDependencies:
             - 渠道活码来源
           painPoints:
-            - 手动打标易遗漏
-            - 欢迎语模板化，新人不熟悉话术边界
+            - 来源打标依赖人工易漏
+            - 欢迎语模板化无个性
           cognitiveLoad: low
     backstageLayer:
-      supportProcess: 排班与流量错配
+      supportProcess: 投放与流量管理
       activities:
-        - name: 班次制排班管理
-          role: 客服主管
-          systemTouchpoints: 排班表/企微后台
+        - name: 直播投放与流量调度
+          role: 投放运营
+          systemTouchpoints: 巨量千川后台
           painPoints:
-            - 全天候流量×班次制人力的结构性错位
-            - 补夜班需三班倒，至少加2-3个编制
+            - 投流成本波动难控制
+          cognitiveLoad: medium
+        - name: 引流钩子A/B测试
+          role: 运营
+          systemTouchpoints: 数据看板
+          painPoints:
+            - 缺乏系统化A/B测试机制
           cognitiveLoad: medium
 
-  - name: 询价·需求澄清
+  # ══════════════════════════════════════════════════════════════
+  # L1-2: 售前客服1v1咨询 ← 本次AI规划聚焦环节
+  # ══════════════════════════════════════════════════════════════
+  - name: 售前客服咨询
     customerLayer:
-      journeyStage: 询价并求证正品与版本
+      journeyStage: 询价求证正品
       actions:
-        - name: 问价格并求证是不是正品/什么版本
+        - name: 询价并求证正品版本
           touchpoints: 企微聊天窗口
           painPoints:
-            - 最关心是不是正品、是哪个版本/规格，回答含糊或版本说不清就流失
-            - 担心买到假货仿品，反复索要正品凭据
-            - 描述模糊反复被追问，体验差
+            - 夜间无人应答等待超8小时
+            - 正品凭据说不清怕买假货
           expectations:
-            - 得到明确的正品凭据与版本/规格差异说明
-            - 被专业地引导确认适配版本与用法
+            - 秒级响应明确正品凭据
+          experienceScore: 3
+        - name: 对比版本规格与价格
+          touchpoints: 企微/商品详情页
+          painPoints:
+            - 版本差异讲不清反复追问
+            - 客服讲法不一致失去信任
+          expectations:
+            - 清晰版本对比与一致口径
+          experienceScore: 4
+        - name: 询问优惠并算到手价
+          touchpoints: 企微聊天窗口
+          painPoints:
+            - 满减规则复杂算不清
+            - 客服算错价引发纠纷
+          expectations:
+            - 快速准确到手价
           experienceScore: 5
     frontstageLayer:
-      processStage: 需求澄清与答疑
+      processStage: 1v1售前咨询与撮合
       activities:
-        - name: 按经验应答正品求证与需求澄清
-          role: 售前客服（人工）
-          systemTouchpoints: 企微工作台/个人经验
+        - name: 首响承接与正品答疑
+          role: 售前客服
+          systemTouchpoints: 企微工作台
           dataDependencies:
-            - 正品凭据与版本说明话术（沉淀在老客服个人脑中）
+            - 正品凭据与版本说明
           painPoints:
-            - 正品求证/版本对比话术未标准化，新老客服水平参差
-            - 新客服培训30天才能独立上岗
-            - 经验沉淀在个人聊天记录，离职即流失
+            - 夜间35%~45%咨询积压
+            - 正品话术未标准化口径不一
           cognitiveLoad: high
-        - name: 应答功效/安全类长尾问题（低频但合规风险最高）
-          role: 售前客服（人工）
-          systemTouchpoints: 话术文档/群共享文件
+        - name: 需求澄清与版本推荐
+          role: 售前客服
+          systemTouchpoints: 企微/个人经验
           dataDependencies:
-            - 合规话术库（散落文档，覆盖不全）
+            - 澄清问题链（个人经验）
           painPoints:
-            - 功效表述踩《广告法》红线风险靠自觉兜底（主动说功效拉单最易越界）
-            - 夜间和大促疲劳时段违规话术高发
-            - 话术文档更新不及时，检索靠翻聊天记录
+            - 澄清靠经验新人易漏问
+            - 合规靠自觉违规高发
+          cognitiveLoad: critical
+        - name: 促销算账与促单撮合
+          role: 售前客服
+          systemTouchpoints: 促销规则文档/计算器
+          dataDependencies:
+            - 当期促销规则
+          painPoints:
+            - 人工心算易错价赔付
+            - 促单节奏靠资深经验
           cognitiveLoad: critical
     backstageLayer:
       supportProcess: 话术与培训支撑
       activities:
         - name: 话术库维护与新人培训
-          role: 运营/资深客服兼任
+          role: 运营/资深客服
           systemTouchpoints: 文档工具/培训材料
           painPoints:
-            - 无专职编制，话术库覆盖率低
-            - 合规审核靠事后抽检，覆盖率低
+            - 无专职编制覆盖率低
+            - 新人培训30天才能上岗
           cognitiveLoad: medium
-
-  - name: 商品对比
-    customerLayer:
-      journeyStage: 对比版本规格与渠道
-      actions:
-        - name: 询问版本/规格差异与真伪辨别
-          touchpoints: 企微聊天窗口/商品详情页
+        - name: 合规质检与抽检
+          role: 运营兼任
+          systemTouchpoints: 会话存档（若开通）
           painPoints:
-            - 版本/规格差异说不清（标品只差在版本，如替西帕肽之孟版/日版）
-            - 等客服翻资料回复慢
-            - 担心比其他渠道买贵、买到非正规版本
-          expectations:
-            - 清晰的版本对比结论与正品凭据
-            - 回答专业一致，不前后矛盾
-          experienceScore: 5
-    frontstageLayer:
-      processStage: 对比讲解
-      activities:
-        - name: 手动整理版本/规格参数生成对比话术
-          role: 售前客服（人工）
-          systemTouchpoints: 商品资料文档/详情页
-          dataDependencies:
-            - SKU参数（版本/规格/价格/正品凭据）
-          painPoints:
-            - 手动翻资料复制粘贴，耗时且易错漏
-            - 不同客服讲法不一致，客户交叉验证后失去信任
-            - 涉及功效对比时易越界表述
+            - 合规审核靠事后抽检
+            - 覆盖率低违规风险高
           cognitiveLoad: high
-    backstageLayer:
-      supportProcess: 商品资料管理
-      activities:
-        - name: SKU资料与资质维护
-          role: 运营
-          systemTouchpoints: 商品文档/资质文件
-          painPoints:
-            - 蓝帽子资质覆盖情况未系统化管理
-            - 新品资料更新滞后
-          cognitiveLoad: medium
 
-  - name: 促销算账
+  # ══════════════════════════════════════════════════════════════
+  # L1-3: 下单支付转化
+  # ══════════════════════════════════════════════════════════════
+  - name: 下单支付
     customerLayer:
-      journeyStage: 问优惠、算总价
+      journeyStage: 扫码支付确认
       actions:
-        - name: 询问活动优惠并反复调整组合
+        - name: 扫码或红包支付
+          touchpoints: 微信扫码/红包
+          painPoints:
+            - 支付方式引导不清易流失
+            - 付款后没人确认恐慌
+          expectations:
+            - 支付顺畅有人确认
+          experienceScore: 5
+        - name: 发送付款截图核对
           touchpoints: 企微聊天窗口
           painPoints:
-            - 满减/赠品/组合价规则复杂算不清
-            - 客服算错价导致纠纷
-            - 高峰期算账等待久
+            - 截图确认超时信任危机
+            - 地址信息核对易出错
           expectations:
-            - 快速给出准确的到手价
-            - 报价前后一致、说到做到
-          experienceScore: 6
+            - 快速确认订单信息
+          experienceScore: 4
     frontstageLayer:
-      processStage: 人工算账报价
+      processStage: 支付引导与订单承接
       activities:
-        - name: 手动计算促销组合价
-          role: 售前客服（人工）
-          systemTouchpoints: 促销规则文档/计算器
+        - name: 支付方式引导
+          role: 售前客服
+          systemTouchpoints: 企微/收款码
+          painPoints:
+            - 支付说明依赖话术无标准
+          cognitiveLoad: low
+        - name: 订单信息核对与承接
+          role: 售前客服
+          systemTouchpoints: 企微/订单系统
           dataDependencies:
-            - 当期促销规则（文档/群通知）
-            - 客户拟购组合
+            - 付款截图/地址信息
           painPoints:
-            - 规则叠加复杂，人工计算易错价
-            - 错价承诺引发客诉与赔付
-            - 客户反复改组合需反复重算，高峰期压力大
-          cognitiveLoad: critical
+            - 人工复述核对易出错
+            - 高峰期漏接付款截图
+          cognitiveLoad: medium
     backstageLayer:
-      supportProcess: 促销规则发布
+      supportProcess: 订单与财务对账
       activities:
-        - name: 促销规则制定与同步
-          role: 运营
-          systemTouchpoints: 文档/群通知
+        - name: 订单录入与财务对账
+          role: 电商后台/财务
+          systemTouchpoints: 订单系统/财务系统
           painPoints:
-            - 规则以文档/口头同步，客服理解偏差
-            - 规则频繁变更难跟进
+            - 多渠道支付对账复杂
           cognitiveLoad: medium
 
-  - name: 下单·发货跟进
+  # ══════════════════════════════════════════════════════════════
+  # L1-4: 物流发货履约
+  # ══════════════════════════════════════════════════════════════
+  - name: 物流履约
     customerLayer:
-      journeyStage: 下单支付与催发货
+      journeyStage: 等发货查物流
       actions:
-        - name: 下单后询问发货与物流进度
-          touchpoints: 企微聊天窗口/订单页
+        - name: 询问发货时效
+          touchpoints: 企微聊天窗口
           painPoints:
-            - 何时发货说不准
-            - 物流查询要等客服上班
+            - 发货时效说不准
+            - 承诺与实际不一致
           expectations:
-            - 随问随答的物流状态
             - 靠谱的发货时效承诺
-          experienceScore: 6
+          experienceScore: 5
+        - name: 查询物流轨迹
+          touchpoints: 企微/订单页
+          painPoints:
+            - 物流查询要等客服上班
+            - 夜间物流咨询无人答
+          expectations:
+            - 随问随答物流状态
+          experienceScore: 5
     frontstageLayer:
-      processStage: 订单与物流应答
+      processStage: 发货与物流应答
       activities:
-        - name: 手动查单回复物流状态
-          role: 售前客服（人工）
-          systemTouchpoints: 订单后台/物流查询页
+        - name: 发货时效承诺
+          role: 售前/售后客服
+          systemTouchpoints: 订单系统
           dataDependencies:
-            - 订单状态
+            - 仓储发货状态
+          painPoints:
+            - 时效凭感觉承诺易说错
+          cognitiveLoad: medium
+        - name: 物流轨迹查询应答
+          role: 售前/售后客服
+          systemTouchpoints: 订单后台/物流页
+          dataDependencies:
             - 物流单号与轨迹
           painPoints:
-            - 跨系统查询后手动复述，占用大量重复劳动
-            - 夜间物流咨询无人应答
-            - 发货时效凭感觉承诺，说错引发客诉
+            - 跨系统查单手动复述
+            - 重复查询挤占售前精力
           cognitiveLoad: medium
     backstageLayer:
-      supportProcess: 订单履约支撑
+      supportProcess: 仓储与物流管理
       activities:
-        - name: 订单与物流数据维护
-          role: 仓储/电商后台
-          systemTouchpoints: 订单系统/物流系统
+        - name: 订单处理与冷链发货
+          role: 仓储
+          systemTouchpoints: WMS/物流系统
           painPoints:
-            - 数据未开放接口，客服只能人肉查询
-            - 大促期发货时效波动大
+            - 大促期发货时效波动
+            - 冷链断链风险
           cognitiveLoad: medium
+        - name: 物流数据维护
+          role: 电商后台
+          systemTouchpoints: 物流系统
+          painPoints:
+            - 数据未开放接口人工查
+          cognitiveLoad: low
+
+  # ══════════════════════════════════════════════════════════════
+  # L1-5: 复购与私域运营
+  # ══════════════════════════════════════════════════════════════
+  - name: 复购运营
+    customerLayer:
+      journeyStage: 用完复购唤回
+      actions:
+        - name: 用完后主动复购
+          touchpoints: 企微/小程序
+          painPoints:
+            - 无人提醒容易忘记复购
+            - 无复购优惠缺乏动机
+          expectations:
+            - 适时提醒与专属优惠
+          experienceScore: 6
+        - name: 沉睡后被唤回
+          touchpoints: 企微群发/1v1
+          painPoints:
+            - 唤回话术千篇一律无感
+            - 已流失无人在意
+          expectations:
+            - 个性化关怀与优惠
+          experienceScore: 4
+    frontstageLayer:
+      processStage: 复购引导与唤回
+      activities:
+        - name: 效果跟进与复购引导
+          role: 私域运营/客服
+          systemTouchpoints: 企微/CRM
+          dataDependencies:
+            - 客户首单记录与服务周期
+          painPoints:
+            - 复购靠人工经验无预测
+            - 大量老客自然流失
+          cognitiveLoad: medium
+        - name: 沉睡客户精准唤回
+          role: 私域运营
+          systemTouchpoints: 企微群发/CRM
+          dataDependencies:
+            - 客户分群与行为数据
+          painPoints:
+            - 无系统化唤回机制
+            - 唤回话术无个性化
+          cognitiveLoad: medium
+    backstageLayer:
+      supportProcess: 会员与数据运营
+      activities:
+        - name: 会员等级与积分运营
+          role: 私域运营
+          systemTouchpoints: CRM/会员系统
+          painPoints:
+            - 会员体系缺失留存动机弱
+            - 未与CRM数据打通
+          cognitiveLoad: medium
+        - name: 复购周期预测建模
+          role: 数据/运营
+          systemTouchpoints: 数据平台
+          painPoints:
+            - 无预测模型靠人工记忆
+          cognitiveLoad: high

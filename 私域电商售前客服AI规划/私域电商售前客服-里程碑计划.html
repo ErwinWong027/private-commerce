@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>保健品私域电商售前客服 AI 里程碑计划（FDE 交付 · 依赖驱动排期） - Milestone Roadmap | Inspire</title>
+  <title>保健品私域电商全链路AI里程碑计划 - Milestone Roadmap | Inspire</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -51,7 +51,7 @@
       padding: 40px;
       width: 85%;
       margin: 48px auto;
-      overflow: hidden;
+      overflow: visible;
       border: 1px solid var(--color-border);
       min-height: calc(100vh - 96px);
       display: flex;
@@ -160,12 +160,6 @@
       overflow-x: auto;
     }
 
-    .timeline-track {
-      position: relative;
-      min-width: 1080px;
-      width: max(100%, 1080px);
-    }
-
     .timeline-header {
       display: flex;
       border-bottom: 2px solid var(--color-border);
@@ -173,23 +167,20 @@
       position: sticky;
       top: 0;
       z-index: 20;
+      min-width: 1060px;
     }
 
     .quarter-col {
-      flex: 0 0 150px;
+      flex: 1;
       padding: 12px;
       text-align: center;
       font-weight: 700;
       font-size: 14px;
       color: var(--color-primary);
       border-right: 1px solid var(--color-border);
-      min-width: 150px;
+      min-width: 100px;
     }
     .quarter-col:last-child { border-right: none; }
-
-    .timeline-body {
-      position: relative;
-    }
 
     /* Vertical Grid Lines */
     .grid-overlay {
@@ -215,12 +206,11 @@
       min-height: 80px;
       position: relative;
       z-index: 2;
+      min-width: 1060px;
     }
 
     .team-info {
-      width: 180px;
-      min-width: 180px;
-      flex: 0 0 180px;
+      width: 160px;
       padding: 16px;
       background: white;
       border-right: 2px solid var(--color-border);
@@ -253,10 +243,9 @@
     }
 
     .tasks-area {
-      flex: 0 0 900px;
+      flex: 1;
       position: relative;
       padding: 10px 0;
-      width: 900px;
       min-width: 900px;
     }
 
@@ -271,6 +260,7 @@
       padding: 0 10px;
       display: flex;
       align-items: center;
+      gap: 6px;
       font-size: 12px;
       font-weight: 600;
       color: var(--color-primary);
@@ -289,6 +279,36 @@
       width: auto !important;
       min-width: 100%;
       padding-right: 20px;
+    }
+
+    /* 机会追溯徽章：核心机会实心 / 支撑任务描边弱化 / 运营守护灰色 */
+    .opp-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+    }
+    .opp-badge.core {
+      color: white;
+      background: var(--opp-color);
+    }
+    .opp-badge.support {
+      color: var(--opp-color);
+      background: color-mix(in srgb, var(--opp-color) 12%, white);
+      border: 1px solid var(--opp-color);
+      font-weight: 600;
+    }
+    .opp-badge.ops {
+      color: white;
+      background: #64748b;
+    }
+    .task-title-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* Milestone Markers */
@@ -410,7 +430,7 @@
 <body>
 <!-- ai4pm-nav-top-start -->
 <style>
-.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;align-self:center;}
 .ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
 .ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
 .ai4pm-nav-top .idx:hover{background:#1B2B47;}
@@ -419,7 +439,7 @@
 .ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
 .ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
 .ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
-.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;align-self:center;width:85%;}
 .ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
 .ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
 .ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
@@ -430,17 +450,12 @@
 .ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
 @media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
 </style>
-<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⊕ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
-
-
-
-
-
+<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
 
   <div class="page-wrap">
     <header class="page-header">
       <div class="header-left">
-        <h1>保健品私域电商售前客服 AI 里程碑计划（FDE 交付 · 依赖驱动排期）</h1>
+        <h1>保健品私域电商全链路AI里程碑计划</h1>
       </div>
       <div class="header-right">
         <div class="btn-group">
@@ -450,742 +465,912 @@
       </div>
     </header>
 
+    <div class="legend-bar" style="display:flex;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:16px;padding:12px 16px;background:var(--color-bg-alt);border-radius:8px;font-size:12px;color:var(--color-text-muted);">
+      <span style="font-weight:700;color:var(--color-primary);">机会追溯图例：</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:28px;height:18px;background:#3b82f6;color:white;font-size:10px;font-weight:700;text-align:center;line-height:18px;border-radius:10px;">O2</span>核心机会（独立立项）</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:34px;height:18px;background:color-mix(in srgb,#3b82f6 12%,white);color:#3b82f6;border:1px solid #3b82f6;font-size:10px;font-weight:600;text-align:center;line-height:16px;border-radius:10px;">→O2</span>支撑任务（从属于该机会）</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:36px;height:18px;background:#64748b;color:white;font-size:10px;font-weight:700;text-align:center;line-height:18px;border-radius:10px;">运营</span>跨机会运营守护</span>
+      <span style="color:var(--color-text-muted);">主线 = 7 个核心机会 O1-O7，支撑任务为其内部组成</span>
+    </div>
+
     <div class="timeline-container">
-      <div class="timeline-track">
-        <div class="timeline-header">
-          <div style="width: 180px; min-width: 180px; flex: 0 0 180px; background: var(--color-bg-alt); border-right: 2px solid var(--color-border);"></div>
+      <div class="timeline-header">
+        <div style="width: 160px; background: var(--color-bg-alt); border-right: 2px solid var(--color-border);"></div>
+        
+        <div class="quarter-col">M1</div>
+        
+        <div class="quarter-col">M2</div>
+        
+        <div class="quarter-col">M3</div>
+        
+        <div class="quarter-col">M4</div>
+        
+        <div class="quarter-col">M5</div>
+        
+        <div class="quarter-col">M6</div>
+        
+        <div class="quarter-col">M7</div>
+        
+        <div class="quarter-col">M8</div>
+        
+        <div class="quarter-col">M9</div>
+        
+      </div>
+
+      <div style="position: relative;">
+        <!-- Grid Lines -->
+        <div class="grid-overlay">
+          <div style="width: 160px;"></div>
           
-          <div class="quarter-col">M1</div>
+          <div class="grid-line"></div>
           
-          <div class="quarter-col">M2</div>
+          <div class="grid-line"></div>
           
-          <div class="quarter-col">M3</div>
+          <div class="grid-line"></div>
           
-          <div class="quarter-col">M4</div>
+          <div class="grid-line"></div>
           
-          <div class="quarter-col">M5</div>
+          <div class="grid-line"></div>
           
-          <div class="quarter-col">M6</div>
+          <div class="grid-line"></div>
+          
+          <div class="grid-line"></div>
+          
+          <div class="grid-line"></div>
+          
+          <div class="grid-line"></div>
           
         </div>
 
-        <div class="timeline-body">
-          <!-- Grid Lines -->
-          <div class="grid-overlay">
-            <div style="width: 180px; min-width: 180px; flex: 0 0 180px;"></div>
-            
-            <div class="grid-line"></div>
-            
-            <div class="grid-line"></div>
-            
-            <div class="grid-line"></div>
-            
-            <div class="grid-line"></div>
-            
-            <div class="grid-line"></div>
-            
-            <div class="grid-line"></div>
-            
-          </div>
-
-          <!-- Milestones Overlay -->
-          <div style="position: absolute; left: 180px; width: 900px; top: 0; bottom: 0; z-index: 30; pointer-events: none;">
-            
-            <div class="milestone-marker" style="left: 33.333333333333336%; --m-color: #ef4444;">
-              <div class="milestone-flag" title="">
-                阶段一 · 自动接待地基（依赖根节点先行）
-              </div>
-            </div>
-            
-            <div class="milestone-marker" style="left: 66.66666666666667%; --m-color: #f59e0b;">
-              <div class="milestone-flag" title="">
-                阶段二 · 全流程标准化问答扩面
-              </div>
-            </div>
-            
-            <div class="milestone-marker" style="left: 100.0%; --m-color: #10b981;">
-              <div class="milestone-flag" title="">
-                阶段三 · 拟合真人与持续提质
-              </div>
-            </div>
-            
-          </div>
-
-          <!-- Teams & Tasks -->
+        <!-- Milestones Overlay -->
+        <div style="position: absolute; left: 160px; right: 0; top: 0; bottom: 0; z-index: 30; pointer-events: none;">
           
-          <div class="team-lane">
-            <div class="team-info">
-              <div class="team-name">
-                <div class="team-icon" style="background: #3b82f6;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm0 8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4zm4-2h.01M6 20h.01"></path>
-                  </svg>
-                </div>
-                平台与通道
-              </div>
-              <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
-                
-              </div>
-            </div>
-            <div class="tasks-area" style="height: 120px;">
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #3b82f6;">
-                kf 通道接入与消息回调
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">kf 通道接入与消息回调</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M1</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">企微微信客服通道打通，实时回调即检索即应答（依赖根节点）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(33.333333333333336% - 4px); top: 42px; --task-color: #3b82f6;">
-                RAG 平台与基础知识库
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">RAG 平台与基础知识库</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">检索增强生成平台与语料管线搭建（依赖根节点）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(33.333333333333336% - 4px); top: 84px; --task-color: #3b82f6;">
-                C15 未命中兜底转人工机制
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C15 未命中兜底转人工机制</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">低置信度自动转接+上下文摘要，不设真人在环的成立前提（几乎被全部机会依赖，最先具备）</div>
-                </div>
-              </div>
-              
+          <div class="milestone-marker" style="left: 33.33333333333333%; --m-color: #ef4444;">
+            <div class="milestone-flag" title="">
+              阶段一·售前AI化地基
             </div>
           </div>
           
-          <div class="team-lane">
-            <div class="team-info">
-              <div class="team-name">
-                <div class="team-icon" style="background: #8b5cf6;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 4h14c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM5 8h14M5 12h14M5 16h14"></path>
-                  </svg>
-                </div>
-                知识库工程
-              </div>
-              <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
-                
-              </div>
-            </div>
-            <div class="tasks-area" style="height: 120px;">
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(33.333333333333336% - 4px); top: 0px; --task-color: #8b5cf6;">
-                C4/C8 正品溯源库+商品库建库
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C4/C8 正品溯源库+商品库建库</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">资质文号/授权链路/防伪/版本规格结构化入库（标品信任逻辑首位依赖）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(33.333333333333336% - 4px); top: 42px; --task-color: #8b5cf6;">
-                C6 预审核合规话术库
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C6 预审核合规话术库</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">功效表述法务预审核入库，合规内置于建库（红线守门，与核心问答同批）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(16.666666666666668% - 4px); top: 84px; --task-color: #8b5cf6;">
-                C10 促销规则库建库
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C10 促销规则库建库</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">满减/赠品/组合价规则结构化，支撑确定性算账</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(33.333333333333336% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #8b5cf6;">
-                C5 需求澄清问题链知识工程
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C5 需求澄清问题链知识工程</div>
-                  <div class="tooltip-meta">
-                    <span>M3 → M3</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">版本/规格/用法适配问题链结构化，产品化老客服澄清经验</div>
-                </div>
-              </div>
-              
+          <div class="milestone-marker" style="left: 66.66666666666666%; --m-color: #f59e0b;">
+            <div class="milestone-flag" title="">
+              阶段二·全链路扩面与体验提质
             </div>
           </div>
           
-          <div class="team-lane">
-            <div class="team-info">
-              <div class="team-name">
-                <div class="team-icon" style="background: #ec4899;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 2h14c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2zM12 18h.01"></path>
-                  </svg>
-                </div>
-                对话应答上线
-              </div>
-              <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
-                
-              </div>
-            </div>
-            <div class="tasks-area" style="height: 120px;">
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #ec4899;">
-                C1 7×24 秒级自动首响
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C1 7×24 秒级自动首响</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">正式上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">全时段首响≤10 秒，承接夜间加粉黄金窗口</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(16.666666666666668% - 4px); top: 42px; --task-color: #ec4899;">
-                C4 正品溯源与版本应答
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C4 正品溯源与版本应答</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M2</span>
-                    
-                    <span style="color: var(--color-accent);">正式上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">标品信任逻辑首位高频问题标准化应答（与首响同批）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(33.333333333333336% - 4px); top: 84px; --task-color: #ec4899;">
-                C10 促销规则库确定性算账
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C10 促销规则库确定性算账</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M3</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">检索规则确定性算价，大模型仅润色，杜绝错价</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(33.333333333333336% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #ec4899;">
-                C2 夜间咨询全自动接待
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C2 夜间咨询全自动接待</div>
-                  <div class="tooltip-meta">
-                    <span>M3 → M3</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">承接夜间 35%~45% 咨询高峰，零夜班编制</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(33.333333333333336% + 2px); width: calc(33.333333333333336% - 4px); top: 42px; --task-color: #ec4899;">
-                C8 商品库检索版本对比
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C8 商品库检索版本对比</div>
-                  <div class="tooltip-meta">
-                    <span>M3 → M4</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">秒级生成结构化版本对比结论，口径一致</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(50.0% + 2px); width: calc(33.333333333333336% - 4px); top: 0px; --task-color: #ec4899;">
-                C5/C9 需求澄清与适配推荐
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C5/C9 需求澄清与适配推荐</div>
-                  <div class="tooltip-meta">
-                    <span>M4 → M5</span>
-                    
-                    <span style="color: var(--color-accent);">实测</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">问题链引导澄清 + 检索匹配适配版本推荐</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(66.66666666666667% + 2px); width: calc(16.666666666666668% - 4px); top: 42px; --task-color: #ec4899;">
-                C11 合规凑单建议
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C11 合规凑单建议</div>
-                  <div class="tooltip-meta">
-                    <span>M5 → M5</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">基于满减门槛给凑单组合与到手价，不做压迫式推销</div>
-                </div>
-              </div>
-              
-            </div>
-          </div>
-          
-          <div class="team-lane">
-            <div class="team-info">
-              <div class="team-name">
-                <div class="team-icon" style="background: #10b981;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                  </svg>
-                </div>
-                数据集成
-              </div>
-              <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
-                
-              </div>
-            </div>
-            <div class="tasks-area" style="height: 80px;">
-              
-              <div class="task-card"
-                   style="left: calc(0.0% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #10b981;">
-                C3 渠道活码/SCRM 打标接入
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C3 渠道活码/SCRM 打标接入</div>
-                  <div class="tooltip-meta">
-                    <span>M1 → M1</span>
-                    
-                    <span style="color: var(--color-accent);">正式上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">自动来源打标与个性化开场（采购现成能力，不自建）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(33.333333333333336% - 4px); top: 0px; --task-color: #10b981;">
-                会话存档 API 开通与合规取数
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">会话存档 API 开通与合规取数</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M3</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">打开合规自证与真人话术语料源（C7/C16 前置依赖）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(33.333333333333336% + 2px); width: calc(33.333333333333336% - 4px); top: 42px; --task-color: #10b981;">
-                订单/物流数据源 API 对接
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">订单/物流数据源 API 对接</div>
-                  <div class="tooltip-meta">
-                    <span>M3 → M4</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">打通物流查询与发货时效确定性数据（C12/C13 前置依赖）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(50.0% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #10b981;">
-                C12 物流状态自动查询
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C12 物流状态自动查询</div>
-                  <div class="tooltip-meta">
-                    <span>M4 → M4</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">对接数据源实时查询轨迹，7×24 即时应答</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(66.66666666666667% + 2px); width: calc(16.666666666666668% - 4px); top: 0px; --task-color: #10b981;">
-                C13 发货时效确定性承诺
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C13 发货时效确定性承诺</div>
-                  <div class="tooltip-meta">
-                    <span>M5 → M5</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">基于订单系统时效数据生成承诺话术，与履约一致</div>
-                </div>
-              </div>
-              
-            </div>
-          </div>
-          
-          <div class="team-lane">
-            <div class="team-info">
-              <div class="team-name">
-                <div class="team-icon" style="background: #f97316;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                  </svg>
-                </div>
-                守护与运营
-              </div>
-              <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
-                
-              </div>
-            </div>
-            <div class="tasks-area" style="height: 120px;">
-              
-              <div class="task-card"
-                   style="left: calc(16.666666666666668% + 2px); width: calc(33.333333333333336% - 4px); top: 0px; --task-color: #f97316;">
-                C14 转化率守护监测看板
-              
-                <div class="task-tooltip is-left">
-                  <div class="tooltip-title">C14 转化率守护监测看板</div>
-                  <div class="tooltip-meta">
-                    <span>M2 → M3</span>
-                    
-                    <span style="color: var(--color-accent);">灰度上线</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">AI 接管组 vs 人工对照组按周监测，放量闸门（与核心上线同批）</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(33.333333333333336% + 2px); width: calc(66.66666666666667% - 4px); top: 42px; --task-color: #f97316;">
-                灰度放量闸门评审
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">灰度放量闸门评审</div>
-                  <div class="tooltip-meta">
-                    <span>M3 → M6</span>
-                    
-                    <span style="color: var(--color-accent);">实测</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">每档放量前须通过转化率闸门，连续两周为负即回滚</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(50.0% + 2px); width: calc(33.333333333333336% - 4px); top: 0px; --task-color: #f97316;">
-                C7 真人话术拟合
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C7 真人话术拟合</div>
-                  <div class="tooltip-meta">
-                    <span>M4 → M5</span>
-                    
-                    <span style="color: var(--color-accent);">实测</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">基于会话存档金牌客服语料调优应答风格，拟合度≥90%</div>
-                </div>
-              </div>
-              
-              <div class="task-card"
-                   style="left: calc(50.0% + 2px); width: calc(50.0% - 4px); top: 84px; --task-color: #f97316;">
-                C16 真实会话回流调优
-              
-                <div class="task-tooltip is-right">
-                  <div class="tooltip-title">C16 真实会话回流调优</div>
-                  <div class="tooltip-meta">
-                    <span>M4 → M6</span>
-                    
-                    <span style="color: var(--color-accent);">研发</span>
-                    
-                  </div>
-                  <div class="tooltip-desc">未命中与低拟合回答持续扩库调优，自动接待率持续爬升</div>
-                </div>
-              </div>
-              
+          <div class="milestone-marker" style="left: 100.0%; --m-color: #10b981;">
+            <div class="milestone-flag" title="">
+              阶段三·LTV增量与持续运营
             </div>
           </div>
           
         </div>
+
+        <!-- Teams & Tasks -->
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #3b82f6;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm0 8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4zm4-2h.01M6 20h.01"></path>
+                </svg>
+              </div>
+              平台与通道
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              基础设施通道，支撑O1自动接待
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 120px;">
+            
+            <div class="task-card"
+                 style="left: calc(0.0% + 2px); width: calc(11.11111111111111% - 4px); top: 0px; --task-color: #3b82f6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">kf通道接入与消息回调</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">kf通道接入与消息回调</div>
+                <div class="tooltip-meta">
+                  <span>M1 → M1</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">企微kf通道打通实时回调</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(0.0% + 2px); width: calc(22.22222222222222% - 4px); top: 42px; --task-color: #3b82f6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">RAG平台与基础知识库</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">RAG平台与基础知识库</div>
+                <div class="tooltip-meta">
+                  <span>M1 → M2</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">检索增强生成平台搭建</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(0.0% + 2px); width: calc(22.22222222222222% - 4px); top: 84px; --task-color: #3b82f6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">未命中兜底转人工机制</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">未命中兜底转人工机制</div>
+                <div class="tooltip-meta">
+                  <span>M1 → M2</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">低置信度转接+上下文摘要</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #8b5cf6;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 4h14c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM5 8h14M5 12h14M5 16h14"></path>
+                </svg>
+              </div>
+              知识库工程
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              四大知识库建库，支撑O1上线与持续调优
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 120px;">
+            
+            <div class="task-card"
+                 style="left: calc(0.0% + 2px); width: calc(22.22222222222222% - 4px); top: 0px; --task-color: #8b5cf6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">正品溯源库+商品库建库</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">正品溯源库+商品库建库</div>
+                <div class="tooltip-meta">
+                  <span>M1 → M2</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">资质文号版本规格结构化入库</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(0.0% + 2px); width: calc(22.22222222222222% - 4px); top: 42px; --task-color: #8b5cf6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">预审核合规话术库【critical】</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">预审核合规话术库【critical】</div>
+                <div class="tooltip-meta">
+                  <span>M1 → M2</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">功效表述法务预审核入库，O1合规护栏module的基石</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(11.11111111111111% + 2px); width: calc(11.11111111111111% - 4px); top: 84px; --task-color: #8b5cf6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">促销规则库建库</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">促销规则库建库</div>
+                <div class="tooltip-meta">
+                  <span>M2 → M2</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">满减赠品组合价规则入库</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(22.22222222222222% + 2px); width: calc(22.22222222222222% - 4px); top: 0px; --task-color: #8b5cf6; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">会话存档API开通取数</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">会话存档API开通取数</div>
+                <div class="tooltip-meta">
+                  <span>M3 → M4</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">合规自证与真人话术语料源，O1持续调优module的数据依赖</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #ec4899;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 2h14c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2zM12 18h.01"></path>
+                </svg>
+              </div>
+              售前AI应答
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              售前客服核心机会O1（含合规护栏+持续调优module）
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 80px;">
+            
+            <div class="task-card"
+                 style="left: calc(11.11111111111111% + 2px); width: calc(22.22222222222222% - 4px); top: 0px; --task-color: #ec4899; --opp-color: #ef4444;">
+              
+              <span class="opp-badge core">O1</span>
+              
+              <span class="task-title-text">RAG自动接待上线</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">RAG自动接待上线</div>
+                <div class="tooltip-meta">
+                  <span>M2 → M3</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    核心机会 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">7×24首响正品版本算账，含合规护栏critical module同批上线</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(11.11111111111111% + 2px); width: calc(22.22222222222222% - 4px); top: 42px; --task-color: #ec4899; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">合规话术库红线守护【O1 module】</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">合规话术库红线守护【O1 module】</div>
+                <div class="tooltip-meta">
+                  <span>M2 → M3</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">功效长尾仅检索预审核库，O1的critical级合规护栏module（非独立机会）</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(33.33333333333333% + 2px); width: calc(33.33333333333333% - 4px); top: 0px; --task-color: #ec4899; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">真人话术拟合【O1 module】</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">真人话术拟合【O1 module】</div>
+                <div class="tooltip-meta">
+                  <span>M4 → M6</span>
+                  
+                  <span style="color: var(--color-accent);">实测</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">金牌客服语料调优应答风格，O1的持续调优module（非独立机会）</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(33.33333333333333% + 2px); width: calc(66.66666666666666% - 4px); top: 42px; --task-color: #ec4899; --opp-color: #ef4444;">
+              
+              <span class="opp-badge support">→O1</span>
+              
+              <span class="task-title-text">真实会话回流调优【O1 module】</span>
+
+              <div class="task-tooltip is-right">
+                <div class="tooltip-title">真实会话回流调优【O1 module】</div>
+                <div class="tooltip-meta">
+                  <span>M4 → M9</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #ef4444; font-weight: 700;">
+                    支撑 O1
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">未命中扩库接待率爬升，O1的持续调优module（非独立机会）</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #10b981;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </div>
+              全链路集成
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              支付/物流2个核心机会O2/O3
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 80px;">
+            
+            <div class="task-card"
+                 style="left: calc(33.33333333333333% + 2px); width: calc(22.22222222222222% - 4px); top: 0px; --task-color: #10b981; --opp-color: #3b82f6;">
+              
+              <span class="opp-badge core">O2</span>
+              
+              <span class="task-title-text">智能支付承接</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">智能支付承接</div>
+                <div class="tooltip-meta">
+                  <span>M4 → M5</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #3b82f6; font-weight: 700;">
+                    核心机会 O2
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">截图识别订单自动核对</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(33.33333333333333% + 2px); width: calc(22.22222222222222% - 4px); top: 42px; --task-color: #10b981; --opp-color: #f59e0b;">
+              
+              <span class="opp-badge core">O3</span>
+              
+              <span class="task-title-text">物流查询自动化</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">物流查询自动化</div>
+                <div class="tooltip-meta">
+                  <span>M4 → M5</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #f59e0b; font-weight: 700;">
+                    核心机会 O3
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">数据源实时查询时效承诺</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #f97316;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3a4 4 0 0 1 4 4c0 1.05-.4 2.01-1.07 2.72A3.99 3.99 0 0 1 18 13.5c0 1.83-1.23 3.37-2.92 3.84v.05A2.6 2.6 0 0 1 12.5 20h-1a2.6 2.6 0 0 1-2.58-2.61v-.05A3.98 3.98 0 0 1 6 13.5c0-.85.27-1.64.73-2.28A4 4 0 0 1 8 5h.07C8.75 3.84 10.28 3 12 3z"></path>
+                </svg>
+              </div>
+              复购增长
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              复购核心机会O4及前置数据打通
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 80px;">
+            
+            <div class="task-card"
+                 style="left: calc(44.44444444444444% + 2px); width: calc(33.33333333333333% - 4px); top: 0px; --task-color: #f97316; --opp-color: #8b5cf6;">
+              
+              <span class="opp-badge support">→O4</span>
+              
+              <span class="task-title-text">CRM数据打通与会员体系</span>
+
+              <div class="task-tooltip is-right">
+                <div class="tooltip-title">CRM数据打通与会员体系</div>
+                <div class="tooltip-meta">
+                  <span>M5 → M7</span>
+                  
+                  <span style="color: var(--color-accent);">研发</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #8b5cf6; font-weight: 700;">
+                    支撑 O4
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">客户全生命周期数据整合</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(66.66666666666666% + 2px); width: calc(33.33333333333333% - 4px); top: 42px; --task-color: #f97316; --opp-color: #8b5cf6;">
+              
+              <span class="opp-badge core">O4</span>
+              
+              <span class="task-title-text">复购周期预测模型</span>
+
+              <div class="task-tooltip is-right">
+                <div class="tooltip-title">复购周期预测模型</div>
+                <div class="tooltip-meta">
+                  <span>M7 → M9</span>
+                  
+                  <span style="color: var(--color-accent);">实测</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #8b5cf6; font-weight: 700;">
+                    核心机会 O4
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">预测复购概率最佳触达</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(77.77777777777777% + 2px); width: calc(22.22222222222222% - 4px); top: 0px; --task-color: #f97316; --opp-color: #8b5cf6;">
+              
+              <span class="opp-badge support">→O4</span>
+              
+              <span class="task-title-text">沉睡客户精准唤回</span>
+
+              <div class="task-tooltip is-right">
+                <div class="tooltip-title">沉睡客户精准唤回</div>
+                <div class="tooltip-meta">
+                  <span>M8 → M9</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #8b5cf6; font-weight: 700;">
+                    支撑 O4
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">分群个性化唤回策略</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <div class="team-lane">
+          <div class="team-info">
+            <div class="team-name">
+              <div class="team-icon" style="background: #06b6d4;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              守护与运营
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">
+              跨机会运营守护与灰度闸门
+            </div>
+          </div>
+          <div class="tasks-area" style="height: 80px;">
+            
+            <div class="task-card"
+                 style="left: calc(11.11111111111111% + 2px); width: calc(33.33333333333333% - 4px); top: 0px; --task-color: #06b6d4; --opp-color: #64748b;">
+              
+              <span class="opp-badge ops">运营</span>
+              
+              <span class="task-title-text">转化率守护看板</span>
+
+              <div class="task-tooltip is-left">
+                <div class="tooltip-title">转化率守护看板</div>
+                <div class="tooltip-meta">
+                  <span>M2 → M4</span>
+                  
+                  <span style="color: var(--color-accent);">灰度上线</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #64748b; font-weight: 700;">
+                    跨机会运营守护
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">AI组vs人工组按周监测</div>
+              </div>
+            </div>
+            
+            <div class="task-card"
+                 style="left: calc(22.22222222222222% + 2px); width: calc(77.77777777777777% - 4px); top: 42px; --task-color: #06b6d4; --opp-color: #64748b;">
+              
+              <span class="opp-badge ops">运营</span>
+              
+              <span class="task-title-text">灰度放量闸门评审</span>
+
+              <div class="task-tooltip is-right">
+                <div class="tooltip-title">灰度放量闸门评审</div>
+                <div class="tooltip-meta">
+                  <span>M3 → M9</span>
+                  
+                  <span style="color: var(--color-accent);">实测</span>
+                  
+                </div>
+                
+                <div class="tooltip-meta" style="margin-top: 2px;">
+                  <span style="color: #64748b; font-weight: 700;">
+                    跨机会运营守护
+                  </span>
+                </div>
+                
+                <div class="tooltip-desc">每档放量前转化率闸门</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
       </div>
     </div>
 
     <footer class="footer">
-      Generated by milestone-plan-generator · 2026-07-30 14:53 · &copy; 2026 Inspire AI4PM
+      Generated by milestone-plan-generator · 2026-08-04 22:27 · &copy; 2026 Inspire AI4PM
     </footer>
   </div>
 
   <div class="toast" id="toast">已成功复制 YAML 数据</div>
   
   <script type="application/yaml" id="raw-yaml">
-title: &#34;保健品私域电商售前客服 AI 里程碑计划（FDE 交付 · 依赖驱动排期）&#34;
-subtitle: &#34;第 7 步 · 依据⑥优先级矩阵的机会依赖关系排期：被依赖的机会前置（兜底机制/首响/正品库/合规库为地基根节点），6 个月三阶段交付&#34;
+# 第 7 步 · 保健品私域电商全链路AI里程碑计划（业务级）
+# 覆盖5环节4个独立AI机会（O1-O4），9个月三阶段交付。
+# 本计划是保健品私域电商整体业务的AI里程碑（非售前客服项目级制作计划）。
+# 售前客服AI助手的项目级交付计划（O1）在⑧产品画布中展开。
+# 排期铁律：被依赖者前置。O1 RAG自动接待是全链路转化引擎，须最先具备；
+#           O1的合规护栏module与上线同批（红线守门）；O1的持续调优module依赖上线后语料，后置；
+#           O4复购预测依赖CRM数据打通，属远期LTV增量。
+#
+# 结构变更（v7）：原O3合规话术库红线守护=O1的critical级合规护栏module（is_core降级，与O1同批）；
+#                原O4真人话术拟合=O1的持续调优module（is_core降级，上线后迭代）。
+# 结构变更（v8）：移除原O1引流钩子A/B测试（非AI机会）；原O2→O1, 原O3→O2, 原O4→O3, 原O5→O4。机会数量5→4。
+#
+# opportunity_id 铁律：里程碑主线是4个独立机会（O1-O4）。
+#   - 核心机会任务：opportunity_id = 自身O编号（is_core: true），任务条显示醒目O徽章
+#   - 支撑任务：opportunity_id = 其服务的O编号（is_core: false），是机会内部的组成部分，
+#     不是独立里程碑环节，任务条显示"→O1"从属标签，视觉弱化
+#   - 运营守护任务：opportunity_id = "运营"，跨机会配套
+# 对应关系：与⑥优先级矩阵的O1-O4全覆盖且排期顺序一致（近期=第一梯队 / 中期=第二梯队 / 远期=远期）
 
-# 排期铁律：被依赖者前置。依赖根节点（RAG平台 / kf通道 / C15兜底机制 / 四大知识库）必须最先具备；
-# 扩面机会（夜间接待/版本对比/需求澄清/物流查询）承接地基；提质机会（适配推荐/真人拟合/回流调优）依赖上线后语料，最后置。
+title: "保健品私域电商全链路AI里程碑计划"
+subtitle: "业务级·覆盖5环节4个独立AI机会·9个月三阶段·LTV全链路驱动"
 quarters:
-  - &#34;M1&#34;
-  - &#34;M2&#34;
-  - &#34;M3&#34;
-  - &#34;M4&#34;
-  - &#34;M5&#34;
-  - &#34;M6&#34;
+  - "M1"
+  - "M2"
+  - "M3"
+  - "M4"
+  - "M5"
+  - "M6"
+  - "M7"
+  - "M8"
+  - "M9"
 milestones:
-  - name: &#34;近期&#34;
-    endQuarter: &#34;M2&#34;
-    title: &#34;阶段一 · 自动接待地基（依赖根节点先行）&#34;
+  - name: "近期"
+    endQuarter: "M3"
+    title: "阶段一·售前AI化地基"
     goals:
-      - headline: &#34;接得住&#34;
-        description: &#34;kf 通道 + RAG 平台 + 兜底转人工机制跑通，7×24 秒级首响上线&#34;
-      - headline: &#34;答得准正品&#34;
-        description: &#34;正品溯源库 + 合规话术库 + 促销规则库建成，正品应答与确定性算账上线&#34;
-      - headline: &#34;守得住转化&#34;
-        description: &#34;转化率守护看板与打标同步就位，守约 10% 水位&#34;
-  - name: &#34;中期&#34;
-    endQuarter: &#34;M4&#34;
-    title: &#34;阶段二 · 全流程标准化问答扩面&#34;
+      - headline: "售前AI化"
+        description: "O1 RAG自动接待上线（含合规护栏critical module），售前客服AI化地基"
+      - headline: "守得住转化"
+        description: "转化率守护看板就位，守10%水位不下降"
+  - name: "中期"
+    endQuarter: "M6"
+    title: "阶段二·全链路扩面与体验提质"
     goals:
-      - headline: &#34;覆盖全时段&#34;
-        description: &#34;夜间全自动接待与商品版本对比上线，覆盖 75%~85% 标准化问题&#34;
-      - headline: &#34;打通数据源&#34;
-        description: &#34;会话存档、订单/物流 API 对接，物流查询自动化&#34;
-  - name: &#34;远期&#34;
-    endQuarter: &#34;M6&#34;
-    title: &#34;阶段三 · 拟合真人与持续提质&#34;
+      - headline: "全链路扩面"
+        description: "O2支付承接+O3物流查询自动化，覆盖下单履约环节"
+      - headline: "体验提质"
+        description: "O1持续调优module上线（真人拟合+回流扩库），消除机器感守护转化"
+  - name: "远期"
+    endQuarter: "M9"
+    title: "阶段三·LTV增量与持续运营"
     goals:
-      - headline: &#34;拟合真人&#34;
-        description: &#34;真人话术拟合与适配推荐上线，消除机器感&#34;
-      - headline: &#34;持续爬升&#34;
-        description: &#34;真实会话回流调优，自动接待率与拟合度随交付周期上升&#34;
+      - headline: "LTV增量"
+        description: "O4复购周期预测与精准唤回，复购率35%→45%"
+      - headline: "持续爬升"
+        description: "全链路AI持续调优，自动接待率与LTV双升"
 teams:
-  - id: &#34;platform&#34;
-    name: &#34;平台与通道&#34;
-    icon: &#34;Server&#34;
+  - id: "platform"
+    name: "平台与通道"
+    icon: "Server"
+    description: "基础设施通道，支撑O1自动接待"
     tasks:
-      - name: &#34;kf 通道接入与消息回调&#34;
-        description: &#34;企微微信客服通道打通，实时回调即检索即应答（依赖根节点）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M1&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;RAG 平台与基础知识库&#34;
-        description: &#34;检索增强生成平台与语料管线搭建（依赖根节点）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;C15 未命中兜底转人工机制&#34;
-        description: &#34;低置信度自动转接+上下文摘要，不设真人在环的成立前提（几乎被全部机会依赖，最先具备）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;灰度上线&#34;
-  - id: &#34;knowledge&#34;
-    name: &#34;知识库工程&#34;
-    icon: &#34;Database&#34;
+      - name: "kf通道接入与消息回调"
+        description: "企微kf通道打通实时回调"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M1"
+        endQuarter: "M1"
+        milestoneTag: "近期"
+        type: "研发"
+      - name: "RAG平台与基础知识库"
+        description: "检索增强生成平台搭建"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M1"
+        endQuarter: "M2"
+        milestoneTag: "近期"
+        type: "研发"
+      - name: "未命中兜底转人工机制"
+        description: "低置信度转接+上下文摘要"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M1"
+        endQuarter: "M2"
+        milestoneTag: "近期"
+        type: "研发"
+  - id: "knowledge"
+    name: "知识库工程"
+    icon: "Database"
+    description: "四大知识库建库，支撑O1上线与持续调优"
     tasks:
-      - name: &#34;C4/C8 正品溯源库+商品库建库&#34;
-        description: &#34;资质文号/授权链路/防伪/版本规格结构化入库（标品信任逻辑首位依赖）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;C6 预审核合规话术库&#34;
-        description: &#34;功效表述法务预审核入库，合规内置于建库（红线守门，与核心问答同批）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;C10 促销规则库建库&#34;
-        description: &#34;满减/赠品/组合价规则结构化，支撑确定性算账&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;C5 需求澄清问题链知识工程&#34;
-        description: &#34;版本/规格/用法适配问题链结构化，产品化老客服澄清经验&#34;
-        startQuarter: &#34;M3&#34;
-        endQuarter: &#34;M3&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;研发&#34;
-  - id: &#34;dialog&#34;
-    name: &#34;对话应答上线&#34;
-    icon: &#34;Smartphone&#34;
+      - name: "正品溯源库+商品库建库"
+        description: "资质文号版本规格结构化入库"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M1"
+        endQuarter: "M2"
+        milestoneTag: "近期"
+        type: "研发"
+      - name: "预审核合规话术库【critical】"
+        description: "功效表述法务预审核入库，O1合规护栏module的基石"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M1"
+        endQuarter: "M2"
+        milestoneTag: "近期"
+        type: "研发"
+      - name: "促销规则库建库"
+        description: "满减赠品组合价规则入库"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M2"
+        endQuarter: "M2"
+        milestoneTag: "近期"
+        type: "研发"
+      - name: "会话存档API开通取数"
+        description: "合规自证与真人话术语料源，O1持续调优module的数据依赖"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M3"
+        endQuarter: "M4"
+        milestoneTag: "中期"
+        type: "研发"
+  - id: "dialog"
+    name: "售前AI应答"
+    icon: "Smartphone"
+    description: "售前客服核心机会O1（含合规护栏+持续调优module）"
     tasks:
-      - name: &#34;C1 7×24 秒级自动首响&#34;
-        description: &#34;全时段首响≤10 秒，承接夜间加粉黄金窗口&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;正式上线&#34;
-      - name: &#34;C4 正品溯源与版本应答&#34;
-        description: &#34;标品信任逻辑首位高频问题标准化应答（与首响同批）&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M2&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;正式上线&#34;
-      - name: &#34;C10 促销规则库确定性算账&#34;
-        description: &#34;检索规则确定性算价，大模型仅润色，杜绝错价&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M3&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;灰度上线&#34;
-      - name: &#34;C2 夜间咨询全自动接待&#34;
-        description: &#34;承接夜间 35%~45% 咨询高峰，零夜班编制&#34;
-        startQuarter: &#34;M3&#34;
-        endQuarter: &#34;M3&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;灰度上线&#34;
-      - name: &#34;C8 商品库检索版本对比&#34;
-        description: &#34;秒级生成结构化版本对比结论，口径一致&#34;
-        startQuarter: &#34;M3&#34;
-        endQuarter: &#34;M4&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;灰度上线&#34;
-      - name: &#34;C5/C9 需求澄清与适配推荐&#34;
-        description: &#34;问题链引导澄清 + 检索匹配适配版本推荐&#34;
-        startQuarter: &#34;M4&#34;
-        endQuarter: &#34;M5&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;实测&#34;
-      - name: &#34;C11 合规凑单建议&#34;
-        description: &#34;基于满减门槛给凑单组合与到手价，不做压迫式推销&#34;
-        startQuarter: &#34;M5&#34;
-        endQuarter: &#34;M5&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;灰度上线&#34;
-  - id: &#34;integration&#34;
-    name: &#34;数据集成&#34;
-    icon: &#34;Globe&#34;
+      - name: "RAG自动接待上线"
+        description: "7×24首响正品版本算账，含合规护栏critical module同批上线"
+        opportunity_id: "O1"
+        is_core: true
+        startQuarter: "M2"
+        endQuarter: "M3"
+        milestoneTag: "近期"
+        type: "灰度上线"
+      - name: "合规话术库红线守护【O1 module】"
+        description: "功效长尾仅检索预审核库，O1的critical级合规护栏module（非独立机会）"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M2"
+        endQuarter: "M3"
+        milestoneTag: "近期"
+        type: "灰度上线"
+      - name: "真人话术拟合【O1 module】"
+        description: "金牌客服语料调优应答风格，O1的持续调优module（非独立机会）"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M4"
+        endQuarter: "M6"
+        milestoneTag: "中期"
+        type: "实测"
+      - name: "真实会话回流调优【O1 module】"
+        description: "未命中扩库接待率爬升，O1的持续调优module（非独立机会）"
+        opportunity_id: "O1"
+        is_core: false
+        startQuarter: "M4"
+        endQuarter: "M9"
+        milestoneTag: "远期"
+        type: "研发"
+  - id: "chain"
+    name: "全链路集成"
+    icon: "Globe"
+    description: "支付/物流2个核心机会O2/O3"
     tasks:
-      - name: &#34;C3 渠道活码/SCRM 打标接入&#34;
-        description: &#34;自动来源打标与个性化开场（采购现成能力，不自建）&#34;
-        startQuarter: &#34;M1&#34;
-        endQuarter: &#34;M1&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;正式上线&#34;
-      - name: &#34;会话存档 API 开通与合规取数&#34;
-        description: &#34;打开合规自证与真人话术语料源（C7/C16 前置依赖）&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M3&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;订单/物流数据源 API 对接&#34;
-        description: &#34;打通物流查询与发货时效确定性数据（C12/C13 前置依赖）&#34;
-        startQuarter: &#34;M3&#34;
-        endQuarter: &#34;M4&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;研发&#34;
-      - name: &#34;C12 物流状态自动查询&#34;
-        description: &#34;对接数据源实时查询轨迹，7×24 即时应答&#34;
-        startQuarter: &#34;M4&#34;
-        endQuarter: &#34;M4&#34;
-        milestoneTag: &#34;中期&#34;
-        type: &#34;灰度上线&#34;
-      - name: &#34;C13 发货时效确定性承诺&#34;
-        description: &#34;基于订单系统时效数据生成承诺话术，与履约一致&#34;
-        startQuarter: &#34;M5&#34;
-        endQuarter: &#34;M5&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;灰度上线&#34;
-  - id: &#34;guard&#34;
-    name: &#34;守护与运营&#34;
-    icon: &#34;Shield&#34;
+      - name: "智能支付承接"
+        description: "截图识别订单自动核对"
+        opportunity_id: "O2"
+        is_core: true
+        startQuarter: "M4"
+        endQuarter: "M5"
+        milestoneTag: "中期"
+        type: "灰度上线"
+      - name: "物流查询自动化"
+        description: "数据源实时查询时效承诺"
+        opportunity_id: "O3"
+        is_core: true
+        startQuarter: "M4"
+        endQuarter: "M5"
+        milestoneTag: "中期"
+        type: "灰度上线"
+  - id: "growth"
+    name: "复购增长"
+    icon: "Brain"
+    description: "复购核心机会O4及前置数据打通"
     tasks:
-      - name: &#34;C14 转化率守护监测看板&#34;
-        description: &#34;AI 接管组 vs 人工对照组按周监测，放量闸门（与核心上线同批）&#34;
-        startQuarter: &#34;M2&#34;
-        endQuarter: &#34;M3&#34;
-        milestoneTag: &#34;近期&#34;
-        type: &#34;灰度上线&#34;
-      - name: &#34;灰度放量闸门评审&#34;
-        description: &#34;每档放量前须通过转化率闸门，连续两周为负即回滚&#34;
-        startQuarter: &#34;M3&#34;
-        endQuarter: &#34;M6&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;实测&#34;
-      - name: &#34;C7 真人话术拟合&#34;
-        description: &#34;基于会话存档金牌客服语料调优应答风格，拟合度≥90%&#34;
-        startQuarter: &#34;M4&#34;
-        endQuarter: &#34;M5&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;实测&#34;
-      - name: &#34;C16 真实会话回流调优&#34;
-        description: &#34;未命中与低拟合回答持续扩库调优，自动接待率持续爬升&#34;
-        startQuarter: &#34;M4&#34;
-        endQuarter: &#34;M6&#34;
-        milestoneTag: &#34;远期&#34;
-        type: &#34;研发&#34;
+      - name: "CRM数据打通与会员体系"
+        description: "客户全生命周期数据整合"
+        opportunity_id: "O4"
+        is_core: false
+        startQuarter: "M5"
+        endQuarter: "M7"
+        milestoneTag: "远期"
+        type: "研发"
+      - name: "复购周期预测模型"
+        description: "预测复购概率最佳触达"
+        opportunity_id: "O4"
+        is_core: true
+        startQuarter: "M7"
+        endQuarter: "M9"
+        milestoneTag: "远期"
+        type: "实测"
+      - name: "沉睡客户精准唤回"
+        description: "分群个性化唤回策略"
+        opportunity_id: "O4"
+        is_core: false
+        startQuarter: "M8"
+        endQuarter: "M9"
+        milestoneTag: "远期"
+        type: "灰度上线"
+  - id: "guard"
+    name: "守护与运营"
+    icon: "Shield"
+    description: "跨机会运营守护与灰度闸门"
+    tasks:
+      - name: "转化率守护看板"
+        description: "AI组vs人工组按周监测"
+        opportunity_id: "运营"
+        is_core: false
+        startQuarter: "M2"
+        endQuarter: "M4"
+        milestoneTag: "近期"
+        type: "灰度上线"
+      - name: "灰度放量闸门评审"
+        description: "每档放量前转化率闸门"
+        opportunity_id: "运营"
+        is_core: false
+        startQuarter: "M3"
+        endQuarter: "M9"
+        milestoneTag: "远期"
+        type: "实测"
 
   </script>
 
@@ -1199,11 +1384,6 @@ teams:
       });
     }
   </script>
-
-
-
-
-
-<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-优先级矩阵.html"><div class="dir">← 上一步 · 排序</div><div class="t">⑥ 优先级矩阵</div><div class="d">前承：16 个机会按收益×成本评分排序，识别 Quick Win 与依赖根节点</div></a><a class="navcard next" href="私域电商售前客服-产品画布.html"><div class="dir">下一步 · 附录 →</div><div class="t">⊕ 产品画布</div><div class="d">后启：最小售前转化闭环 Demo：首响 + 正品信任 + 促销算账 + 转人工兜底 + 转化守护</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-优先级矩阵.html"><div class="dir">← 上一页</div><div class="t">⑥ 优先级矩阵</div><div class="d">5个机会收益÷成本评分</div></a><a class="navcard next" href="私域电商售前客服-产品画布.html"><div class="dir">下一页 →</div><div class="t">⑧ 产品画布</div><div class="d">售前客服AI助手项目级画布</div></a></div></div><!-- ai4pm-nav-bottom-end -->
 </body>
 </html>
