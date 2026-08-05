@@ -30,29 +30,38 @@ PAGES = [
      "16 个机会按收益×成本评分排序，识别 Quick Win 与依赖根节点"),
     ("私域电商售前客服-里程碑计划.html", "⑦ 里程碑计划", "落地",
      "依赖驱动排期：被依赖机会前置，6 个月三阶段 FDE 交付甘特图"),
-    ("私域电商售前客服-产品画布.html", "⊕ 产品画布", "附录",
+    ("私域电商售前客服-产品画布.html", "⑧ 产品画布", "附录",
      "最小售前转化闭环 Demo：首响 + 正品信任 + 促销算账 + 转人工兜底 + 转化守护"),
-    ("私域电商售前客服-政策规则数据清单.html", "⊕ 数据清单", "附录",
+    ("私域电商售前客服-政策规则数据清单.html", "⑨ 数据清单", "附录",
      "真实业务数据底稿：19 位客户语料 + 16 档全规格价格 + 验真/物流/支付口径"),
-    ("私域电商售前客服-业务本体设计.html", "⊕ 本体设计", "附录",
+    ("私域电商售前客服-业务本体设计.html", "⑩ 本体设计", "附录",
      "Agent 三层本体：10 实体对象关系 + 5 个行动边界 + 3 条执行流状态迁移"),
-    ("私域电商售前客服-测试用例集.html", "⊕ 测试用例", "附录",
+    ("私域电商售前客服-测试用例集.html", "⑪ 测试用例", "附录",
      "三层三类 MVP 验证集：30 条用例（Golden 50% / Hard 30% / Edge 20%）+ 本体遗漏检查"),
-    ("私域电商售前客服-售前问答Demo.html", "⊕ 问答Demo", "附录",
+    ("私域电商售前客服-售前问答Demo.html", "⑫ 问答Demo", "附录",
      "确定性问答引擎可运行 Demo：左侧会话气泡 + 右侧透明面板（意图/置信度/知识证据/行动边界/转人工），镜像 answer_engine 规则"),
 ]
 
 NAV_CSS = """
 <style>
-.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;}
-.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
-.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-shell{position:fixed;top:12px;left:0;right:0;z-index:9999;pointer-events:none;}
+.ai4pm-nav-spacer{height:118px;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:calc(100% - 48px);max-width:1440px;margin:0 auto;pointer-events:auto;}
+.ai4pm-nav,.ai4pm-nav *{box-sizing:border-box;font-style:normal;letter-spacing:normal;text-transform:none;}
+.ai4pm-nav a,.ai4pm-nav span,.ai4pm-nav div{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;}
+.ai4pm-nav-top{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-row{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;}
+.ai4pm-nav-row::-webkit-scrollbar{height:6px;}
+.ai4pm-nav-row::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px;}
+.ai4pm-nav-row::-webkit-scrollbar-track{background:transparent;}
+.ai4pm-nav-top .idx{display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
 .ai4pm-nav-top .idx:hover{background:#1B2B47;}
-.ai4pm-nav-top .sep{color:#E2E8F0;}
-.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .sep{display:inline-flex;align-items:center;color:#E2E8F0;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
 .ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
 .ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
-.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
+.ai4pm-nav-top .arrow{display:inline-flex;align-items:center;color:#CBD5E1;font-size:11px;line-height:1;margin:0!important;}
+.ai4pm-nav-top .idx,.ai4pm-nav-top .sep,.ai4pm-nav-top .pill,.ai4pm-nav-top .arrow{flex:0 0 auto;}
 .ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
 .ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
 .ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
@@ -62,22 +71,26 @@ NAV_CSS = """
 .ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
 .ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
 .ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
-@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+@media (max-width:768px){.ai4pm-nav{width:calc(100% - 24px);}.ai4pm-nav-spacer{height:126px;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
 </style>
 """
 
 def top_nav(cur: int) -> str:
-    pills = []
+    row1 = []
+    row2 = []
     for i, (fn, short, _, _) in enumerate(PAGES):
         cls = "pill cur" if i == cur else "pill"
-        pills.append(f'<a class="{cls}" href="{fn}">{short}</a>')
-        if i < len(PAGES) - 1:
-            pills.append('<span class="arrow">›</span>')
+        target = row1 if i < 7 else row2
+        target.append(f'<a class="{cls}" href="{fn}">{short}</a>')
+        if (i < 6) or (7 <= i < len(PAGES) - 1):
+            target.append('<span class="arrow">›</span>')
     return (
-        '<div class="ai4pm-nav"><div class="ai4pm-nav-top">'
-        f'<a class="idx" href="{INDEX}">☰ 导航索引</a><span class="sep">|</span>'
-        + "".join(pills)
-        + "</div></div>"
+        '<div class="ai4pm-nav-shell"><div class="ai4pm-nav"><div class="ai4pm-nav-top">'
+        f'<div class="ai4pm-nav-row"><a class="idx" href="{INDEX}">☰ 导航索引</a><span class="sep">|</span>'
+        + "".join(row1)
+        + '</div><div class="ai4pm-nav-row">'
+        + "".join(row2)
+        + "</div></div></div></div><div class=\"ai4pm-nav-spacer\"></div>"
     )
 
 def bottom_nav(cur: int) -> str:
@@ -115,6 +128,15 @@ def inject(path: str, cur: int) -> None:
     # 幂等：先移除旧导航块
     html = re.sub(re.escape(TOP_MARK_S) + r".*?" + re.escape(TOP_MARK_E), "", html, flags=re.S)
     html = re.sub(re.escape(BOT_MARK_S) + r".*?" + re.escape(BOT_MARK_E), "", html, flags=re.S)
+    # 清理历史遗留的孤儿导航样式和导航块，避免重复注入后叠加
+    html = re.sub(r"<style>\s*\.ai4pm-nav\{.*?@media \(max-width:768px\)\{.*?\}\s*</style>\s*", "", html, flags=re.S)
+    html = re.sub(r'<div class="ai4pm-nav-shell">.*?</div>\s*<div class="ai4pm-nav-spacer"></div>\s*', "", html, flags=re.S)
+    html = re.sub(r'<div class="ai4pm-nav-spacer"></div>\s*', "", html, flags=re.S)
+    html = re.sub(r'<div class="ai4pm-nav"><div class="ai4pm-nav-top">.*?</div></div>(?:<!-- ai4pm-nav-top-end -->)?\s*', "", html, flags=re.S)
+    html = re.sub(r'<div class="ai4pm-nav"><div class="ai4pm-nav-bottom">.*?</div></div>(?:<!-- ai4pm-nav-bottom-end -->)?\s*', "", html, flags=re.S)
+    # 清理个别页面早期自带的旧面包屑导航，避免与统一导航并存
+    html = re.sub(r"\s*\.nav\s*\{.*?\}\s*\.nav a\s*\{.*?\}\s*", "", html, flags=re.S)
+    html = re.sub(r'\s*<div class="nav">.*?</div>\s*', "\n", html, flags=re.S)
 
     top_block = f"{TOP_MARK_S}{NAV_CSS}{top_nav(cur)}{TOP_MARK_E}"
     bot_block = f"{BOT_MARK_S}{bottom_nav(cur)}{BOT_MARK_E}"

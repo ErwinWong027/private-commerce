@@ -368,16 +368,25 @@
 <body>
 <!-- ai4pm-nav-top-start -->
 <style>
-.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:85%;margin:0 auto;align-self:center;}
-.ai4pm-nav-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 18px;margin:16px auto 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
-.ai4pm-nav-top .idx{font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-shell{position:fixed;top:12px;left:0;right:0;z-index:9999;pointer-events:none;}
+.ai4pm-nav-spacer{height:118px;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:calc(100% - 48px);max-width:1440px;margin:0 auto;pointer-events:auto;}
+.ai4pm-nav,.ai4pm-nav *{box-sizing:border-box;font-style:normal;letter-spacing:normal;text-transform:none;}
+.ai4pm-nav a,.ai4pm-nav span,.ai4pm-nav div{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;}
+.ai4pm-nav-top{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-row{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;}
+.ai4pm-nav-row::-webkit-scrollbar{height:6px;}
+.ai4pm-nav-row::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px;}
+.ai4pm-nav-row::-webkit-scrollbar-track{background:transparent;}
+.ai4pm-nav-top .idx{display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
 .ai4pm-nav-top .idx:hover{background:#1B2B47;}
-.ai4pm-nav-top .sep{color:#E2E8F0;}
-.ai4pm-nav-top .pill{font-size:12px;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;}
+.ai4pm-nav-top .sep{display:inline-flex;align-items:center;color:#E2E8F0;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
 .ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
 .ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
-.ai4pm-nav-top .arrow{color:#CBD5E1;font-size:11px;}
-.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;align-self:center;width:85%;}
+.ai4pm-nav-top .arrow{display:inline-flex;align-items:center;color:#CBD5E1;font-size:11px;line-height:1;margin:0!important;}
+.ai4pm-nav-top .idx,.ai4pm-nav-top .sep,.ai4pm-nav-top .pill,.ai4pm-nav-top .arrow{flex:0 0 auto;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
 .ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
 .ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
 .ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
@@ -386,9 +395,21 @@
 .ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
 .ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
 .ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
-@media (max-width:768px){.ai4pm-nav-top{overflow-x:auto;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+@media (max-width:768px){.ai4pm-nav{width:calc(100% - 24px);}.ai4pm-nav-spacer{height:126px;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
 </style>
-<div class="ai4pm-nav"><div class="ai4pm-nav-top"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⊕ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⊕ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⊕ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⊕ 问答Demo</a></div></div><!-- ai4pm-nav-top-end -->
+<div class="ai4pm-nav-shell"><div class="ai4pm-nav"><div class="ai4pm-nav-top"><div class="ai4pm-nav-row"><a class="idx" href="私域电商售前客服-导航索引.html">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="私域电商售前客服-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill cur" href="私域电商售前客服-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-里程碑计划.html">⑦ 里程碑计划</a></div><div class="ai4pm-nav-row"><a class="pill" href="私域电商售前客服-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-政策规则数据清单.html">⑨ 数据清单</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-业务本体设计.html">⑩ 本体设计</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-测试用例集.html">⑪ 测试用例</a><span class="arrow">›</span><a class="pill" href="私域电商售前客服-售前问答Demo.html">⑫ 问答Demo</a></div></div></div></div><div class="ai4pm-nav-spacer"></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+
+
+
+
+
+
+
+
     <div class="page-container">
         <header class="page-header">
       <div class="header-left">
@@ -850,6 +871,18 @@ stages:
             });
         }
     </script>
-<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-服务蓝图.html"><div class="dir">← 上一页</div><div class="t">④ 服务蓝图</div><div class="d">全链路5环节三层泳道</div></a><a class="navcard next" href="私域电商售前客服-优先级矩阵.html"><div class="dir">下一页 →</div><div class="t">⑥ 优先级矩阵</div><div class="d">5个机会收益÷成本评分</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="私域电商售前客服-服务蓝图.html"><div class="dir">← 上一步 · 分析</div><div class="t">④ 服务蓝图</div><div class="d">前承：三层泳道解剖 As-Is 人工售前 5 阶段，定位认知负荷 critical 的痛点节点</div></a><a class="navcard next" href="私域电商售前客服-优先级矩阵.html"><div class="dir">下一步 · 排序 →</div><div class="t">⑥ 优先级矩阵</div><div class="d">后启：16 个机会按收益×成本评分排序，识别 Quick Win 与依赖根节点</div></a></div></div><!-- ai4pm-nav-bottom-end -->
 </body>
 </html>
