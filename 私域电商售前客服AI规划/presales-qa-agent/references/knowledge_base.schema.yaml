@@ -1,0 +1,115 @@
+# =============================================================================
+# 售前问答知识库 Schema（presales-qa-agent）
+# -----------------------------------------------------------------------------
+# 本文件既是「结构说明」也是「可运行的通用示例」：answer_engine.py / build_demo.py
+# 直接消费本结构。换行业时复制本文件、替换各 section 内容即可复用。
+# 价格/承诺/话术必须逐条可溯源；缺失数据标 TODO 并让引擎转人工兜底，不臆造。
+# 下例采用一个中性的「私域数码配件」业务，仅用于演示字段含义。
+# =============================================================================
+
+meta:
+  title: "私域售前问答知识库（通用示例）"
+  product_name: "示例店铺 AI 售前助手"
+  generated_by: presales-qa-agent
+
+# 首响欢迎语模板（ab_first_response）——必须走预置模板，禁止即兴承诺
+welcome_template: "您好，欢迎咨询～这里可以帮您解答型号、价格、正品与发货问题，请问想先了解哪一块？"
+
+# 意图路由配置（详见 references/intent_routing.md）
+routing:
+  confidence_threshold: 0.34          # 低于此值判低置信 → 转人工
+  intent_keywords:
+    handoff: ["转人工", "人工", "投诉", "不放心"]
+    risk: ["效果", "保证", "副作用", "能不能用"]
+    fulfillment_payment: ["付款", "支付", "发货", "多久到", "运费", "截图", "地址"]
+    pricing: ["多少钱", "价格", "优惠", "活动", "到手", "几支"]
+    authenticity: ["正品", "真假", "验", "假货", "退款"]
+    version: ["版本", "区别", "哪个好", "型号", "成分"]
+
+# 商品版本（core）——version 意图应答来源
+product_versions:
+  - id: v_std
+    name: 标准版
+    aliases: ["标配", "普通版"]
+    package_desc: "单件装"
+    product_form: "标准型"
+    usage_desc: "开箱即用"
+    storage_desc: "常温干燥存放"
+    compare_note: "基础功能齐全，性价比首选"
+    integral_only: false              # 是否只能整盒/整套购买
+    doses: ["单件"]                    # 该版本可选规格档（数码场景可用容量/型号替代剂量）
+
+# 规格价格表（core）——pricing 意图唯一权威数据源，绝不心算
+# 每档一条；session_price + conflict 用于表达"表价与历史浮动口径不一致"的冲突档
+sku_prices:
+  - version: 标准版
+    dose: "单件"
+    list_price: 199                   # 表价（权威）
+    session_price: null               # 会话浮动口径（无冲突填 null）
+    conflict: false                   # true → 命中即转人工，不二选一报价
+    stock: in_stock                   # in_stock / out_of_stock
+    unit: 件
+
+# 促销规则（reference）——到手价只能由规则表算出
+promo_rules:
+  - id: PROMO-001
+    name: "满减活动"
+    version: 标准版                    # 适用版本；null 表示全版本
+    scope: per_unit                   # per_unit 单件 / per_order 整单
+    discount: 10                      # 减免金额（元）
+    validity: active                  # active / expired / manual_only
+
+# 人工议价口径（reference）——未结构化，禁止 AI 自动执行，命中即转人工
+manual_only_promos:
+  - "老客户可议价（口径未统一）"
+
+# 正品凭据（reference）——authenticity 意图应答来源，凭据只来自此处
+authenticity_proofs:
+  verify_steps:
+    - "官网扫码验真"
+    - "官网唯一网址查验"
+  packaging:
+    - "原厂封装 + 防伪标"
+  refund_promise: "验出非正品可退"     # 逐字口径，不得扩大
+  forbidden:                          # 禁止伪造/使用的表述
+    - "批准文号 / 注册证书编号 / 质检结论"
+    - "绝对正品 / 官方唯一授权 / 国家级等绝对化表述"
+
+# 合规话术白名单（reference）——risk 意图只能走此处，超白名单转人工
+compliance_whitelist:
+  - intent: 效果承诺
+    trigger_words: ["效果", "保证", "有没有用"]
+    response_mode: safe_reply         # safe_reply 保守回复 / transfer 直接转人工
+    reply: "效果因人而异，无法承诺固定结果，具体以说明书和实际使用为准。"
+  - intent: 售后疑难
+    trigger_words: ["坏了", "故障"]
+    response_mode: transfer
+    reply: "这类情况我帮您转人工进一步处理。"
+
+# 禁忌/特殊人群固定口径（reference）——命中且坚持购买 → 不推进成交，转人工
+contraindications:
+  groups: []                          # 数码场景可留空；医药/食品场景填禁忌人群
+  reply: ""
+
+# 物流与支付口径（reference）——fulfillment_payment 意图应答来源
+fulfillment_payment:
+  payment_methods: ["微信", "支付宝"]
+  payment_unavailable: "暂不支持货到付款"
+  shipping_origin: "深圳"
+  ship_time: "48 小时内发出"
+  delivery_time: "揽收后 2-3 天送达"
+  freight: "满 99 包邮，不满收 10 元运费"
+  screenshot_handoff: "收到付款截图后转人工核对订单要素，不确认收款成功"
+
+# 使用与保存（reference）——高频事实问答
+usage_storage:
+  usage: "开箱即用，按说明书操作"
+  storage_unopened: "常温干燥存放"
+  storage_opened: "避免潮湿"
+  side_effects: ""
+
+# 不在售/不在范围（reference）——不报价、不引导代购
+not_in_scope:
+  - item: 定制版
+    aliases: ["定制", "特别版"]
+    reply: "定制版暂不在本店销售范围，可为您介绍在售型号。"

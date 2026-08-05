@@ -1,0 +1,108 @@
+# =============================================================================
+# 通用示例知识库（presales-qa-agent · examples）
+# -----------------------------------------------------------------------------
+# 这是一份「可直接跑」的示例知识库，用一个中性的「私域数码配件」店铺演示如何
+# 换行业复用本 Skill：复制 references/knowledge_base.schema.yaml 的结构 → 替换
+# 各 section 内容即可。answer_engine.py / build_demo.py 直接消费本文件。
+#   python3 ../scripts/answer_engine.py example_kb.yaml --ask "旗舰版 多少钱？"
+#   python3 ../scripts/build_demo.py   example_kb.yaml example_demo.html
+# 价格/承诺/话术逐条可溯源；缺失即让引擎转人工兜底，不臆造。
+# =============================================================================
+
+meta:
+  title: "示例数码店 · 售前问答知识库"
+  product_name: "示例店铺 AI 售前助手"
+  generated_by: presales-qa-agent
+
+welcome_template: "您好，欢迎咨询～这里可以帮您解答型号、价格、正品与发货问题，请问想先了解哪一款？"
+
+synonyms_note: "本店在售标准版、旗舰版两个型号，均为原厂正品，支持官网验真。"
+
+routing:
+  confidence_threshold: 0.34
+  intent_keywords:
+    handoff: ["转人工", "人工", "真人", "投诉", "不放心", "骗子"]
+    risk: ["保证", "效果", "有没有用", "能不能用", "副作用", "辐射", "安全吗", "过敏"]
+    fulfillment_payment: ["付款", "支付", "怎么付", "转账", "微信", "支付宝", "发货",
+            "从哪发", "多久到", "几天到", "快递", "物流", "运费", "包邮", "截图", "付好了", "地址"]
+    pricing: ["多少钱", "价格", "什么价", "报价", "优惠", "活动", "到手", "便宜", "折扣",
+            "打折", "减", "几件", "一件多少", "618"]
+    authenticity: ["正品", "真的假的", "真假", "验真", "验", "扫码", "假货", "退款", "退货", "序列号", "防伪"]
+    version: ["版本", "型号", "标准版", "旗舰版", "区别", "哪个好", "参数", "配置", "怎么用", "用法", "保养", "保存"]
+
+product_versions:
+  - id: v_std
+    name: 标准版
+    aliases: ["标配", "普通版"]
+    package_desc: "单件装"
+    product_form: "标准型"
+    usage_desc: "开箱即用，按说明书操作"
+    storage_desc: "常温干燥存放，避免潮湿"
+    compare_note: "基础功能齐全，性价比首选"
+    integral_only: false
+    doses: ["单件"]
+  - id: v_pro
+    name: 旗舰版
+    aliases: ["高配版", "Pro"]
+    package_desc: "单件装 + 配件包"
+    product_form: "旗舰型"
+    usage_desc: "开箱即用，按说明书操作"
+    storage_desc: "常温干燥存放，避免潮湿"
+    compare_note: "性能与配件更全，进阶价格带"
+    integral_only: false
+    doses: ["单件"]
+
+sku_prices:
+  - {version: 标准版, dose: "单件", list_price: 199,  session_price: null, conflict: false, stock: in_stock,     unit: 件}
+  - {version: 旗舰版, dose: "单件", list_price: 399,  session_price: 359,  conflict: true,  stock: in_stock,     unit: 件}
+
+promo_rules:
+  - {id: PROMO-001, name: "618 活动·标准版", version: 标准版, scope: per_unit, discount: 20, validity: active}
+
+manual_only_promos:
+  - "老客户可议价（口径未统一）"
+
+authenticity_proofs:
+  verify_steps:
+    - "官网扫码验真"
+    - "官网唯一网址查验序列号"
+  packaging:
+    - "原厂封装 + 防伪标"
+  refund_promise: "验出非正品可退"
+  forbidden:
+    - "批准文号 / 注册证书编号 / 质检结论"
+    - "绝对正品 / 官方唯一授权 / 国家级等绝对化表述"
+
+compliance_whitelist:
+  - intent: 效果承诺
+    trigger_words: ["效果", "保证", "有没有用"]
+    response_mode: safe_reply
+    reply: "效果因人而异，无法承诺固定结果，具体以说明书和实际使用为准哦。"
+  - intent: 安全疑难
+    trigger_words: ["辐射", "安全吗", "过敏"]
+    response_mode: transfer
+    reply: "这类安全相关的问题我不能直接下结论，帮您转人工进一步说明。"
+
+contraindications:
+  groups: []
+  reply: ""
+
+fulfillment_payment:
+  payment_methods: ["微信", "支付宝"]
+  payment_unavailable: "暂不支持货到付款"
+  shipping_origin: "深圳"
+  ship_time: "48 小时内发出"
+  delivery_time: "揽收后 2-3 天送达"
+  freight: "满 99 包邮，不满收 10 元运费"
+  screenshot_handoff: "收到付款截图后转人工核对订单要素，不确认收款成功"
+
+usage_storage:
+  usage: "开箱即用，按说明书操作"
+  storage_unopened: "常温干燥存放"
+  storage_opened: "避免潮湿，远离热源"
+  side_effects: ""
+
+not_in_scope:
+  - item: 定制版
+    aliases: ["定制", "特别版"]
+    reply: "定制版暂不在本店销售范围，可为您介绍在售的标准版 / 旗舰版。"

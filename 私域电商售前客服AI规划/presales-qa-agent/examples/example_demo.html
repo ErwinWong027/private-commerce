@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>示例数码店 · 售前问答知识库 · 售前问答 Demo</title>
+<style>
+:root{
+  --color-primary:#10213E; --color-accent:#5DB2E2; --color-secondary:#625D9C;
+  --color-success:#00524C; --color-warning:#F59E0B; --color-destructive:#EF4444;
+  --color-bg:#FFFFFF; --color-bg-alt:#F5F5F6; --color-fg:#10213E;
+  --color-muted:#64748B; --color-border:#E2E8F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;background:var(--color-bg-alt);color:var(--color-fg);line-height:1.6;}
+.container{width:85%;margin:0 auto;padding:28px 0 56px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;padding:22px 0 18px;border-bottom:1px solid var(--color-border);margin-bottom:22px;}
+.page-header h1{font-size:26px;font-weight:600;color:var(--color-primary);}
+.page-header .subtitle{font-size:13.5px;color:var(--color-muted);margin-top:6px;}
+.gen-info{text-align:right;font-size:12px;color:var(--color-muted);line-height:1.8;}
+/* 护栏说明条 */
+.guardrails{background:linear-gradient(135deg,#1B2B47 0%,#4A9FD8 100%);color:#fff;border-radius:8px;padding:16px 22px;margin-bottom:20px;font-size:13px;line-height:1.9;}
+.guardrails b{color:#BFE3F7;}
+.guardrails .g{display:inline-block;margin-right:18px;}
+/* chips */
+.chips{background:var(--color-bg);border:1px solid var(--color-border);border-radius:8px;padding:14px 18px;margin-bottom:18px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.chips .lbl{font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--color-secondary);text-transform:uppercase;margin-bottom:10px;}
+.chips .chip{display:inline-block;font-size:12.5px;color:var(--color-primary);background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:20px;padding:6px 14px;margin:0 8px 8px 0;cursor:pointer;transition:all .15s ease-out;}
+.chips .chip:hover{border-color:var(--color-accent);background:#EAF6FC;}
+/* 主体两栏 */
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.panel{background:var(--color-bg);border:1px solid var(--color-border);border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.08);display:flex;flex-direction:column;height:620px;}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:10px;}
+.panel-head .dot{width:10px;height:10px;border-radius:50%;}
+.panel-head .t{font-size:15px;font-weight:700;color:var(--color-primary);}
+.panel-head .sub{font-size:12px;color:var(--color-muted);margin-left:auto;}
+/* 聊天区 */
+.chat-dot{background:var(--color-accent);}
+.chat-body{flex:1;overflow-y:auto;padding:18px;background:var(--color-bg-alt);}
+.msg{display:flex;margin-bottom:14px;}
+.msg .bubble{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.msg.cust{justify-content:flex-end;}
+.msg.cust .bubble{background:var(--color-accent);color:#fff;border-bottom-right-radius:3px;}
+.msg.ai{justify-content:flex-start;}
+.msg.ai .bubble{background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-fg);border-bottom-left-radius:3px;}
+.msg .turn{font-size:10px;color:var(--color-muted);align-self:flex-end;margin:0 6px;}
+.msg.ai .bubble.human{border-left:3px solid var(--color-warning);}
+.chat-input{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--color-border);}
+.chat-input input{flex:1;font-family:inherit;font-size:13.5px;padding:9px 12px;border:1px solid var(--color-border);border-radius:6px;outline:none;}
+.chat-input input:focus{border-color:var(--color-accent);box-shadow:0 0 0 2px rgba(93,178,226,.25);}
+.chat-input button{font-family:inherit;font-size:13.5px;font-weight:600;color:#fff;background:var(--color-primary);border:none;border-radius:6px;padding:9px 18px;cursor:pointer;transition:opacity .15s;}
+.chat-input button:hover{opacity:.85;}
+.chat-input .clear{background:var(--color-bg-alt);color:var(--color-muted);border:1px solid var(--color-border);}
+/* 透明面板 */
+.trace-dot{background:var(--color-secondary);}
+.trace-body{flex:1;overflow-y:auto;padding:16px 18px;}
+.trace-empty{color:var(--color-muted);font-size:13px;text-align:center;margin-top:40px;line-height:1.9;}
+.tcard{border:1px solid var(--color-border);border-radius:8px;padding:14px 16px;margin-bottom:14px;background:var(--color-bg);}
+.tcard .thead{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.tcard .tnum{font-size:11px;font-weight:700;color:#fff;background:var(--color-secondary);border-radius:5px;padding:2px 8px;}
+.tcard .intent{font-size:13px;font-weight:700;color:var(--color-primary);}
+.tcard .flag{font-size:11px;font-weight:700;border-radius:5px;padding:2px 9px;margin-left:auto;}
+.flag.auto{background:#E6F4EA;color:var(--color-success);}
+.flag.human{background:#FEF3E2;color:var(--color-warning);}
+.trow{margin-bottom:9px;}
+.trow .k{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--color-secondary);text-transform:uppercase;margin-bottom:3px;}
+.trow .v{font-size:12.5px;color:var(--color-fg);}
+.conf{display:flex;align-items:center;gap:8px;}
+.conf .bar{flex:1;height:7px;background:var(--color-bg-alt);border-radius:4px;overflow:hidden;}
+.conf .bar span{display:block;height:100%;background:var(--color-accent);}
+.conf .val{font-size:12px;font-weight:700;color:var(--color-primary);min-width:38px;text-align:right;}
+.evid{list-style:none;}
+.evid li{font-size:11.5px;color:var(--color-fg);background:var(--color-bg-alt);border-left:3px solid var(--color-accent);border-radius:0 4px 4px 0;padding:5px 9px;margin-bottom:5px;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;word-break:break-all;}
+.decision{font-size:12.5px;color:var(--color-fg);background:#F0F6FB;border-radius:6px;padding:8px 10px;}
+.summary{font-size:12px;color:var(--color-fg);background:#FEF9F0;border:1px dashed var(--color-warning);border-radius:6px;padding:9px 11px;white-space:pre-wrap;line-height:1.7;}
+.mk{display:inline-block;font-size:11px;color:var(--color-muted);background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:4px;padding:1px 7px;margin:0 5px 5px 0;}
+footer{text-align:center;font-size:12px;color:var(--color-muted);padding-top:20px;}
+footer b{color:var(--color-secondary);}
+@media (max-width:1024px){.workspace{grid-template-columns:1fr;}.panel{height:520px;}}
+@media (max-width:768px){.page-header{flex-direction:column;align-items:flex-start;gap:10px;}.container{width:92%;}.guardrails .g{display:block;margin-bottom:4px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>示例数码店 · 售前问答知识库</h1>
+      <div class="subtitle">售前问答确定性引擎 · 交互 Demo（示例店铺 AI 售前助手）</div>
+    </div>
+    <div class="gen-info">
+      Generated by presales-qa-agent<br>2026-07-30 19:33
+    </div>
+  </div>
+
+  <div class="guardrails">
+    <b>三条不可逾越的护栏（浏览器内 JS 引擎镜像 answer_engine.py，价格零幻觉）：</b><br>
+    <span class="g">① <b>价格只走确定性查表</b>——命中缺货/口径冲突即转人工</span>
+    <span class="g">② <b>正品凭据只来自知识库</b>——禁伪造监管编号/绝对化背书</span>
+    <span class="g">③ <b>敏感功效只走白名单</b>——治疗/禁忌类直接转人工</span>
+  </div>
+
+  <div class="chips">
+    <div class="lbl">快捷提问（取自测试用例集的高信号场景）</div>
+    <div id="chipsBox"></div>
+  </div>
+
+  <div class="workspace">
+    <!-- 左：聊天模拟器 -->
+    <div class="panel">
+      <div class="panel-head"><span class="dot chat-dot"></span><span class="t">客户会话</span><span class="sub">企微 1v1 自动回复模拟</span></div>
+      <div class="chat-body" id="chatBody"></div>
+      <div class="chat-input">
+        <input id="msgInput" type="text" placeholder="输入客户问题，回车发送…" autocomplete="off">
+        <button id="sendBtn">发送</button>
+        <button class="clear" id="clearBtn">清空</button>
+      </div>
+    </div>
+    <!-- 右：透明面板 -->
+    <div class="panel">
+      <div class="panel-head"><span class="dot trace-dot"></span><span class="t">AI 决策透明面板</span><span class="sub">意图 · 证据 · 行动边界 · 转人工</span></div>
+      <div class="trace-body" id="traceBody">
+        <div class="trace-empty" id="traceEmpty">
+          点击上方快捷提问，或在左侧输入问题。<br>
+          每一轮 AI 应答都会在此展开：命中意图 + 置信度、命中的知识条目/规则、<br>触发的行动边界决策、是否转人工及三段式摘要。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    引擎为<b>规则驱动确定性</b>应答，无外部 LLM、无后端，离线可演示 ·
+    价格/承诺/话术逐条溯源自 <b>示例店铺 AI 售前助手</b> 知识库
+  </footer>
+</div>
+
+<script>
+/* ===================================================================== *
+ * 注入数据：知识库 JSON + 快捷提问 chips
+ * ===================================================================== */
+const KB = {"meta": {"title": "示例数码店 · 售前问答知识库", "product_name": "示例店铺 AI 售前助手", "generated_by": "presales-qa-agent"}, "welcome_template": "您好，欢迎咨询～这里可以帮您解答型号、价格、正品与发货问题，请问想先了解哪一款？", "synonyms_note": "本店在售标准版、旗舰版两个型号，均为原厂正品，支持官网验真。", "routing": {"confidence_threshold": 0.34, "intent_keywords": {"handoff": ["转人工", "人工", "真人", "投诉", "不放心", "骗子"], "risk": ["保证", "效果", "有没有用", "能不能用", "副作用", "辐射", "安全吗", "过敏"], "fulfillment_payment": ["付款", "支付", "怎么付", "转账", "微信", "支付宝", "发货", "从哪发", "多久到", "几天到", "快递", "物流", "运费", "包邮", "截图", "付好了", "地址"], "pricing": ["多少钱", "价格", "什么价", "报价", "优惠", "活动", "到手", "便宜", "折扣", "打折", "减", "几件", "一件多少", "618"], "authenticity": ["正品", "真的假的", "真假", "验真", "验", "扫码", "假货", "退款", "退货", "序列号", "防伪"], "version": ["版本", "型号", "标准版", "旗舰版", "区别", "哪个好", "参数", "配置", "怎么用", "用法", "保养", "保存"]}}, "product_versions": [{"id": "v_std", "name": "标准版", "aliases": ["标配", "普通版"], "package_desc": "单件装", "product_form": "标准型", "usage_desc": "开箱即用，按说明书操作", "storage_desc": "常温干燥存放，避免潮湿", "compare_note": "基础功能齐全，性价比首选", "integral_only": false, "doses": ["单件"]}, {"id": "v_pro", "name": "旗舰版", "aliases": ["高配版", "Pro"], "package_desc": "单件装 + 配件包", "product_form": "旗舰型", "usage_desc": "开箱即用，按说明书操作", "storage_desc": "常温干燥存放，避免潮湿", "compare_note": "性能与配件更全，进阶价格带", "integral_only": false, "doses": ["单件"]}], "sku_prices": [{"version": "标准版", "dose": "单件", "list_price": 199, "session_price": null, "conflict": false, "stock": "in_stock", "unit": "件"}, {"version": "旗舰版", "dose": "单件", "list_price": 399, "session_price": 359, "conflict": true, "stock": "in_stock", "unit": "件"}], "promo_rules": [{"id": "PROMO-001", "name": "618 活动·标准版", "version": "标准版", "scope": "per_unit", "discount": 20, "validity": "active"}], "manual_only_promos": ["老客户可议价（口径未统一）"], "authenticity_proofs": {"verify_steps": ["官网扫码验真", "官网唯一网址查验序列号"], "packaging": ["原厂封装 + 防伪标"], "refund_promise": "验出非正品可退", "forbidden": ["批准文号 / 注册证书编号 / 质检结论", "绝对正品 / 官方唯一授权 / 国家级等绝对化表述"]}, "compliance_whitelist": [{"intent": "效果承诺", "trigger_words": ["效果", "保证", "有没有用"], "response_mode": "safe_reply", "reply": "效果因人而异，无法承诺固定结果，具体以说明书和实际使用为准哦。"}, {"intent": "安全疑难", "trigger_words": ["辐射", "安全吗", "过敏"], "response_mode": "transfer", "reply": "这类安全相关的问题我不能直接下结论，帮您转人工进一步说明。"}], "contraindications": {"groups": [], "reply": ""}, "fulfillment_payment": {"payment_methods": ["微信", "支付宝"], "payment_unavailable": "暂不支持货到付款", "shipping_origin": "深圳", "ship_time": "48 小时内发出", "delivery_time": "揽收后 2-3 天送达", "freight": "满 99 包邮，不满收 10 元运费", "screenshot_handoff": "收到付款截图后转人工核对订单要素，不确认收款成功"}, "usage_storage": {"usage": "开箱即用，按说明书操作", "storage_unopened": "常温干燥存放", "storage_opened": "避免潮湿，远离热源", "side_effects": ""}, "not_in_scope": [{"item": "定制版", "aliases": ["定制", "特别版"], "reply": "定制版暂不在本店销售范围，可为您介绍在售的标准版 / 旗舰版。"}]};
+const CHIPS = [{"label": "在吗？（首响）", "text": "在吗？想了解一下"}, {"label": "孟版 5.0 多少钱", "text": "孟版 5.0 多少钱一支？"}, {"label": "日版 2.5 报价（C-016 双口径）", "text": "日版 2.5 多少钱一盒？"}, {"label": "议价（C-017）", "text": "上次你们客服给我优惠了 10，这次也一样吧？1200 的能不能 80 拿？"}, {"label": "治疗红线（C-026）", "text": "我有糖尿病，这个能降血糖吗？能不能代替我在吃的药？"}, {"label": "日版 15 缺货（C-015）", "text": "日版 15 的有货吗？多少钱？"}, {"label": "珠峰 12.5（无此档）", "text": "珠峰 12.5 多少钱？"}, {"label": "正品验真", "text": "怎么验证是不是正品？"}, {"label": "发货运费", "text": "从哪发货？运费怎么算？"}, {"label": "点名人工", "text": "我要转人工"}];
+
+/* ===================================================================== *
+ * ENGINE —— 浏览器内确定性引擎，镜像 scripts/answer_engine.py 的
+ *           五阶段流水线（意图路由 → 合规红线闸 → 转人工判定 →
+ *           确定性价格查表 → 知识应答），读注入的 KB 现场作答。
+ * ===================================================================== */
+const INTENT_PRIORITY = ["handoff", "risk", "fulfillment_payment", "pricing", "authenticity", "version"];
+const GREETINGS = ["在吗", "在么", "在不在", "你好", "您好", "哈喽", "hi", "hello", "有人吗", "咨询下", "想了解", "了解一下"];
+
+function normalizeDose(raw){
+  if(raw === null || raw === undefined) return null;
+  raw = String(raw).trim();
+  if(raw === "5" || raw === "5.0") return "5.0";
+  if(raw === "10" || raw === "10.0") return "10";
+  if(raw === "15" || raw === "15.0") return "15";
+  if(raw === "2.5" || raw === "7.5" || raw === "12.5") return raw;
+  return raw;
+}
+function detectVersion(msg, kb){
+  const vs = kb.product_versions || [];
+  for(const v of vs){
+    const names = [v.name || ""].concat(v.aliases || []);
+    for(const n of names){ if(n && msg.indexOf(n) !== -1) return v; }
+  }
+  return null;
+}
+function detectDoses(msg){
+  const doses = [];
+  const found = msg.match(/\d+\.?\d*/g) || [];
+  for(const m of found){
+    const d = normalizeDose(m);
+    if(d && doses.indexOf(d) === -1) doses.push(d);
+  }
+  return doses;
+}
+function findSku(kb, vname, dose){
+  for(const s of (kb.sku_prices || [])){
+    if(s.version === vname && String(s.dose) === String(dose)) return s;
+  }
+  return null;
+}
+function anyIn(msg, arr){ for(const k of arr){ if(k && msg.indexOf(k) !== -1) return true; } return false; }
+
+/* --------------------------- 阶段 1：意图路由 --------------------------- */
+function classify(msg, kb){
+  const routing = kb.routing || {};
+  const kwmap = routing.intent_keywords || {};
+  const scores = {}, hits = {};
+  for(const intent in kwmap){
+    let s = 0; const h = [];
+    for(const w of kwmap[intent]){ if(w && msg.indexOf(w) !== -1){ s += 1; h.push(w); } }
+    if(intent === "risk") s = s * 1.5;
+    scores[intent] = s; hits[intent] = h;
+  }
+  let chosen;
+  if((scores.handoff || 0) > 0){ chosen = "handoff"; }
+  else if((scores.risk || 0) > 0){ chosen = "risk"; }
+  else {
+    const ranked = Object.keys(kwmap).sort((a, b) => {
+      const d = (scores[b] || 0) - (scores[a] || 0);
+      if(d !== 0) return d;
+      return INTENT_PRIORITY.indexOf(a) - INTENT_PRIORITY.indexOf(b);
+    });
+    chosen = (ranked.length && (scores[ranked[0]] || 0) > 0) ? ranked[0] : null;
+  }
+  const raw = chosen ? (scores[chosen] || 0) : 0;
+  const confidence = Math.min(1.0, raw / 2.0);
+  return { intent: chosen, confidence: Math.round(confidence * 100) / 100, hits: chosen ? (hits[chosen] || []) : [] };
+}
+
+/* ---------------------- 阶段 2/3：合规 + 转人工摘要 ---------------------- */
+function makeSummary(concern, answered, unresolved){
+  return "【客户关注点】" + concern + "\n【已答内容】" + answered + "\n【未解决问题】" + unresolved;
+}
+
+function handleRisk(msg, kb){
+  const contra = kb.contraindications || {};
+  for(const g of (contra.groups || [])){
+    if(g && msg.indexOf(g) !== -1){
+      return {
+        boundary_decision: "ab_risk_compliance → 禁忌人群命中，不推进成交（transfer）",
+        need_human: true,
+        matched_evidence: ["contraindications.groups: " + g],
+        handoff_summary: makeSummary("自述属禁忌人群「" + g + "」仍希望购买",
+          "已按固定口径说明该人群为禁忌/慎用", "是否可购买需人工按医嘱判断，不由 AI 推进成交"),
+        reply: contra.reply || "该情况属于禁忌/慎用人群，需遵医嘱，不便直接推进购买。"
+      };
+    }
+  }
+  for(const item of (kb.compliance_whitelist || [])){
+    for(const w of (item.trigger_words || [])){
+      if(w && msg.indexOf(w) !== -1){
+        const mode = item.response_mode || "safe_reply";
+        if(mode === "transfer"){
+          return {
+            boundary_decision: "ab_risk_compliance → 白名单「" + item.intent + "」response_mode=transfer",
+            need_human: true,
+            matched_evidence: ["compliance_whitelist[" + item.intent + "] trigger=" + w],
+            handoff_summary: makeSummary("涉及「" + item.intent + "」（触发词：" + w + "）",
+              "已按白名单输出保守话术，不回应治疗/功效", "治疗/功效类问题超出白名单，需人工承接"),
+            reply: item.reply || ""
+          };
+        }
+        return {
+          boundary_decision: "ab_risk_compliance → 白名单「" + item.intent + "」safe_reply",
+          need_human: false,
+          matched_evidence: ["compliance_whitelist[" + item.intent + "] trigger=" + w],
+          handoff_summary: "",
+          reply: item.reply || ""
+        };
+      }
+    }
+  }
+  return {
+    boundary_decision: "ab_risk_compliance → 白名单未覆盖，保守答复并转人工",
+    need_human: true,
+    matched_evidence: ["compliance_whitelist: 无命中"],
+    handoff_summary: makeSummary("风险类问题（白名单未覆盖）", "未即兴作答", "需人工按合规口径处理"),
+    reply: "这个问题我不方便直接下结论，帮您转人工进一步说明。"
+  };
+}
+
+/* --------------------------- 阶段 4：确定性价格 --------------------------- */
+function matchPromo(kb, vname){
+  for(const p of (kb.promo_rules || [])){
+    if(p.validity !== "active") continue;
+    if(p.version === null || p.version === undefined || p.version === vname) return p;
+  }
+  return null;
+}
+function detectManualPromo(msg){
+  const kws = ["优惠10", "优惠 10", "便宜点", "少点", "抹零", "送一", "买三", "打折",
+    "能不能便宜", "再便宜", "议价", "1200", "80拿", "80 拿"];
+  return anyIn(msg, kws);
+}
+function handlePricing(msg, kb){
+  const version = detectVersion(msg, kb);
+  for(const ni of (kb.not_in_scope || [])){
+    const names = [ni.item || ""].concat(ni.aliases || []);
+    if(names.some(n => n && msg.indexOf(n) !== -1)){
+      return { boundary_decision: "ab_deterministic_pricing → 命中 not_in_scope，不报价",
+        need_human: false, matched_evidence: ["not_in_scope: " + ni.item], handoff_summary: "",
+        reply: ni.reply || "该商品不在本店销售范围，不便报价。" };
+    }
+  }
+  if(!version){
+    return { boundary_decision: "ab_deterministic_pricing → 未识别版本，请客户澄清",
+      need_human: false, matched_evidence: [], handoff_summary: "",
+      reply: "请问您想了解哪个版本（日版礼来 / 孟版杰西卡 / 珠峰）的价格呢？" };
+  }
+  const vname = version.name;
+  const versionDoses = (version.doses || []).map(x => String(x));
+  const doses = detectDoses(msg);
+  const validDoses = doses.filter(d => versionDoses.indexOf(d) !== -1);
+  const askPromo = anyIn(msg, ["优惠", "活动", "到手", "减", "便宜", "折扣", "618"]);
+
+  if(doses.length && !validDoses.length){
+    const avail = versionDoses.join("/");
+    return { boundary_decision: "ab_deterministic_pricing → " + vname + " 无 " + doses[0] + " 档，纠正认知不虚构价格",
+      need_human: false, matched_evidence: ["sku_prices: " + vname + "×" + doses[0] + " 不存在"], handoff_summary: "",
+      reply: vname + "没有 " + doses[0] + " 这个档位哦，实际只有 " + avail + " 档，需要我帮您看哪一档？" };
+  }
+
+  if(validDoses.length === 1){
+    const dose = validDoses[0];
+    const sku = findSku(kb, vname, dose);
+    if(!sku){
+      const avail = versionDoses.join("/");
+      return { boundary_decision: "ab_deterministic_pricing → " + vname + " 无 " + dose + " 档，纠正认知不虚构价格",
+        need_human: false, matched_evidence: ["sku_prices: " + vname + "×" + dose + " 不存在"], handoff_summary: "",
+        reply: vname + "没有 " + dose + " 这个档位哦，实际只有 " + avail + " 档，需要我帮您看哪一档？" };
+    }
+    if(sku.conflict){
+      return { boundary_decision: "ab_deterministic_pricing → 命中口径冲突档，保守话术 + 口径冲突工单",
+        need_human: true,
+        matched_evidence: ["sku_prices: " + vname + "×" + dose + " 表价 " + sku.list_price + " / 会话口径 " + sku.session_price + "（conflict）"],
+        handoff_summary: makeSummary("询问 " + vname + " " + dose + " 价格", "未直接二选一报价（避免错价）",
+          "该档存在表价 " + sku.list_price + " 与会话口径 " + sku.session_price + " 双口径，需运营统一后报价"),
+        reply: "这个档位的价格我需要和运营核对统一后再回复您，稍等帮您转人工确认，避免报错价格。" };
+    }
+    if(sku.stock === "out_of_stock"){
+      return { boundary_decision: "ab_deterministic_pricing → 缺货档，不报价不引导成交",
+        need_human: false, matched_evidence: ["sku_prices: " + vname + "×" + dose + " stock=out_of_stock"], handoff_summary: "",
+        reply: vname + " " + dose + " 这个档位目前暂时缺货，没法下单哦，需要的话我帮您看其他有货档位。" };
+    }
+    const price = sku.list_price;
+    const unit = sku.unit || "件";
+    let reply = vname + " " + dose + " 表价 " + price + " 元/" + unit + "（价格以规则表为准）。";
+    const evidence = ["sku_prices: " + vname + "×" + dose + " list_price=" + price];
+    if(askPromo){
+      const promo = matchPromo(kb, vname);
+      if(promo){
+        const finalP = price - promo.discount;
+        reply += " 当前「" + promo.name + "」" + promo.discount + " 元优惠，到手 " + finalP + " 元/" + unit + "。";
+        evidence.push("promo_rules: " + promo.id + " -" + promo.discount);
+      }
+    }
+    if(version.integral_only) reply += " （该版本只能整盒购买，不拆卖。）";
+    return { boundary_decision: "ab_deterministic_pricing → 单档查表命中",
+      need_human: false, matched_evidence: evidence, handoff_summary: "", reply: reply };
+  }
+
+  const rows = [];
+  for(const s of (kb.sku_prices || [])){
+    if(s.version !== vname) continue;
+    if(s.stock === "out_of_stock") rows.push(s.dose + "：暂缺货");
+    else if(s.conflict) rows.push(s.dose + "：价格待运营统一");
+    else rows.push(s.dose + "：" + s.list_price + " 元/" + (s.unit || "件"));
+  }
+  let reply = vname + "各档位价格如下——" + rows.join("；") + "。";
+  const evidence = ["sku_prices: " + vname + " 全档位"];
+  if(askPromo){
+    const promo = matchPromo(kb, vname);
+    if(promo){ reply += " 另有「" + promo.name + "」" + promo.discount + " 元优惠。"; evidence.push("promo_rules: " + promo.id); }
+  }
+  if(version.integral_only) reply += " 该版本只能整盒购买，不拆卖。";
+  return { boundary_decision: "ab_deterministic_pricing → 版本价目表查表",
+    need_human: false, matched_evidence: evidence, handoff_summary: "", reply: reply };
+}
+
+/* ----------------------------- 阶段 5：知识应答 ----------------------------- */
+function handleAuthenticity(msg, kb){
+  const proofs = kb.authenticity_proofs || {};
+  if(anyIn(msg, ["验不出", "验不了", "扫不出", "扫码根本", "货收到", "收到货", "验到是假", "是假的"])){
+    return { boundary_decision: "ab_authenticity_reply → 已收货验真失败异常，按退款承诺 + 转人工售后",
+      need_human: true, matched_evidence: ["authenticity_proofs.refund_promise"],
+      handoff_summary: makeSummary("收货后扫码验真失败，质疑真假",
+        "已告知退款承诺：" + (proofs.refund_promise || ""), "需人工核实验真结果并处理退款/售后"),
+      reply: "别急，按我们承诺——" + (proofs.refund_promise || "验出问题可退") + "。我马上帮您转人工核实处理。" };
+  }
+  if(anyIn(msg, ["蓝帽子", "批准文号", "注册证", "质检"])){
+    const steps = (proofs.verify_steps || []).join("、");
+    return { boundary_decision: "ab_authenticity_reply → 监管凭据不可伪造，仅给可验证路径 + 转人工",
+      need_human: true, matched_evidence: ["authenticity_proofs.forbidden"],
+      handoff_summary: makeSummary("索要蓝帽子编号/批准文号等监管凭据",
+        "已提供可自行验证路径：" + steps, "监管编号类凭据不能由 AI 提供，需人工按合规口径对接"),
+      reply: "这类编号我这边不能随便提供，但您可以自行验证：" + steps + "。其他需要我帮您转人工进一步说明。" };
+  }
+  const steps = (proofs.verify_steps || []).join("、");
+  const pack = (proofs.packaging || []).join("、");
+  let reply = "可以放心，支持自行验真：" + steps + "。";
+  if(pack) reply += "包装为" + pack + "。";
+  if(proofs.refund_promise) reply += proofs.refund_promise + "。";
+  return { boundary_decision: "ab_authenticity_reply → 正品说明（验真路径 + 退款承诺）",
+    need_human: false, matched_evidence: ["authenticity_proofs.verify_steps"], handoff_summary: "", reply: reply };
+}
+
+function wrapVersion(decision, evidence, reply){
+  return { boundary_decision: "ab_authenticity_reply(版本) → " + decision,
+    need_human: false, matched_evidence: evidence, handoff_summary: "", reply: reply };
+}
+function handleVersion(msg, kb){
+  const us = kb.usage_storage || {};
+  if(anyIn(msg, ["打几次", "用多久", "几次", "怎么用", "用法", "多久用", "频率", "一针"])){
+    return wrapVersion("使用口径（固定口径，不给个体化剂量建议）", ["usage_storage.usage"], us.usage || "");
+  }
+  if(anyIn(msg, ["放冰箱", "冰箱", "冷藏", "保存", "存放", "冷冻", "保质"])){
+    const reply = (us.storage_unopened || "") + "；" + (us.storage_opened || "");
+    return wrapVersion("保存口径（未开封/已开封两段式）",
+      ["usage_storage.storage_unopened", "usage_storage.storage_opened"], reply);
+  }
+  for(const ni of (kb.not_in_scope || [])){
+    const names = [ni.item || ""].concat(ni.aliases || []);
+    if(names.some(n => n && msg.indexOf(n) !== -1)){
+      return wrapVersion("命中 not_in_scope，不报价不引导代购", ["not_in_scope: " + ni.item], ni.reply || "");
+    }
+  }
+  const syn = kb.synonyms_note;
+  if(syn && anyIn(msg, ["替c", "替C", "替尔", "泊肽", "成分", "一个东西", "替西帕肽"])){
+    return wrapVersion("同义词归一", ["synonyms_note"], syn);
+  }
+  for(const v of (kb.product_versions || [])){
+    if(v.name && msg.indexOf(v.name) !== -1 && v.compare_note && v.name === "珠峰"){
+      const doses = (v.doses || []).map(x => String(x)).join("/");
+      return wrapVersion("珠峰版本定位", ["product_versions: " + v.name],
+        v.compare_note + "，仅有 " + doses + " 四档。");
+    }
+  }
+  if(anyIn(msg, ["只买一支", "单买", "拆", "太多"])){
+    return wrapVersion("拆盒诉求处理", ["product_versions.integral_only"],
+      "日版礼来是一盒两支、不拆卖；如果想要一盒一支，可以考虑孟版杰西卡或珠峰。");
+  }
+  const lines = [];
+  for(const v of (kb.product_versions || [])){
+    lines.push(v.name + "（" + (v.package_desc || "") + "/" + (v.product_form || "") + "）");
+  }
+  return wrapVersion("版本对比（不做疗效优劣断言）", ["product_versions: 全部"],
+    lines.join("、") + "。区别主要在包装、剂型和价格带，按您的预算和使用习惯选择即可。");
+}
+
+function handleFulfillment(msg, kb){
+  const fp = kb.fulfillment_payment || {};
+  if(anyIn(msg, ["截图", "付好了", "付款了", "已付", "付了"])){
+    const stalled = anyIn(msg, ["没人", "没人理", "多久了", "40 分钟", "怎么没", "骗子"]);
+    if(stalled){
+      return { boundary_decision: "ab_order_handoff → 承接超时 recovery，安抚 + 升级值班，不确认收款",
+        need_human: true, matched_evidence: ["fulfillment_payment.screenshot_handoff"],
+        handoff_summary: makeSummary("已付款但迟迟无人接管，情绪不满",
+          "已安抚并说明客服正在加急处理", "需值班客服立即补接管并核对订单，AI 不能确认收款成功"),
+        reply: "非常抱歉让您久等，您的付款信息已收到，客服正在加急为您处理，马上安排接单核对，请再稍等一下～" };
+    }
+    return { boundary_decision: "ab_order_handoff → 收到付款截图，转人工复述核对（不确认收款）",
+      need_human: true, matched_evidence: ["fulfillment_payment.screenshot_handoff"],
+      handoff_summary: makeSummary("已发付款截图及收货信息",
+        "已告知将由客服人工复述订单要素核对", "需人工核对姓名/电话/地址并确认收款，AI 不确认订单生效"),
+      reply: "已经收到您的付款信息啦～稍后客服会跟您复述一遍订单信息核对，确认无误后安排发货，请稍等。" };
+  }
+  const parts = [];
+  if(anyIn(msg, ["付款", "支付", "怎么付", "转账", "微信", "支付宝", "红包"]))
+    parts.push("支持" + (fp.payment_methods || []).join("、") + "；" + (fp.payment_unavailable || ""));
+  if(anyIn(msg, ["从哪发", "发货", "多久到", "几天到", "快递", "物流", "多久"]))
+    parts.push((fp.shipping_origin || "") + "发货，" + (fp.ship_time || "") + "，" + (fp.delivery_time || ""));
+  if(anyIn(msg, ["运费", "包邮", "邮费", "冷链"]))
+    parts.push(fp.freight || "");
+  if(!parts.length)
+    parts.push((fp.shipping_origin || "") + "发货，" + (fp.ship_time || "") + "，" + (fp.delivery_time || "") + "；" + (fp.freight || ""));
+  return { boundary_decision: "ab_order_handoff → 支付/发货口径说明（不承诺具体到货日）",
+    need_human: false, matched_evidence: ["fulfillment_payment"], handoff_summary: "",
+    reply: parts.filter(p => p).join("；") + "。" };
+}
+
+/* ------------------------------- 主流程 ------------------------------- */
+function answer(msg, kb){
+  const c = classify(msg, kb);
+  const intent = c.intent, confidence = c.confidence, hits = c.hits;
+  const threshold = (kb.routing || {}).confidence_threshold || 0.34;
+  const base = { intent: intent, confidence: confidence, matched_keywords: hits };
+
+  if(intent === null && GREETINGS.some(g => msg.indexOf(g) !== -1)){
+    return Object.assign(base, { boundary_decision: "ab_first_response → 秒级欢迎语首响承接",
+      need_human: false, matched_evidence: ["welcome_template"], handoff_summary: "",
+      reply: kb.welcome_template || "您好，欢迎咨询～" });
+  }
+  if(intent === null || confidence < threshold){
+    return Object.assign(base, { boundary_decision: "意图路由 → 低置信/知识盲区，保守答复并转人工",
+      need_human: true, matched_evidence: ["confidence=" + confidence + " < " + threshold],
+      handoff_summary: makeSummary("问题超出当前知识库覆盖范围", "未硬答", "需人工确认后回复"),
+      reply: "这个问题我这边暂时没法准确回答，帮您转人工进一步确认，请稍等。" });
+  }
+  if(intent === "handoff"){
+    return Object.assign(base, { boundary_decision: "handoff → 客户点名人工，停止实质作答并附摘要转接",
+      need_human: true, matched_evidence: ["handoff 关键词：" + JSON.stringify(hits)],
+      handoff_summary: makeSummary("客户明确要求转人工/表达不信任", "已确认为其转接人工", "需人工尽快接管承接后续咨询"),
+      reply: "好的，已经帮您转接人工客服，马上为您跟进，请稍等～" });
+  }
+  if(intent === "risk") return Object.assign(base, handleRisk(msg, kb));
+  if(intent === "pricing"){
+    if(detectManualPromo(msg)){
+      return Object.assign(base, { boundary_decision: "ab_deterministic_pricing → 规则库外议价/组合优惠，不承诺减免转人工",
+        need_human: true, matched_evidence: ["promo_rules: 无匹配 / manual_only_promos"],
+        handoff_summary: makeSummary("提出规则库外的议价或组合优惠诉求",
+          "已说明当前有效活动口径，未承诺额外减免", "是否额外优惠需人工客服决定"),
+        reply: "额外的优惠我这边不能自己做主哦，当前活动是规则表内的口径，其他优惠帮您转人工由客服确认。" });
+    }
+    return Object.assign(base, handlePricing(msg, kb));
+  }
+  if(intent === "authenticity") return Object.assign(base, handleAuthenticity(msg, kb));
+  if(intent === "version") return Object.assign(base, handleVersion(msg, kb));
+  if(intent === "fulfillment_payment") return Object.assign(base, handleFulfillment(msg, kb));
+  return Object.assign(base, { boundary_decision: "未路由", need_human: true,
+    matched_evidence: [], handoff_summary: "", reply: "帮您转人工。" });
+}
+
+/* ===================================================================== *
+ * UI 渲染
+ * ===================================================================== */
+const INTENT_LABEL = { handoff: "点名人工", risk: "合规风险", fulfillment_payment: "支付物流",
+  pricing: "价格咨询", authenticity: "正品验真", version: "版本咨询", null: "未识别/首响" };
+
+const chatBody = document.getElementById("chatBody");
+const traceBody = document.getElementById("traceBody");
+const traceEmpty = document.getElementById("traceEmpty");
+const msgInput = document.getElementById("msgInput");
+let turn = 0;
+
+function esc(s){ return String(s === null || s === undefined ? "" : s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+function addBubble(role, text, isHuman){
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + (role === "cust" ? "cust" : "ai");
+  const humanCls = (role === "ai" && isHuman) ? " human" : "";
+  wrap.innerHTML = '<div class="bubble' + humanCls + '">' + esc(text) + '</div>';
+  chatBody.appendChild(wrap);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function addTrace(n, res){
+  if(traceEmpty) traceEmpty.style.display = "none";
+  const label = INTENT_LABEL[res.intent] || (res.intent || "未识别/首响");
+  const pct = Math.round((res.confidence || 0) * 100);
+  const flagCls = res.need_human ? "human" : "auto";
+  const flagTxt = res.need_human ? "转人工" : "自动应答";
+  const evid = (res.matched_evidence || []).map(e => "<li>" + esc(e) + "</li>").join("");
+  const kw = (res.matched_keywords || []).map(k => '<span class="mk">' + esc(k) + "</span>").join("");
+  let summaryHtml = "";
+  if(res.handoff_summary){
+    summaryHtml = '<div class="trow"><div class="k">转人工摘要（三段式）</div><div class="summary">'
+      + esc(res.handoff_summary) + "</div></div>";
+  }
+  const card = document.createElement("div");
+  card.className = "tcard";
+  card.innerHTML =
+    '<div class="thead"><span class="tnum">#' + n + '</span>'
+    + '<span class="intent">意图：' + esc(label) + '</span>'
+    + '<span class="flag ' + flagCls + '">' + flagTxt + '</span></div>'
+    + '<div class="trow"><div class="k">置信度</div><div class="conf"><div class="bar"><span style="width:' + pct + '%"></span></div>'
+    + '<div class="val">' + (res.confidence || 0).toFixed(2) + '</div></div></div>'
+    + (kw ? '<div class="trow"><div class="k">命中关键词</div><div class="v">' + kw + '</div></div>' : "")
+    + '<div class="trow"><div class="k">行动边界决策</div><div class="decision">' + esc(res.boundary_decision) + '</div></div>'
+    + '<div class="trow"><div class="k">命中知识条目 / 规则</div><ul class="evid">' + (evid || "<li>—</li>") + '</ul></div>'
+    + summaryHtml;
+  traceBody.appendChild(card);
+  traceBody.scrollTop = traceBody.scrollHeight;
+}
+
+function send(text){
+  const msg = (text !== undefined ? text : msgInput.value).trim();
+  if(!msg) return;
+  turn += 1;
+  addBubble("cust", msg, false);
+  const res = answer(msg, KB);
+  addBubble("ai", res.reply, res.need_human);
+  addTrace(turn, res);
+  msgInput.value = "";
+  msgInput.focus();
+}
+
+// 渲染快捷 chips
+const chipsBox = document.getElementById("chipsBox");
+CHIPS.forEach(c => {
+  const el = document.createElement("span");
+  el.className = "chip";
+  el.textContent = c.label;
+  el.title = c.text;
+  el.addEventListener("click", () => send(c.text));
+  chipsBox.appendChild(el);
+});
+
+document.getElementById("sendBtn").addEventListener("click", () => send());
+document.getElementById("clearBtn").addEventListener("click", () => {
+  chatBody.innerHTML = ""; traceBody.innerHTML = "";
+  traceBody.appendChild(traceEmpty); traceEmpty.style.display = "block"; turn = 0;
+});
+msgInput.addEventListener("keydown", e => { if(e.key === "Enter") send(); });
+</script>
+</body>
+</html>
