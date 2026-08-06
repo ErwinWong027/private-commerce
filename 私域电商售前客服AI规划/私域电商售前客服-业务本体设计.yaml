@@ -64,7 +64,7 @@ entities:
         description: 剂型（原研自动笔/仿制针剂）
       - name: usage_desc
         type: string
-        description: 使用口径（一针管一个星期）
+        description: 使用口径（一盒一针，一针一次，管一个星期）
       - name: storage_desc
         type: string
         description: "保存口径（未开封 2-8°C 冷藏；已开封 <30°C 存 21 天）"
@@ -91,7 +91,7 @@ entities:
         values: [in_stock, out_of_stock]
         description: 库存状态（日版 15 暂缺货）
     key_distinctions:
-      - "表价 ≠ 会话浮动报价（日版 2.5 表价 498，会话出现过 548）"
+      - "表价为唯一权威报价，价格已统一不存在会话浮动口径"
       - "珠峰仅 2.5/5.0/7.5/10 四档，无 12.5/15 档"
       - "缺货档位不能报价成交，只能说明缺货"
 
@@ -187,7 +187,7 @@ entities:
     attributes:
       - name: payment_method
         type: enum
-        values: [微信扫码, 微信红包, 支付宝]
+        values: [微信, 支付宝]
         description: 支付方式（企微未开通转账收款）
       - name: payment_screenshot
         type: boolean
@@ -197,7 +197,7 @@ entities:
         description: 订单要素是否已人工复述核对
       - name: shipping_desc
         type: string
-        description: "发货口径（深圳发/48h 内发出/冷链到付约 20）"
+        description: "发货口径（深圳发/48h 内发出/冷链到付约 20 元，非固定，以后台运单数据为准）"
     key_distinctions:
       - "收到付款截图 ≠ 订单完成，必须人工复述订单要素核对"
       - "发货时效口径（揽收后 1-3 天）≠ 承诺具体到货日期"
@@ -309,11 +309,11 @@ action_boundaries:
         checks: "「验出假货可退」为真实会话中确认过的标准口径"
     valid_actions:
       - "检索并输出验真流程（扫码/官网/三码合一）"
-      - "展示真实包装图与版本差异说明"
+      - "输出版本差异说明（不展示包装图，仅输出验真路径）"
       - "按标准口径说明假货退款承诺"
       - "凭据不足时保守答复并转人工"
     invalid_actions:
-      - action: "编造批准文号、注册证书、质检结论等监管凭据"
+      - action: "编造批准文号、注册证书、质检结论、蓝帽子编号等监管凭据"
         reason: "伪造监管信息是合规硬红线，Demo 也不例外"
       - action: "用「绝对正品/官方唯一授权」等绝对化背书作答"
         reason: "绝对化表述违反广告法，凭据只能展示可验证路径"
@@ -331,18 +331,14 @@ action_boundaries:
         checks: "当前生效的活动规则与适用条件（618 减 20 等）"
     valid_actions:
       - "调用规则表计算到手价并附活动说明"
-      - "说明冷链到付运费约 20 的固定口径"
+      - "说明冷链到付运费约 20 元（非固定，以后台运单数据为准）"
       - "对缺货档位如实说明缺货，不引导成交"
     invalid_actions:
       - action: "让大模型脱离规则表自行心算或估算价格"
         reason: "价格禁止大模型独立决策，防幻觉错价"
       - action: "复用会话中的人工议价口径自动给客户减价"
         reason: "人工口径（优惠10/1200-80）未结构化，自动执行会口径失控"
-      - action: "对表价与会话报价不一致的档位直接二选一作答"
-        reason: "日版 2.5 存在 498/548 双口径，未统一前作答即错价风险"
     exception_triggers:
-      - condition: "命中表价与会话口径不一致的档位（如日版 2.5）"
-        action: "输出保守话术并创建口径冲突工单，升级运营统一价格"
       - condition: "客户提出规则库外的议价或组合优惠诉求"
         action: "不承诺任何减免，附摘要转人工由客服决定"
 

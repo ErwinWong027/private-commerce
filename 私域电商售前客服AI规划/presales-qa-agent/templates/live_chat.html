@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>售前客服 · LLM 实时对话</title>
+<style>
+:root{
+  --color-primary:#10213E; --color-accent:#5DB2E2; --color-secondary:#625D9C;
+  --color-success:#00524C; --color-warning:#F59E0B;
+  --color-bg:#FFFFFF; --color-bg-alt:#F5F5F6; --color-fg:#10213E;
+  --color-muted:#64748B; --color-border:#E2E8F0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;background:var(--color-bg-alt);color:var(--color-fg);line-height:1.6;height:100vh;display:flex;flex-direction:column;}
+.header{background:var(--color-primary);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px;}
+.header .dot{width:10px;height:10px;border-radius:50%;background:#4ADE80;animation:pulse 2s infinite;}
+.header .t{font-size:16px;font-weight:600;}
+.header .sub{font-size:12px;color:#BFE3F7;margin-left:auto;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chat-body{flex:1;overflow-y:auto;padding:20px;max-width:800px;width:100%;margin:0 auto;}
+.msg{display:flex;margin-bottom:14px;}
+.msg .bubble{max-width:75%;padding:11px 15px;border-radius:14px;font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word;}
+.msg.cust{justify-content:flex-end;}
+.msg.cust .bubble{background:var(--color-accent);color:#fff;border-bottom-right-radius:4px;}
+.msg.ai{justify-content:flex-start;}
+.msg.ai .bubble{background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-fg);border-bottom-left-radius:4px;}
+.msg.ai .bubble.human{border-left:3px solid var(--color-warning);}
+.msg .meta{font-size:10px;color:var(--color-muted);margin-top:3px;}
+.msg.ai .meta{margin-left:4px;}
+.msg.cust .meta{text-align:right;margin-right:4px;}
+.typing{display:none;justify-content:flex-start;margin-bottom:14px;}
+.typing.show{display:flex;}
+.typing .bubble{background:var(--color-bg);border:1px solid var(--color-border);border-radius:14px;border-bottom-left-radius:4px;padding:14px 18px;}
+.typing .dots{display:flex;gap:4px;}
+.typing .dots span{width:7px;height:7px;border-radius:50%;background:var(--color-muted);animation:blink 1.4s infinite;}
+.typing .dots span:nth-child(2){animation-delay:.2s;}
+.typing .dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,60%,100%{opacity:.3;}30%{opacity:1;}}
+.input-bar{border-top:1px solid var(--color-border);background:var(--color-bg);padding:14px 20px;}
+.input-wrap{max-width:800px;margin:0 auto;display:flex;gap:10px;}
+.input-wrap input{flex:1;font-family:inherit;font-size:14px;padding:11px 14px;border:1px solid var(--color-border);border-radius:8px;outline:none;transition:border-color .15s;}
+.input-wrap input:focus{border-color:var(--color-accent);box-shadow:0 0 0 2px rgba(93,178,226,.2);}
+.input-wrap button{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--color-primary);border:none;border-radius:8px;padding:11px 22px;cursor:pointer;transition:opacity .15s;}
+.input-wrap button:hover{opacity:.85;}
+.input-wrap button:disabled{opacity:.5;cursor:not-allowed;}
+.tip{text-align:center;font-size:11px;color:var(--color-muted);margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="dot"></span>
+  <span class="t">企微 AI 售前助手</span>
+  <span class="sub">LLM + 工具实时运行 · IDE 内 LLM 驱动</span>
+</div>
+<div class="chat-body" id="chatBody">
+  <div class="msg ai"><div class="bubble">哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～</div></div>
+</div>
+<div class="typing" id="typing"><div class="bubble"><div class="dots"><span></span><span></span><span></span></div></div></div>
+<div class="input-bar">
+  <div class="input-wrap">
+    <input id="msgInput" type="text" placeholder="输入客户问题，回车发送…" autocomplete="off">
+    <button id="sendBtn">发送</button>
+  </div>
+  <div class="tip">输入消息后点发送，AI 将通过 LLM + 确定性工具实时应答</div>
+</div>
+
+<script>
+/* 交互协议：用户发送消息后存入 window.pendingMsg，等待 IDE 内 LLM 读取处理 */
+let turn = 0;
+const chatBody = document.getElementById("chatBody");
+const typing = document.getElementById("typing");
+const msgInput = document.getElementById("msgInput");
+const sendBtn = document.getElementById("sendBtn");
+
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function addCustMsg(text){
+  const el = document.createElement("div");
+  el.className = "msg cust";
+  el.innerHTML = '<div class="bubble">' + esc(text) + '</div>';
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function addAiMsg(text, isHuman, meta){
+  typing.classList.remove("show");
+  const el = document.createElement("div");
+  el.className = "msg ai";
+  const humanCls = isHuman ? " human" : "";
+  el.innerHTML = '<div class="bubble' + humanCls + '">' + esc(text) + '</div>'
+    + (meta ? '<div class="meta">' + esc(meta) + '</div>' : '');
+  chatBody.appendChild(el);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function send(){
+  const msg = msgInput.value.trim();
+  if(!msg) return;
+  turn += 1;
+  addCustMsg(msg);
+  /* 存入 pendingMsg 供 IDE 内 LLM 读取 */
+  window.pendingMsg = {text: msg, turn: turn, ts: Date.now()};
+  msgInput.value = "";
+  sendBtn.disabled = true;
+  typing.classList.add("show");
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+/* LLM 写入回答的接口：window.llmReply({reply, needHuman, tool, toolResult, summary}) */
+window.llmReply = function(data){
+  const metaParts = [];
+  if(data.tool) metaParts.push("🔧 " + data.tool);
+  if(data.needHuman) metaParts.push("⚠️ 已转人工");
+  addAiMsg(data.reply, data.needHuman, metaParts.join(" · "));
+  sendBtn.disabled = false;
+  msgInput.focus();
+};
+
+/* 清除已处理的消息 */
+window.clearPending = function(){
+  window.pendingMsg = null;
+};
+
+sendBtn.addEventListener("click", send);
+msgInput.addEventListener("keydown", e => {if(e.key === "Enter") send();});
+msgInput.focus();
+</script>
+</body>
+</html>
