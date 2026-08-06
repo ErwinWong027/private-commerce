@@ -1,0 +1,30 @@
+{
+  "name": "agentic-ai-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "npm run test:unit",
+    "test:unit": "tsx --test src/lib/presalesEngine.test.ts",
+    "test:all": "npm run test:unit && npm run update:report",
+    "update:report": "python3 scripts/run_tests.py tests/AgentTestCaseSuite.md tests/reports"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  }
+}
