@@ -1,10 +1,12 @@
-# 只纳入私域电商售前客服 AI 规划交付物
+# 只纳入私域电商售前客服规划与 Demo 交付物
 /*
 !/.gitignore
 !/inject_nav.py
 !/私域电商售前客服AI规划/
 !/私域电商售前客服AgenticDemo/
 !/私域电商售前客服AgenticDemo/**
+!/私域电商微信企微双端Demo/
+!/私域电商微信企微双端Demo/**
 /私域电商售前客服AgenticDemo/.next/
 /私域电商售前客服AgenticDemo/node_modules/
 /私域电商售前客服AgenticDemo/.env.local
