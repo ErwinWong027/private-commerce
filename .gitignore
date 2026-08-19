@@ -11,3 +11,6 @@
 /私域电商售前客服AgenticDemo/node_modules/
 /私域电商售前客服AgenticDemo/.env.local
 /私域电商售前客服AgenticDemo/.env*
+
+# macOS
+.DS_Store

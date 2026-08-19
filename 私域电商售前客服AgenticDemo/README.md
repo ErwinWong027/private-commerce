@@ -13,7 +13,7 @@
 - 保留“价格只走规则表、合规只走白名单”的硬约束
 - 支持版本对比、正品验真、促销算价、支付履约、付款承接
 - 支持点名人工、禁忌人群、治疗问题、监管编号诱导等高风险场景
-- 内置 31 条自动化回归测试
+- 内置 32 条自动化回归测试
 - 文档中心可直接预览架构、业务本体、验收矩阵和测试报告
 
 ## 本地启动
@@ -45,7 +45,7 @@ FOUNDATION_MODEL_NAME=deepseek-v4-pro
 
 ## 自动化测试
 
-方式一：在页面点击“**一键回归 31 条用例**”
+方式一：在页面点击“**一键回归 32 条用例**”
 
 方式二：
 
@@ -64,7 +64,7 @@ curl -X POST http://localhost:3000/api/test/run
 - `src/lib/presalesKnowledge.ts`：结构化知识库常量
 - `src/lib/presalesEngine.ts`：售前规则引擎
 - `src/lib/presalesStore.ts`：内存态演示存储
-- `src/lib/presalesTestCases.ts`：31 条自动化测试用例
+- `src/lib/presalesTestCases.ts`：32 条自动化测试用例
 - `docs/`：沉淀后的产品、架构、验收与部署文档
 
 ## 当前限制

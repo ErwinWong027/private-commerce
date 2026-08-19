@@ -35,6 +35,7 @@ interface IntentPlan {
     msg?: string | null;
   };
   subIntent: string;
+  sentenceType: "question" | "non_question";
   reasoning: string;
 }
 
@@ -78,6 +79,10 @@ export async function runPresalesSkillOrchestrator({
   }
 
   const plan = await classifyIntentWithSkill(safeMessage, safeHistory);
+  if (plan.sentenceType === "non_question" && hasQuestionSignal(safeMessage)) {
+    plan.sentenceType = "question";
+    plan.reasoning += "（确定性兜底：消息含疑问信号，升格为 question）";
+  }
   const riskAnalysis = plan.toolName === "compliance" ? analyzeRiskContext(safeMessage, safeHistory) : null;
   const toolExecution = plan.toolName ? await executeSkillTool(plan) : { toolName: null, toolArgs: [], result: null };
   const outcome = evaluateOutcome(plan, toolExecution.result, safeMessage, safeHistory, riskAnalysis);
@@ -147,6 +152,7 @@ async function classifyIntentWithSkill(
               msg: null,
             },
             subIntent: "payment_methods",
+            sentenceType: "question",
             reasoning: "一句中文解释",
           },
           null,
@@ -166,6 +172,9 @@ async function classifyIntentWithSkill(
         "fulfillment_payment 类：subIntent 只能取 payment_methods, payment_completed, payment_timeout, shipping_origin, delivery_time, freight。",
         "authenticity 类：subIntent 只能取 verify, refund_promise, regulatory_id, received_verify_failed。",
         "handoff 类不调用工具，toolName=null。",
+        "sentenceType 只能取 question / non_question：",
+        "- 客户在语义上是在提问、求证、咨询（含省略式提问、反问）-> question",
+        "- 陈述、闲聊、情绪宣泄、无意义输入 -> non_question",
         "",
         "以下是知识库原文，请以它为准：",
         knowledgeText,
@@ -365,11 +374,22 @@ function evaluateOutcome(
   }
 
   if (!toolResult || !plan.toolName) {
-    const fallbackReply = "这个问题我帮您确认一下，稍等哦～";
+    if (plan.sentenceType === "non_question") {
+      return makeOutcome(
+        false,
+        null,
+        "ab_kb_fallback -> 非疑问句闲聊/无效输入，轻承接并引导回业务，不触发转人工",
+        ["chitchat_non_question"],
+        "在的哦～有想了解的版本、价格、活动或发货问题，随时滴滴我～",
+        "",
+      );
+    }
+
+    const fallbackReply = "这个我帮您确认下，稍等哦～";
     return makeOutcome(
       true,
       "知识盲区",
-      "ab_kb_fallback -> 未能成功调用工具，保守答复并转人工",
+      "ab_kb_fallback -> 疑问句未能成功调用工具，保守答复并转人工",
       ["tool_execution_failed"],
       fallbackReply,
       buildHandoffSummary(message, "未输出知识库外结论。", "需要人工继续确认。"),
@@ -811,6 +831,14 @@ function shouldSilentlyIntercept(plan: IntentPlan, outcome: EvaluatedOutcome): b
   return plan.intent === "handoff" && outcome.needHuman;
 }
 
+// 确定性疑问信号兜底：防止 LLM 把真疑问句误判成闲聊后双重误伤（只升不降，只会更保守）
+function hasQuestionSignal(message: string): boolean {
+  if (/[?？]/.test(message)) {
+    return true;
+  }
+  return /(吗|嘛|呢|怎么|怎样|咋|多少|几个|几支|几盒|几天|啥时候|为什么|为啥|能不能|可不可以|是不是|有没有|好不好|行不行|要不要|哪里|哪个|哪种|哪年|哪天|哪位)/.test(message);
+}
+
 function pickStyleVariant(plan: IntentPlan, outcome: EvaluatedOutcome): string | null {
   if (outcome.needHuman) {
     return null;
@@ -1022,6 +1050,9 @@ function getDirectReply(plan: IntentPlan, outcome: EvaluatedOutcome): string | n
   if (plan.intent === "greeting" || plan.intent === "identity") {
     return outcome.fallbackReply;
   }
+  if (plan.intent === "unknown" && plan.sentenceType === "non_question") {
+    return outcome.fallbackReply;
+  }
   if (plan.toolName === "compliance" && outcome.matchedEvidence.includes("compliance:miss_transfer")) {
     return outcome.fallbackReply;
   }
@@ -1039,7 +1070,7 @@ function buildTrace(
       id: "trace-1",
       title: "LLM 语义意图识别",
       stage: "llm",
-      content: `${plan.reasoning}\nintent=${plan.intent}\nconfidence=${plan.confidence.toFixed(2)}\nsubIntent=${plan.subIntent}`,
+      content: `${plan.reasoning}\nintent=${plan.intent}\nconfidence=${plan.confidence.toFixed(2)}\nsentenceType=${plan.sentenceType}\nsubIntent=${plan.subIntent}`,
     },
     {
       id: "trace-2",
@@ -1136,6 +1167,7 @@ function normalizeIntentPlan(payload: Record<string, unknown>): IntentPlan {
       msg: asNullableString(toolArgs.msg),
     },
     subIntent: typeof payload.subIntent === "string" && payload.subIntent.trim() ? payload.subIntent.trim() : "general",
+    sentenceType: payload.sentenceType === "non_question" ? "non_question" : "question",
     reasoning: typeof payload.reasoning === "string" && payload.reasoning.trim() ? payload.reasoning.trim() : "按语义进行意图识别与工具选择。",
   };
 }

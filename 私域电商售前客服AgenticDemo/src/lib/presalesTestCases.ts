@@ -296,4 +296,14 @@ export const presalesAutomationCases: PresalesAutomationCase[] = [
     expectedIntent: "fulfillment_payment",
     expectedNeedHuman: false,
   },
+  {
+    id: "C-032",
+    scenario: "闲聊无意义输入-非疑问句不转人工",
+    type: "Hard Case",
+    input: "今天天气很不错，是情人节，我吃了混凝土拌面，坐船到南极拉稀",
+    expectedReplyIncludes: ["在的哦"],
+    expectedReplyExcludes: ["稍等", "转人工", "AI", "机器人"],
+    expectedIntent: "unknown",
+    expectedNeedHuman: false,
+  },
 ];
