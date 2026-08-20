@@ -48,7 +48,7 @@ LLM 与工具分工协同，保证可解释、可回归：
 | 阶段 | 执行者 | 职责 |
 |------|--------|------|
 | ① 加载知识库 | LLM | 读取 YAML，理解商品/价格/合规/物流数据 |
-| ② 语义意图识别 | **LLM** | 理解客户消息语义，判类（version/authenticity/pricing/risk/fulfillment_payment/handoff/identity/greeting）。支持口语化、模糊表达、省略词 |
+| ② 语义意图识别 | **LLM** | 理解客户消息语义，判类（version/authenticity/pricing/risk/fulfillment_payment/handoff/identity/greeting），并输出 `sentenceType`（question/non_question）支撑非疑问句分流。支持口语化、模糊表达、省略词 |
 | ③ 调用工具 | LLM 选择 → 工具执行 | 按意图调用 `answer_engine.py` 对应工具，获取确定性数据 |
 | ④ 返回数据 | **工具** | 价格查表/促销计算/合规判定/库存查询（零幻觉） |
 | ⑤ 生成话术 | **LLM** | 基于工具返回值，润色成真人客服话术（不改变 `need_human`） |
@@ -143,6 +143,7 @@ python3 scripts/build_demo.py <kb.yaml> <output.html>
 - [ ] `--replay` 通过率是否作为工具函数正确性证据留存
 - [ ] IDE内AI模式：LLM是否先调`--tool`再做话术润色（不绕过工具直接答价格/合规）
 - [ ] LLM生成的话术是否未改变工具返回的 `need_human` 值
+- [ ] 非疑问句（确认/闲聊，sentenceType=non_question）是否轻承接并引导回业务（不误转人工）；含疑问信号时是否升格为 question（只升不降）
 - [ ] 对客户话术是否无"转人工/AI/机器人"字样（无感转接）
 
 ## 开发者参考

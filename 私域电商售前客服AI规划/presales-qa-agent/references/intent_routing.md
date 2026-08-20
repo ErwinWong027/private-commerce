@@ -44,3 +44,17 @@
 | `risk` | ab_risk_compliance | 白名单 safe_reply / transfer |
 | `fulfillment_payment` | ab_order_handoff | 收截图转人工，不越权确认 |
 | `handoff` | （直接触发 handoff_ticket） | 附三段式摘要 |
+| `unknown + non_question` | ab_kb_fallback（轻承接分支） | 轻承接 + 引导回业务，不触发转人工 |
+
+## sentenceType 分流（疑问句 vs 非疑问句）
+
+意图识别同时输出 `sentenceType`（`question` / `non_question`），用于区分"真疑问句的知识盲区"与"确认/闲聊/无效输入"，避免把非疑问句一律当低置信转人工：
+
+| sentenceType | 语义 | 未命中工具时的处理 | need_human |
+|---|---|---|---|
+| `question` | 提问、求证、咨询（含省略式提问、反问） | 保守答复 + 转人工（知识盲区兜底） | true |
+| `non_question` | 陈述、确认（"好的/可以滴"）、闲聊、情绪宣泄、无意义输入 | 轻承接 + 引导回业务（知识库 `chitchat_non_question_reply` 口径） | false |
+
+**确定性疑问信号兜底（只升不降）**：编排层对 LLM 的 `sentenceType` 做确定性校验——若判为 `non_question` 但消息含 `?？` 或疑问词（吗/嘛/呢/怎么/怎样/多少/几个/几支/几盒/几天/啥时候/为什么/为啥/能不能/可不可以/是不是/有没有/好不好/行不行/要不要/哪里/哪个/哪种/哪年/哪天/哪位），则升格为 `question`。该兜底只会让处理更保守，不会放过真疑问句。
+
+**与优先级规则的关系**：sentenceType 不改变意图路由优先级（handoff > risk > fulfillment_payment > pricing > authenticity > version）；handoff/risk 命中时无论 sentenceType 一律按对应边界处理。sentenceType 只在"无明确业务意图（unknown）或工具未成功调用"的兜底路径上生效。
