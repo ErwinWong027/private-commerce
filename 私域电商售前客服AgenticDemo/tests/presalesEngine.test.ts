@@ -11,6 +11,9 @@ for (const testCase of presalesAutomationCases) {
     if (testCase.expectedNeedHuman !== undefined) {
       assert.equal(decision.needHuman, testCase.expectedNeedHuman);
     }
+    if (testCase.expectedSilentIntercept !== undefined) {
+      assert.equal(decision.silentIntercept, testCase.expectedSilentIntercept);
+    }
 
     testCase.expectedReplyIncludes.forEach((snippet) => {
       assert.equal(decision.reply.includes(snippet), true, `回复缺少片段: ${snippet}`);

@@ -41,11 +41,69 @@ describe("PresalesRepository", () => {
     assert.equal(repo.getConversation("S-001")?.messages.length, 2);
     assert.equal(repo.getConversation("S-001")?.decisions.length, 1);
     assert.ok(result.ticket);
-    repo.updateTicket(result.ticket!.id, "take_over");
+    const takeOver = repo.updateTicket(result.ticket!.id, "take_over", "U-AGENT-001");
+    assert.equal(takeOver.ok, true);
     assert.equal(repo.getSessionStatus("S-001"), "human_serving");
-    repo.updateTicket(result.ticket!.id, "resolve");
+    const resolve = repo.updateTicket(result.ticket!.id, "resolve", "U-AGENT-001");
+    assert.equal(resolve.ok, true);
     assert.equal(repo.getSessionStatus("S-001"), "ai_serving");
     assert.equal(repo.getConversation("S-001")?.tickets[0].status, "resolved");
+    repo.close();
+  });
+
+  it("工单状态机：重复动作幂等，跨状态返回冲突", () => {
+    const repo = createRepository();
+    const customer = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "我要人工");
+    const { ticket } = repo.saveAutomatedDecision("S-001", customer.id, "我要人工", {
+      intent: "handoff", confidence: 0.99, reply: "", needHuman: true, silentIntercept: true,
+      handoffTriggerType: "客户点名人工", boundaryDecision: "停止 AI 回复", matchedEvidence: ["handoff"],
+      handoffSummary: "客户要求人工", toolName: null, toolArgs: [], toolResult: null,
+    });
+    const ticketId = ticket!.id;
+    assert.deepEqual(repo.updateTicket("T-NOT-EXIST", "take_over", "U-AGENT-001"), { ok: false, reason: "not_found" });
+    const early = repo.updateTicket(ticketId, "resolve", "U-AGENT-001");
+    assert.equal(early.ok, false);
+    assert.equal(early.ok === false && early.reason, "invalid_transition");
+    assert.equal(repo.getSessionStatus("S-001"), "ai_serving");
+    repo.updateTicket(ticketId, "take_over", "U-AGENT-001");
+    // 重复接管保持幂等，不会重复插入系统消息。
+    const beforeRepeat = repo.getConversation("S-001")!.messages.length;
+    assert.equal(repo.updateTicket(ticketId, "take_over", "U-AGENT-001").ok, true);
+    assert.equal(repo.getConversation("S-001")!.messages.length, beforeRepeat);
+    repo.updateTicket(ticketId, "resolve", "U-AGENT-001");
+    const afterResolve = repo.getConversation("S-001")!.messages.length;
+    assert.equal(repo.updateTicket(ticketId, "resolve", "U-AGENT-001").ok, true);
+    assert.equal(repo.getConversation("S-001")!.messages.length, afterResolve);
+    const reTakeOver = repo.updateTicket(ticketId, "take_over", "U-AGENT-001");
+    assert.equal(reTakeOver.ok, false);
+    assert.equal(reTakeOver.ok === false && reTakeOver.reason, "invalid_transition");
+    repo.close();
+  });
+
+  it("双向未读记账，按角色分别清零", () => {
+    const repo = createRepository();
+    // seed 的欢迎消息由 AI 直接写入，未读从 0 起算。
+    assert.equal(repo.listConversations("agent")[0].unreadCount, 0);
+    assert.equal(repo.listConversations("customer")[0].unreadCount, 0);
+    repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "在吗");
+    repo.appendMessage("S-001", "ai", null, "在的");
+    repo.appendMessage("S-001", "system", null, "系统提示");
+    assert.equal(repo.listConversations("agent")[0].unreadCount, 1);
+    assert.equal(repo.listConversations("customer")[0].unreadCount, 1);
+    assert.equal(repo.markConversationRead("S-001", "agent"), true);
+    assert.equal(repo.listConversations("agent")[0].unreadCount, 0);
+    assert.equal(repo.listConversations("customer")[0].unreadCount, 1);
+    assert.equal(repo.markConversationRead("S-001", "customer"), true);
+    assert.equal(repo.listConversations("customer")[0].unreadCount, 0);
+    assert.equal(repo.markConversationRead("S-404", "agent"), false);
+    repo.close();
+  });
+
+  it("getConversation 不再清零未读", () => {
+    const repo = createRepository();
+    repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "在吗");
+    repo.getConversation("S-001", "agent");
+    assert.equal(repo.listConversations("agent")[0].unreadCount, 1);
     repo.close();
   });
 
@@ -94,6 +152,16 @@ describe("PresalesRepository", () => {
     const image = repo.appendMessage("S-1", "customer", "U-1", "", "/api/media/x.png");
     assert.equal(image.contentType, "image");
     assert.equal(repo.listConversations()[0].lastMessage, "[图片]");
+    repo.close();
+  });
+
+  it("成交状态默认咨询中，可持久化并随 reset 恢复初始", () => {
+    const repo = createRepository();
+    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "consulting", trackingNo: null });
+    repo.setDealState("S-001", { stage: "awaiting_pickup", trackingNo: "SF12345678" });
+    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "awaiting_pickup", trackingNo: "SF12345678" });
+    repo.reset();
+    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "consulting", trackingNo: null });
     repo.close();
   });
 });

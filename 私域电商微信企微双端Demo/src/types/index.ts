@@ -27,8 +27,33 @@ export interface ConversationSummary {
   lastMessage: string; lastMessageAt: string; unreadCount: number; messageCount: number;
 }
 export interface ConversationDetail extends ConversationSummary {
-  customer: UserRecord; messages: MessageRecord[]; decisions: DecisionRecord[]; tickets: HandoffTicketRecord[];
+  customer: UserRecord; messages: MessageRecord[]; decisions: DecisionRecord[]; tickets: HandoffTicketRecord[]; dealState: DealState;
 }
+
+// 轻量成交进度（仅供 Demo 演示，非真实订单/物流系统）
+export type DealStage =
+  | "consulting"        // 咨询中
+  | "awaiting_payment"  // 待付款
+  | "awaiting_review"   // 待核对
+  | "awaiting_shipment" // 待出单
+  | "awaiting_pickup"   // 待揽收
+  | "picked_up"         // 已揽收
+  | "in_transit";       // 运输中
+export type DealAdvanceAction = "confirm_review" | "generate_tracking" | "simulate_pickup" | "simulate_transit";
+export interface DealState { stage: DealStage; trackingNo: string | null }
+export const DEAL_STAGE_ORDER: DealStage[] = [
+  "consulting", "awaiting_payment", "awaiting_review", "awaiting_shipment", "awaiting_pickup", "picked_up", "in_transit",
+];
+export const DEAL_STAGE_LABELS: Record<DealStage, string> = {
+  consulting: "咨询中", awaiting_payment: "待付款", awaiting_review: "待核对", awaiting_shipment: "待出单",
+  awaiting_pickup: "待揽收", picked_up: "已揽收", in_transit: "运输中",
+};
+export const DEAL_ACTIONS: Array<{ action: DealAdvanceAction; label: string; from: DealStage; to: DealStage }> = [
+  { action: "confirm_review", label: "确认核对", from: "awaiting_review", to: "awaiting_shipment" },
+  { action: "generate_tracking", label: "生成模拟单号", from: "awaiting_shipment", to: "awaiting_pickup" },
+  { action: "simulate_pickup", label: "模拟揽收", from: "awaiting_pickup", to: "picked_up" },
+  { action: "simulate_transit", label: "模拟运输", from: "picked_up", to: "in_transit" },
+];
 export interface DashboardState { conversations: ConversationSummary[]; activeConversation: ConversationDetail | null; metrics: Record<string, number> }
 
 export type PresalesIntent = "greeting" | "identity" | "handoff" | "risk" | "fulfillment_payment" | "pricing" | "authenticity" | "version" | "unknown";
