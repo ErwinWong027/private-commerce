@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -11,13 +12,40 @@ import {
 import { getFoundationModelConfig, isFoundationModelConfigured } from "./foundationModelConfig";
 
 const execFileAsync = promisify(execFile);
-const PROJECT_ROOT = process.cwd();
-const WORKSPACE_ROOT = path.resolve(PROJECT_ROOT, "..");
-const PLANNING_ROOT = path.join(WORKSPACE_ROOT, "私域电商售前客服AI规划");
-const SKILL_ROOT = path.join(PLANNING_ROOT, "presales-qa-agent");
+
+// 技能根目录与知识库文件由环境变量提供，启动期一次性解析为绝对路径。
+// 未配置时回退到相邻规划目录（保持既有 Demo 开箱可用），但路径缺失会在首次调用时显式报错，
+// 而不是让 readFile / execFile 抛出难以定位的 ENOENT。
+const DEFAULT_PLANNING_ROOT = path.resolve(process.cwd(), "..", "私域电商售前客服AI规划");
+const SKILL_ROOT = path.resolve(
+  process.cwd(),
+  process.env.PRESALES_SKILL_ROOT || path.join(DEFAULT_PLANNING_ROOT, "presales-qa-agent"),
+);
+const KNOWLEDGE_BASE_PATH = path.resolve(
+  process.cwd(),
+  process.env.PRESALES_KNOWLEDGE_BASE || path.join(DEFAULT_PLANNING_ROOT, "私域电商售前客服-售前问答知识库.yaml"),
+);
 const SKILL_PROMPT_PATH = path.join(SKILL_ROOT, "references", "agent_system_prompt.md");
 const ANSWER_ENGINE_PATH = path.join(SKILL_ROOT, "scripts", "answer_engine.py");
-const KNOWLEDGE_BASE_PATH = path.join(PLANNING_ROOT, "私域电商售前客服-售前问答知识库.yaml");
+
+let skillResourcesChecked = false;
+
+function ensureSkillResources() {
+  if (skillResourcesChecked) return;
+  const missing = [
+    [SKILL_PROMPT_PATH, "PRESALES_SKILL_ROOT"],
+    [ANSWER_ENGINE_PATH, "PRESALES_SKILL_ROOT"],
+    [KNOWLEDGE_BASE_PATH, "PRESALES_KNOWLEDGE_BASE"],
+  ].filter(([target]) => !existsSync(target));
+  if (missing.length) {
+    throw new Error(
+      `售前技能资源缺失，请检查环境变量后重启：\n${missing
+        .map(([target, key]) => `  - ${target}（由 ${key} 决定）`)
+        .join("\n")}`,
+    );
+  }
+  skillResourcesChecked = true;
+}
 
 interface ConversationMessage {
   role: "user" | "assistant" | "system";
@@ -78,6 +106,8 @@ export async function runPresalesSkillOrchestrator({
     throw new Error("消息内容为空");
   }
 
+  ensureSkillResources();
+
   const plan = await classifyIntentWithSkill(safeMessage, safeHistory);
   if (plan.sentenceType === "non_question" && hasQuestionSignal(safeMessage)) {
     plan.sentenceType = "question";
@@ -118,7 +148,7 @@ export async function runPresalesSkillOrchestrator({
     subIntent: plan.subIntent,
     styleVariant,
     riskContextSummary: riskAnalysis?.summary ?? null,
-    trace: buildTrace(plan, toolExecution, outcome, reply),
+    trace: buildTrace(safeMessage, plan, toolExecution, outcome, reply),
   };
 }
 
@@ -1063,12 +1093,21 @@ function getDirectReply(plan: IntentPlan, outcome: EvaluatedOutcome): string | n
 }
 
 function buildTrace(
+  inputMessage: string,
   plan: IntentPlan,
   toolExecution: ToolExecution,
   outcome: EvaluatedOutcome,
   reply: string,
 ): PresalesTraceStep[] {
   return [
+    {
+      id: "trace-0",
+      title: "入模消息（含图片描述）",
+      stage: "llm",
+      // 图片识别结果由 conversationService 拼进消息文本，这里原样记录，
+      // 保证识图内容在链路上可追溯，而不是只影响回复却不留痕。
+      content: inputMessage,
+    },
     {
       id: "trace-1",
       title: "LLM 语义意图识别",
@@ -1206,7 +1245,7 @@ async function resolvePythonCommand(): Promise<{ command: string; prefixArgs: st
   for (const candidate of candidates) {
     try {
       await execFileAsync(candidate.command, [...candidate.prefixArgs, "--version"], {
-        cwd: PROJECT_ROOT,
+        cwd: process.cwd(),
         encoding: "utf8",
       });
       return candidate;

@@ -10,7 +10,7 @@ import { PresalesRepository } from "../src/server/repository";
 const dirs: string[] = [];
 before(() => {
   process.env.FOUNDATION_MODEL_API_KEY = "";
-  process.env.FOUNDATION_MODEL_VISION_NAME = "";
+  process.env.FOUNDATION_VISION_MODEL_NAME = "";
   process.env.PRESALES_UPLOAD_DIR = path.join(mkdtempSync(path.join(tmpdir(), "presales-imgflow-")), "uploads");
   dirs.push(path.dirname(process.env.PRESALES_UPLOAD_DIR!));
 });
@@ -28,23 +28,23 @@ describe("客服发图物料", () => {
 describe("发图触发规则(基于真实聊天记录归纳)", () => {
   it("首次问价格发送报价表,已发过则不再发", () => {
     assert.equal(
-      selectTriggeredImageAsset({ intent: "pricing", subIntent: "general", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "pricing", subIntent: "general", sentMediaPaths: [], stage: "consulting" }),
       QUOTE_SHEET_ASSET,
     );
     assert.equal(
-      selectTriggeredImageAsset({ intent: "pricing", subIntent: "general", sentMediaPaths: [QUOTE_SHEET_ASSET] }),
+      selectTriggeredImageAsset({ intent: "pricing", subIntent: "general", sentMediaPaths: [QUOTE_SHEET_ASSET], stage: "consulting" }),
       null,
     );
   });
 
   it("首次进入付款环节(询问支付方式)发送收款码", () => {
     assert.equal(
-      selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [], stage: "awaiting_payment" }),
       PAYMENT_CODE_ASSET,
     );
     assert.equal(
       selectTriggeredImageAsset({
-        intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [PAYMENT_CODE_ASSET],
+        intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [PAYMENT_CODE_ASSET], stage: "awaiting_payment",
       }),
       null,
     );
@@ -52,22 +52,32 @@ describe("发图触发规则(基于真实聊天记录归纳)", () => {
 
   it("物流子意图、其他意图不触发", () => {
     assert.equal(
-      selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "delivery_time", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "delivery_time", sentMediaPaths: [], stage: "consulting" }),
       null,
     );
     assert.equal(
-      selectTriggeredImageAsset({ intent: "authenticity", subIntent: "verify", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "authenticity", subIntent: "verify", sentMediaPaths: [], stage: "consulting" }),
       null,
     );
     assert.equal(
-      selectTriggeredImageAsset({ intent: "unknown", subIntent: "general", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "unknown", subIntent: "general", sentMediaPaths: [], stage: "consulting" }),
       null,
     );
   });
 
+  it("已进入待核对及之后阶段不再发报价表/收款码", () => {
+    for (const stage of ["awaiting_review", "awaiting_shipment", "awaiting_pickup", "picked_up", "in_transit"] as const) {
+      assert.equal(selectTriggeredImageAsset({ intent: "pricing", subIntent: "general", sentMediaPaths: [], stage }), null);
+      assert.equal(
+        selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [], stage }),
+        null,
+      );
+    }
+  });
+
   it("价格触发优先于付款触发", () => {
     assert.equal(
-      selectTriggeredImageAsset({ intent: "pricing", subIntent: "payment_methods", sentMediaPaths: [] }),
+      selectTriggeredImageAsset({ intent: "pricing", subIntent: "payment_methods", sentMediaPaths: [], stage: "consulting" }),
       QUOTE_SHEET_ASSET,
     );
   });

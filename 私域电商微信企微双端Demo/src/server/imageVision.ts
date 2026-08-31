@@ -36,30 +36,39 @@ export async function getVisionModelConfig(): Promise<VisionModelConfig | null> 
   };
 }
 
-function sniffMimeType(buffer: Buffer): string {
+// 魔数嗅探：上传校验与视觉调用共用同一实现，避免信任客户端声明的 MIME。
+export function sniffMimeType(buffer: Buffer): string | null {
   if (buffer.subarray(0, 8).toString("hex") === "89504e470d0a1a0a") return "image/png";
   if (buffer.subarray(0, 3).toString("hex") === "ffd8ff") return "image/jpeg";
   if (buffer.subarray(0, 4).toString("hex") === "47494638") return "image/gif";
   if (buffer.subarray(0, 4).toString("hex") === "52494646" && buffer.subarray(8, 12).toString("ascii") === "WEBP") return "image/webp";
-  return "image/png";
+  return null;
 }
 
 // 调用视觉模型描述客户图片。任何失败(未配置、文件缺失、接口报错)都返回 null,
-// 由调用方回退到原有的 [图片] 文本标记行为,不阻断聊天。
+// 由调用方回退到原有的 [图片] 文本标记行为,不阻断聊天;失败原因写 warn 日志便于排查。
+const VISION_TIMEOUT_MS = 15000;
+
+function visionSkipped(reason: string): null {
+  console.warn(`[imageVision] 跳过识图：${reason}`);
+  return null;
+}
+
 export async function describeCustomerImage(mediaPath: string): Promise<string | null> {
-  const filename = mediaPath.slice(mediaPath.lastIndexOf("/") + 1);
+  const filename = mediaPath.split("?")[0].slice(mediaPath.split("?")[0].lastIndexOf("/") + 1);
   let buffer: Buffer;
   try {
     buffer = await readFile(path.join(resolveUploadDir(), filename));
   } catch {
-    return null;
+    return visionSkipped(`图片文件不存在 ${filename}`);
   }
   const vision = await getVisionModelConfig();
-  if (!vision) return null;
-  const dataUrl = `data:${sniffMimeType(buffer)};base64,${buffer.toString("base64")}`;
+  if (!vision) return visionSkipped("未配置具备视觉能力的模型");
+  const dataUrl = `data:${sniffMimeType(buffer) ?? "image/png"};base64,${buffer.toString("base64")}`;
   try {
     const response = await fetch(`${vision.baseUrl}/chat/completions`, {
       method: "POST",
+      signal: AbortSignal.timeout(VISION_TIMEOUT_MS),
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${vision.apiKey}` },
       body: JSON.stringify({
         model: vision.model,
@@ -69,11 +78,10 @@ export async function describeCustomerImage(mediaPath: string): Promise<string |
           {
             role: "system",
             content: [
-              "你是私域电商售前客服的图片理解助手。客户在聊天中发来图片,请用 1-3 句中文描述图片内容,必须包含:",
+              "你是私域电商售前客服的图片理解助手。客户在聊天中发来图片,请用 1-2 句中文说明图片大致内容,只需包含:",
               "1) 图片类型(付款截图 / 商品或药品实拍 / 价格表 / 聊天记录 / 其他);",
-              "2) 若是付款截图,写出支付平台、金额、时间(如可见);",
-              "3) 若是商品或药品,写出可见的品牌、版本、剂量、规格;",
-              "4) 其他关键文字信息。",
+              "2) 若能看出商品品类,写出品类名称。",
+              "严禁抽取或转述金额、时间、订单号、单号、支付平台等具体数字与凭据信息;这些事实一律由客服与系统核对,不得由图片描述引入。",
               "只输出描述本身,不要任何前缀或解释。",
             ].join("\n"),
           },
@@ -87,11 +95,11 @@ export async function describeCustomerImage(mediaPath: string): Promise<string |
         ],
       }),
     });
-    if (!response.ok) return null;
+    if (!response.ok) return visionSkipped(`视觉接口返回 ${response.status}`);
     const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const text = payload.choices?.[0]?.message?.content?.trim();
-    return text ? text : null;
-  } catch {
-    return null;
+    return text ? text : visionSkipped("视觉接口返回空描述");
+  } catch (error) {
+    return visionSkipped(error instanceof Error ? error.message : "视觉接口调用异常");
   }
 }

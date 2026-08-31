@@ -48,8 +48,8 @@ export function runPresalesEngine({ message, history = [] }: EngineInput): Presa
     confidence: intentResult.confidence,
     reply: decision.reply,
     needHuman: decision.needHuman,
-    silentIntercept: false,
-    interceptReason: undefined,
+    silentIntercept: decision.silentIntercept,
+    interceptReason: decision.interceptReason,
     notificationStatus: decision.needHuman ? "pending" : "not_applicable",
     handoffTriggerType: decision.handoffTriggerType,
     boundaryDecision: decision.boundaryDecision,
@@ -127,14 +127,19 @@ function routeIntent(
   }
 
   if (intent === "handoff") {
-    return buildHumanDecision(
-      "好的，已为您转接人工客服，马上为您跟进，请稍等～",
-      "客户点名人工",
-      "ab_first_response -> 客户明确要求人工，AI 停止实质作答",
-      makeSummary("客户明确要求转人工", extractLastAssistantReply(history), "等待人工接管后继续服务"),
-      ["handoff keyword"],
-      "handoff",
-    );
+    // 客户点名人工时静默拦截：不向客户发送任何 AI 自动回复，直接进人工队列。
+    return {
+      ...buildHumanDecision(
+        "",
+        "客户点名人工",
+        "ab_first_response -> 客户明确要求人工，AI 静默拦截不作答",
+        makeSummary("客户明确要求转人工", extractLastAssistantReply(history), "等待人工接管后继续服务"),
+        ["handoff keyword"],
+        "handoff",
+      ),
+      silentIntercept: true,
+      interceptReason: "已识别为人工转接诉求，本轮不向客户发送 AI 自动回复。",
+    };
   }
 
   if (intent === "risk") {
@@ -155,6 +160,19 @@ function routeIntent(
 
   if (intent === "version") {
     return handleVersion(message, context);
+  }
+
+  // unknown 分流：非疑问句的闲聊/无意义输入只做轻承接，不占用人工；真实知识盲区才转人工。
+  if (!hasQuestionSignal(message)) {
+    return buildDecision(
+      "在的哦～有想了解的版本、价格、活动或发货问题，随时滴滴我～",
+      false,
+      null,
+      "ab_kb_fallback -> 非疑问句闲聊/无效输入，轻承接并引导回业务，不触发转人工",
+      ["chitchat_non_question"],
+      "",
+      "fallback",
+    );
   }
 
   return buildHumanDecision(
@@ -271,6 +289,19 @@ function handleFulfillment(message: string): Omit<PresalesDecision, "intent" | "
       null,
       "ab_order_handoff -> 发货时效口径固定，不承诺具体到货日",
       ["fulfillment_payment.ship_time", "fulfillment_payment.delivery_time"],
+      "",
+      "fulfillment",
+    );
+  }
+
+  const unsupportedMethod = ["红包", "扫码", "刷卡", "花呗", "分期"].find((item) => message.includes(item));
+  if (unsupportedMethod) {
+    return buildDecision(
+      `${unsupportedMethod}这种方式这边不支持哦，目前可以走${info.paymentMethods.join(" / ")}。另外，${info.paymentUnavailable}。`,
+      false,
+      null,
+      "ab_order_handoff -> 客户问及未开通的收款方式，先明确不支持再给可用口径",
+      ["fulfillment_payment.payment_methods", "fulfillment_payment.payment_unavailable"],
       "",
       "fulfillment",
     );
@@ -703,4 +734,14 @@ function extractLastAssistantReply(history: ConversationMessage[]): string {
 
 function isGreeting(message: string): boolean {
   return GREETINGS.some((item) => message.toLowerCase().includes(item));
+}
+
+// 疑问信号判定：用于区分「真实提问」与「陈述/闲聊/情绪宣泄」。
+function hasQuestionSignal(message: string): boolean {
+  if (/[?？]/.test(message)) {
+    return true;
+  }
+  return /(吗|嘛|呢|怎么|怎样|咋|多少|几个|几支|几盒|几天|啥时候|为什么|为啥|能不能|可不可以|是不是|有没有|好不好|行不行|要不要|哪里|哪个|哪种|哪年|哪天|哪位)/.test(
+    message,
+  );
 }

@@ -1,5 +1,5 @@
 {
-  "name": "agentic-ai-template",
+  "name": "presales-customer-service-agentic-demo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,9 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:unit",
-    "test:unit": "tsx --test src/lib/presalesEngine.test.ts",
+    "test:unit": "tsx --test tests/**/*.test.ts",
+    "test:tap": "tsx --test --test-reporter=tap tests/**/*.test.ts",
     "test:all": "npm run test:unit && npm run update:report",
-    "update:report": "python3 scripts/run_tests.py tests/AgentTestCaseSuite.md tests/reports"
+    "update:report": "python3 scripts/run_tests.py docs/AgentTestCaseSuite.md tests/reports"
   },
   "dependencies": {
     "next": "16.2.10",

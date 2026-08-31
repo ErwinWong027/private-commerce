@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { ChatActor, ConversationDetail, ConversationSummary, DecisionRecord, HandoffTicketRecord, MessageContentType, MessageRecord, SessionStatus, TicketStatus, UserRecord } from "@/types";
+import type { ChatActor, ConversationDetail, ConversationSummary, DealStage, DealState, DecisionRecord, HandoffTicketRecord, MessageContentType, MessageRecord, PortalRole, SessionStatus, TicketStatus, UserRecord } from "@/types";
 
 const DEFAULT_DB = path.join(process.cwd(), "data", "presales-demo.db");
 const WELCOME = "哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～";
@@ -12,6 +12,11 @@ function id(prefix: string) { return `${prefix}-${Date.now()}-${Math.random().to
 function bool(value: unknown) { return Number(value) === 1; }
 function jsonArray(value: unknown): string[] { try { return JSON.parse(String(value ?? "[]")); } catch { return []; } }
 function jsonObject(value: unknown): Record<string, unknown> | null { if (!value) return null; try { return JSON.parse(String(value)); } catch { return null; } }
+
+export type TicketUpdateResult =
+  | { ok: true; ticket: HandoffTicketRecord }
+  | { ok: false; reason: "not_found" }
+  | { ok: false; reason: "invalid_transition"; message: string };
 
 export class PresalesRepository {
   readonly db: DatabaseSync;
@@ -32,7 +37,8 @@ export class PresalesRepository {
       );
       CREATE TABLE IF NOT EXISTS sessions (
         id TEXT PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES users(id), status TEXT NOT NULL CHECK(status IN ('ai_serving','human_serving','closed')),
-        assigned_agent_id TEXT REFERENCES users(id), unread_count INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+        assigned_agent_id TEXT REFERENCES users(id), unread_count INTEGER NOT NULL DEFAULT 0,
+        customer_unread_count INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS messages (
         id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -56,6 +62,10 @@ export class PresalesRepository {
       CREATE TABLE IF NOT EXISTS metrics (
         key TEXT PRIMARY KEY, value REAL NOT NULL DEFAULT 0, updated_at TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS deal_states (
+        session_id TEXT PRIMARY KEY REFERENCES sessions(id) ON DELETE CASCADE,
+        stage TEXT NOT NULL, tracking_no TEXT, updated_at TEXT NOT NULL
+      );
       CREATE INDEX IF NOT EXISTS idx_messages_session_sequence ON messages(session_id, sequence);
       CREATE INDEX IF NOT EXISTS idx_sessions_updated ON sessions(updated_at DESC);
       CREATE INDEX IF NOT EXISTS idx_decisions_session_created ON decisions(session_id, created_at DESC);
@@ -69,6 +79,11 @@ export class PresalesRepository {
       const columns = (this.db.prepare("PRAGMA table_info(messages)").all() as Row[]).map((item) => String(item.name));
       if (!columns.includes(column)) this.db.exec(`ALTER TABLE messages ADD COLUMN ${column} ${definition}`);
     }
+    // unread_count 表示客服侧未读，customer_unread_count 表示客户侧未读（旧库原地补列）。
+    const sessionColumns = (this.db.prepare("PRAGMA table_info(sessions)").all() as Row[]).map((item) => String(item.name));
+    if (!sessionColumns.includes("customer_unread_count")) {
+      this.db.exec("ALTER TABLE sessions ADD COLUMN customer_unread_count INTEGER NOT NULL DEFAULT 0");
+    }
   }
 
   private seed() {
@@ -78,10 +93,12 @@ export class PresalesRepository {
         .run("U-CUSTOMER-001", "customer", "林女士", "林", null, t);
       this.db.prepare("INSERT OR IGNORE INTO users(id,role,name,avatar,organization,created_at) VALUES(?,?,?,?,?,?)")
         .run("U-AGENT-001", "agent", "小禾", "禾", "小禾健康私域服务中心", t);
-      this.db.prepare("INSERT OR IGNORE INTO sessions(id,customer_id,status,assigned_agent_id,unread_count,created_at,updated_at) VALUES(?,?,?,?,?,?,?)")
-        .run("S-001", "U-CUSTOMER-001", "ai_serving", null, 0, t, t);
+      this.db.prepare("INSERT OR IGNORE INTO sessions(id,customer_id,status,assigned_agent_id,unread_count,customer_unread_count,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)")
+        .run("S-001", "U-CUSTOMER-001", "ai_serving", null, 0, 0, t, t);
       this.db.prepare("INSERT OR IGNORE INTO messages(id,session_id,sequence,actor,sender_id,content,created_at) VALUES(?,?,?,?,?,?,?)")
         .run("M-WELCOME-001", "S-001", 1, "ai", null, WELCOME, t);
+      this.db.prepare("INSERT OR IGNORE INTO deal_states(session_id,stage,tracking_no,updated_at) VALUES(?,?,?,?)")
+        .run("S-001", "consulting", null, t);
       for (const [key, value] of [["total_messages", 1], ["ai_replies", 1], ["handoffs", 0]]) {
         this.db.prepare("INSERT OR IGNORE INTO metrics(key,value,updated_at) VALUES(?,?,?)").run(key, value, t);
       }
@@ -94,13 +111,13 @@ export class PresalesRepository {
     catch (error) { this.db.exec("ROLLBACK"); throw error; }
   }
 
-  getUserForRole(role: "customer" | "agent"): UserRecord {
-    const userId = role === "customer" ? "U-CUSTOMER-001" : "U-AGENT-001";
-    const row = this.db.prepare("SELECT * FROM users WHERE id=?").get(userId) as Row;
+  getUserForRole(role: PortalRole): UserRecord {
+    const row = this.db.prepare("SELECT * FROM users WHERE role=? ORDER BY created_at, id LIMIT 1").get(role) as Row | undefined;
+    if (!row) throw new Error(`演示数据缺少角色 ${role} 的用户`);
     return { id: String(row.id), role: row.role as UserRecord["role"], name: String(row.name), avatar: String(row.avatar), organization: row.organization ? String(row.organization) : null };
   }
 
-  listConversations(): ConversationSummary[] {
+  listConversations(role: PortalRole = "agent"): ConversationSummary[] {
     const rows = this.db.prepare(`
       SELECT s.*, u.name customer_name,
         COALESCE((SELECT CASE WHEN content_type='image' THEN '[图片]' ELSE content END FROM messages m WHERE m.session_id=s.id ORDER BY sequence DESC LIMIT 1),'') last_message,
@@ -112,23 +129,43 @@ export class PresalesRepository {
       id: String(r.id), customerId: String(r.customer_id), customerName: String(r.customer_name),
       status: r.status as SessionStatus, assignedAgentId: r.assigned_agent_id ? String(r.assigned_agent_id) : null,
       lastMessage: String(r.last_message), lastMessageAt: String(r.last_message_at),
-      unreadCount: Number(r.unread_count), messageCount: Number(r.message_count),
+      unreadCount: Number(role === "agent" ? r.unread_count : r.customer_unread_count), messageCount: Number(r.message_count),
     }));
   }
 
-  getConversation(sessionId: string, markRead = false): ConversationDetail | null {
-    const summary = this.listConversations().find((item) => item.id === sessionId);
+  // 只读查询：标记已读改由 markConversationRead 显式触发，避免 GET 产生副作用。
+  getConversation(sessionId: string, role: PortalRole = "agent"): ConversationDetail | null {
+    const summary = this.listConversations(role).find((item) => item.id === sessionId);
     if (!summary) return null;
-    if (markRead) this.db.prepare("UPDATE sessions SET unread_count=0 WHERE id=?").run(sessionId);
     const customerRow = this.db.prepare("SELECT * FROM users WHERE id=?").get(summary.customerId) as Row;
     const messages = (this.db.prepare("SELECT * FROM messages WHERE session_id=? ORDER BY sequence").all(sessionId) as Row[]).map(this.mapMessage);
     const decisions = (this.db.prepare("SELECT * FROM decisions WHERE session_id=? ORDER BY created_at DESC").all(sessionId) as Row[]).map(this.mapDecision);
     const tickets = (this.db.prepare("SELECT * FROM handoff_tickets WHERE session_id=? ORDER BY created_at DESC").all(sessionId) as Row[]).map(this.mapTicket);
     return {
-      ...summary, unreadCount: markRead ? 0 : summary.unreadCount,
+      ...summary,
       customer: { id: String(customerRow.id), role: "customer", name: String(customerRow.name), avatar: String(customerRow.avatar), organization: null },
-      messages, decisions, tickets,
+      messages, decisions, tickets, dealState: this.getDealState(sessionId),
     };
+  }
+
+  markConversationRead(sessionId: string, role: PortalRole): boolean {
+    const column = role === "agent" ? "unread_count" : "customer_unread_count";
+    const result = this.db.prepare(`UPDATE sessions SET ${column}=0 WHERE id=?`).run(sessionId);
+    return Number(result.changes) > 0;
+  }
+
+  getDealState(sessionId: string): DealState {
+    const row = this.db.prepare("SELECT stage, tracking_no FROM deal_states WHERE session_id=?").get(sessionId) as Row | undefined;
+    if (!row) return { stage: "consulting", trackingNo: null };
+    return { stage: row.stage as DealStage, trackingNo: row.tracking_no ? String(row.tracking_no) : null };
+  }
+
+  setDealState(sessionId: string, state: DealState): DealState {
+    return this.transaction(() => {
+      this.db.prepare("INSERT INTO deal_states(session_id,stage,tracking_no,updated_at) VALUES(?,?,?,?) ON CONFLICT(session_id) DO UPDATE SET stage=excluded.stage,tracking_no=excluded.tracking_no,updated_at=excluded.updated_at")
+        .run(sessionId, state.stage, state.trackingNo, now());
+      return state;
+    });
   }
 
   private mapMessage = (r: Row): MessageRecord => ({
@@ -171,7 +208,11 @@ export class PresalesRepository {
     const messageId = id("M");
     this.db.prepare("INSERT INTO messages(id,session_id,sequence,actor,sender_id,content,content_type,media_path,created_at) VALUES(?,?,?,?,?,?,?,?,?)")
       .run(messageId, sessionId, next, actor, senderId, content, mediaPath ? "image" : "text", mediaPath, t);
-    this.db.prepare("UPDATE sessions SET updated_at=?, unread_count=unread_count+? WHERE id=?").run(t, actor === "customer" ? 1 : 0, sessionId);
+    // 按接收方视角双向记账：客户发言累加客服未读，AI/人工发言累加客户未读，系统消息不计未读。
+    const agentUnread = actor === "customer" ? 1 : 0;
+    const customerUnread = actor === "ai" || actor === "agent" ? 1 : 0;
+    this.db.prepare("UPDATE sessions SET updated_at=?, unread_count=unread_count+?, customer_unread_count=customer_unread_count+? WHERE id=?")
+      .run(t, agentUnread, customerUnread, sessionId);
     this.bump("total_messages", 1, t);
     return { id: messageId, sessionId, sequence: next, actor, senderId, content, contentType: mediaPath ? "image" : "text", mediaPath, imageDescription: null, createdAt: t };
   }
@@ -210,27 +251,48 @@ export class PresalesRepository {
     });
   }
 
-  updateTicket(ticketId: string, action: "take_over" | "resolve"): HandoffTicketRecord | null {
+  // 工单状态机：pending --take_over--> in_progress --resolve--> resolved。
+  // 重复提交同一动作按幂等处理，跨状态提交返回冲突原因，避免已解决工单把人工会话打回。
+  updateTicket(ticketId: string, action: "take_over" | "resolve", agentId: string): TicketUpdateResult {
     return this.transaction(() => {
       const existing = this.db.prepare("SELECT * FROM handoff_tickets WHERE id=?").get(ticketId) as Row | undefined;
-      if (!existing) return null;
+      if (!existing) return { ok: false as const, reason: "not_found" as const };
+      const status = existing.status as TicketStatus;
+      const sessionId = String(existing.session_id);
       const t = now();
       if (action === "take_over") {
-        this.db.prepare("UPDATE handoff_tickets SET status='in_progress',assigned_agent_id='U-AGENT-001',updated_at=? WHERE id=?").run(t, ticketId);
-        this.db.prepare("UPDATE sessions SET status='human_serving',assigned_agent_id='U-AGENT-001',updated_at=? WHERE id=?").run(t, String(existing.session_id));
-        this.insertMessage(String(existing.session_id), "system", null, "人工客服小禾已接入会话");
-      } else {
-        this.db.prepare("UPDATE handoff_tickets SET status='resolved',updated_at=? WHERE id=?").run(t, ticketId);
-        this.db.prepare("UPDATE sessions SET status='ai_serving',assigned_agent_id=NULL,updated_at=? WHERE id=?").run(t, String(existing.session_id));
-        this.insertMessage(String(existing.session_id), "system", null, "人工服务已结束，智能助手恢复服务");
+        if (status === "in_progress") return { ok: true as const, ticket: this.readTicket(ticketId) };
+        if (status !== "pending") return { ok: false as const, reason: "invalid_transition" as const, message: "工单已解决，无法再次接管" };
+        const agentName = this.getUserName(agentId);
+        this.db.prepare("UPDATE handoff_tickets SET status='in_progress',assigned_agent_id=?,updated_at=? WHERE id=?").run(agentId, t, ticketId);
+        this.db.prepare("UPDATE sessions SET status='human_serving',assigned_agent_id=?,updated_at=? WHERE id=?").run(agentId, t, sessionId);
+        this.insertMessage(sessionId, "system", null, `人工客服${agentName}已接入会话`);
+        return { ok: true as const, ticket: this.readTicket(ticketId) };
       }
-      return this.mapTicket(this.db.prepare("SELECT * FROM handoff_tickets WHERE id=?").get(ticketId) as Row);
+      if (status === "resolved") return { ok: true as const, ticket: this.readTicket(ticketId) };
+      if (status !== "in_progress") return { ok: false as const, reason: "invalid_transition" as const, message: "工单尚未被接管，无法解决" };
+      this.db.prepare("UPDATE handoff_tickets SET status='resolved',updated_at=? WHERE id=?").run(t, ticketId);
+      const sessionStatus = this.db.prepare("SELECT status FROM sessions WHERE id=?").get(sessionId) as Row | undefined;
+      if (sessionStatus?.status === "human_serving") {
+        this.db.prepare("UPDATE sessions SET status='ai_serving',assigned_agent_id=NULL,updated_at=? WHERE id=?").run(t, sessionId);
+        this.insertMessage(sessionId, "system", null, "人工服务已结束，智能助手恢复服务");
+      }
+      return { ok: true as const, ticket: this.readTicket(ticketId) };
     });
+  }
+
+  private readTicket(ticketId: string): HandoffTicketRecord {
+    return this.mapTicket(this.db.prepare("SELECT * FROM handoff_tickets WHERE id=?").get(ticketId) as Row);
+  }
+
+  private getUserName(userId: string): string {
+    const row = this.db.prepare("SELECT name FROM users WHERE id=?").get(userId) as Row | undefined;
+    return row ? String(row.name) : "客服";
   }
 
   reset() {
     this.transaction(() => {
-      this.db.exec("DELETE FROM decisions; DELETE FROM handoff_tickets; DELETE FROM messages; DELETE FROM sessions; DELETE FROM metrics;");
+      this.db.exec("DELETE FROM decisions; DELETE FROM handoff_tickets; DELETE FROM messages; DELETE FROM deal_states; DELETE FROM sessions; DELETE FROM metrics;");
     });
     this.seed();
     return this.getConversation("S-001");
