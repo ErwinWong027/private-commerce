@@ -7,3 +7,4 @@ data/*.db-*
 data/uploads/
 coverage/
 *.log
+tsconfig.tsbuildinfo
