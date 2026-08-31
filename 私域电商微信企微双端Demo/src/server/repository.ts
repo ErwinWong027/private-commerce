@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { ChatActor, ConversationDetail, ConversationSummary, DecisionRecord, HandoffTicketRecord, MessageRecord, SessionStatus, TicketStatus, UserRecord } from "@/types";
+import type { ChatActor, ConversationDetail, ConversationSummary, DecisionRecord, HandoffTicketRecord, MessageContentType, MessageRecord, SessionStatus, TicketStatus, UserRecord } from "@/types";
 
 const DEFAULT_DB = path.join(process.cwd(), "data", "presales-demo.db");
 const WELCOME = "哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～";
@@ -37,7 +37,9 @@ export class PresalesRepository {
       CREATE TABLE IF NOT EXISTS messages (
         id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
         sequence INTEGER NOT NULL, actor TEXT NOT NULL CHECK(actor IN ('customer','ai','agent','system')),
-        sender_id TEXT REFERENCES users(id), content TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(session_id, sequence)
+        sender_id TEXT REFERENCES users(id), content TEXT NOT NULL,
+        content_type TEXT NOT NULL DEFAULT 'text' CHECK(content_type IN ('text','image')),
+        media_path TEXT, image_description TEXT, created_at TEXT NOT NULL, UNIQUE(session_id, sequence)
       );
       CREATE TABLE IF NOT EXISTS decisions (
         id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -59,6 +61,14 @@ export class PresalesRepository {
       CREATE INDEX IF NOT EXISTS idx_decisions_session_created ON decisions(session_id, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_tickets_session_status ON handoff_tickets(session_id, status);
     `);
+    for (const [column, definition] of [
+      ["content_type", "TEXT NOT NULL DEFAULT 'text'"],
+      ["media_path", "TEXT"],
+      ["image_description", "TEXT"],
+    ] as const) {
+      const columns = (this.db.prepare("PRAGMA table_info(messages)").all() as Row[]).map((item) => String(item.name));
+      if (!columns.includes(column)) this.db.exec(`ALTER TABLE messages ADD COLUMN ${column} ${definition}`);
+    }
   }
 
   private seed() {
@@ -93,7 +103,7 @@ export class PresalesRepository {
   listConversations(): ConversationSummary[] {
     const rows = this.db.prepare(`
       SELECT s.*, u.name customer_name,
-        COALESCE((SELECT content FROM messages m WHERE m.session_id=s.id ORDER BY sequence DESC LIMIT 1),'') last_message,
+        COALESCE((SELECT CASE WHEN content_type='image' THEN '[图片]' ELSE content END FROM messages m WHERE m.session_id=s.id ORDER BY sequence DESC LIMIT 1),'') last_message,
         COALESCE((SELECT created_at FROM messages m WHERE m.session_id=s.id ORDER BY sequence DESC LIMIT 1),s.updated_at) last_message_at,
         (SELECT COUNT(*) FROM messages m WHERE m.session_id=s.id) message_count
       FROM sessions s JOIN users u ON u.id=s.customer_id ORDER BY last_message_at DESC
@@ -123,7 +133,11 @@ export class PresalesRepository {
 
   private mapMessage = (r: Row): MessageRecord => ({
     id: String(r.id), sessionId: String(r.session_id), sequence: Number(r.sequence), actor: r.actor as ChatActor,
-    senderId: r.sender_id ? String(r.sender_id) : null, content: String(r.content), createdAt: String(r.created_at),
+    senderId: r.sender_id ? String(r.sender_id) : null, content: String(r.content),
+    contentType: (r.content_type as MessageContentType) ?? "text",
+    mediaPath: r.media_path ? String(r.media_path) : null,
+    imageDescription: r.image_description ? String(r.image_description) : null,
+    createdAt: String(r.created_at),
   });
   private mapDecision = (r: Row): DecisionRecord => ({
     id: String(r.id), sessionId: String(r.session_id), messageId: String(r.message_id), intent: String(r.intent),
@@ -143,19 +157,23 @@ export class PresalesRepository {
     return row ? row.status as SessionStatus : null;
   }
 
-  appendMessage(sessionId: string, actor: ChatActor, senderId: string | null, content: string): MessageRecord {
-    return this.transaction(() => this.insertMessage(sessionId, actor, senderId, content));
+  appendMessage(sessionId: string, actor: ChatActor, senderId: string | null, content: string, mediaPath: string | null = null): MessageRecord {
+    return this.transaction(() => this.insertMessage(sessionId, actor, senderId, content, mediaPath));
   }
 
-  private insertMessage(sessionId: string, actor: ChatActor, senderId: string | null, content: string): MessageRecord {
+  setMessageImageDescription(messageId: string, description: string): void {
+    this.db.prepare("UPDATE messages SET image_description=? WHERE id=?").run(description, messageId);
+  }
+
+  private insertMessage(sessionId: string, actor: ChatActor, senderId: string | null, content: string, mediaPath: string | null = null): MessageRecord {
     const t = now();
     const next = Number((this.db.prepare("SELECT COALESCE(MAX(sequence),0)+1 seq FROM messages WHERE session_id=?").get(sessionId) as Row).seq);
     const messageId = id("M");
-    this.db.prepare("INSERT INTO messages(id,session_id,sequence,actor,sender_id,content,created_at) VALUES(?,?,?,?,?,?,?)")
-      .run(messageId, sessionId, next, actor, senderId, content, t);
+    this.db.prepare("INSERT INTO messages(id,session_id,sequence,actor,sender_id,content,content_type,media_path,created_at) VALUES(?,?,?,?,?,?,?,?,?)")
+      .run(messageId, sessionId, next, actor, senderId, content, mediaPath ? "image" : "text", mediaPath, t);
     this.db.prepare("UPDATE sessions SET updated_at=?, unread_count=unread_count+? WHERE id=?").run(t, actor === "customer" ? 1 : 0, sessionId);
     this.bump("total_messages", 1, t);
-    return { id: messageId, sessionId, sequence: next, actor, senderId, content, createdAt: t };
+    return { id: messageId, sessionId, sequence: next, actor, senderId, content, contentType: mediaPath ? "image" : "text", mediaPath, imageDescription: null, createdAt: t };
   }
 
   saveAutomatedDecision(sessionId: string, customerMessageId: string, customerContent: string, decision: {

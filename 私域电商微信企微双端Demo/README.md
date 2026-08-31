@@ -21,6 +21,7 @@ npm run dev
 - `FOUNDATION_MODEL_API_KEY`：模型密钥（必填；缺失时 API 返回明确配置提示）
 - `FOUNDATION_MODEL_BASE_URL`：OpenAI 兼容接口基址
 - `FOUNDATION_MODEL_NAME`：模型名称
+- `PRESALES_UPLOAD_DIR`：图片上传目录（可选，默认 `data/uploads`）
 
 仓库不包含 `.env.local` 或任何密钥。
 
@@ -48,6 +49,13 @@ SQLite 文件位于 `data/presales-demo.db`，运行时文件已加入 `.gitigno
 3. 接管工单后会话进入 `human_serving`，客户消息只持久化、不调用 AI；客服可人工回复。
 4. 解决工单后恢复 `ai_serving`，后续客户消息重新进入 Agentic 链路。
 5. 客服侧“重置 Demo”可恢复 seed 数据。
+
+## 发送图片
+
+- 客户微信与客服企业微信的输入区均有 📷 按钮，可上传 PNG / JPEG / WebP / GIF（≤5MB），纯图片或“图片 + 文字”均可发送；客服侧图片同样需要在人工接管后可发。
+- 上传的图片保存到运行时目录 `data/uploads/`，并通过 `GET /api/media/<文件名>` 读取；文件名由服务端生成（UUID），仅允许从该目录读取。
+- 客户发送图片时，AI 决策链路收到附带文字或 `[图片]` 标记，继续走原有意图识别与话术生成；会话列表的最后一条消息对纯图片显示为 `[图片]`。
+- 消息表通过 `content_type`（`text`/`image`）与 `media_path` 字段保存图片，旧数据库启动时自动升级。
 
 ## 验证
 

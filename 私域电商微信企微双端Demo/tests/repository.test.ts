@@ -3,6 +3,7 @@ import { afterEach, describe, it } from "node:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { PresalesRepository } from "../src/server/repository";
 
 const dirs: string[] = [];
@@ -53,6 +54,46 @@ describe("PresalesRepository", () => {
     repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "一");
     repo.appendMessage("S-001", "agent", "U-AGENT-001", "二");
     assert.deepEqual(repo.getConversation("S-001")?.messages.map((m) => m.sequence), [1, 2, 3]);
+    repo.close();
+  });
+
+  it("保存图片消息，会话列表展示 [图片]", () => {
+    const repo = createRepository();
+    const image = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "", "/api/media/abc.png");
+    assert.equal(image.contentType, "image");
+    assert.equal(image.mediaPath, "/api/media/abc.png");
+    assert.equal(repo.listConversations()[0].lastMessage, "[图片]");
+    const withCaption = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "这个正品吗", "/api/media/def.png");
+    assert.equal(withCaption.contentType, "image");
+    assert.equal(withCaption.content, "这个正品吗");
+    const text = repo.appendMessage("S-001", "agent", "U-AGENT-001", "是正品");
+    assert.equal(text.contentType, "text");
+    assert.equal(text.mediaPath, null);
+    assert.equal(repo.listConversations()[0].lastMessage, "是正品");
+    repo.close();
+  });
+
+  it("旧库（无图片列）启动时原地升级", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "presales-repo-"));
+    dirs.push(dir);
+    const dbPath = path.join(dir, "legacy.db");
+    const raw = new DatabaseSync(dbPath);
+    raw.exec(`
+      CREATE TABLE users (id TEXT PRIMARY KEY, role TEXT NOT NULL, name TEXT NOT NULL, avatar TEXT NOT NULL, organization TEXT, created_at TEXT NOT NULL);
+      CREATE TABLE sessions (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, status TEXT NOT NULL, assigned_agent_id TEXT, unread_count INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+      CREATE TABLE messages (id TEXT PRIMARY KEY, session_id TEXT NOT NULL, sequence INTEGER NOT NULL, actor TEXT NOT NULL, sender_id TEXT, content TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(session_id, sequence));
+      INSERT INTO users VALUES ('U-1','customer','A','A',NULL,'t');
+      INSERT INTO sessions VALUES ('S-1','U-1','ai_serving',NULL,0,'t','t');
+      INSERT INTO messages VALUES ('M-1','S-1',1,'customer',NULL,'你好','t');
+    `);
+    raw.close();
+    const repo = new PresalesRepository(dbPath);
+    const legacy = repo.getConversation("S-1")!.messages[0];
+    assert.equal(legacy.contentType, "text");
+    assert.equal(legacy.mediaPath, null);
+    const image = repo.appendMessage("S-1", "customer", "U-1", "", "/api/media/x.png");
+    assert.equal(image.contentType, "image");
+    assert.equal(repo.listConversations()[0].lastMessage, "[图片]");
     repo.close();
   });
 });

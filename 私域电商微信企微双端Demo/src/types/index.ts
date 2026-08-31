@@ -1,5 +1,6 @@
 export type PortalRole = "customer" | "agent";
 export type ChatActor = "customer" | "ai" | "agent" | "system";
+export type MessageContentType = "text" | "image";
 export type SessionStatus = "ai_serving" | "human_serving" | "closed";
 export type TicketStatus = "pending" | "in_progress" | "resolved";
 export type HumanNotificationStatus = "pending" | "suppressed" | "not_applicable";
@@ -14,7 +15,7 @@ export type HandoffTriggerType =
   | "知识盲区";
 
 export interface UserRecord { id: string; role: PortalRole; name: string; avatar: string; organization: string | null }
-export interface MessageRecord { id: string; sessionId: string; sequence: number; actor: ChatActor; senderId: string | null; content: string; createdAt: string }
+export interface MessageRecord { id: string; sessionId: string; sequence: number; actor: ChatActor; senderId: string | null; content: string; contentType: MessageContentType; mediaPath: string | null; imageDescription: string | null; createdAt: string }
 export interface DecisionRecord {
   id: string; sessionId: string; messageId: string; intent: string; confidence: number; needHuman: boolean;
   silentIntercept: boolean; boundaryDecision: string; matchedEvidence: string[]; toolName: string | null;

@@ -64,6 +64,8 @@ def normalize_dose(raw):
 
 def find_version(kb, query):
     """按 name/aliases 命中版本；返回版本 dict 或 None。"""
+    if not query:
+        return None
     for v in kb.get("product_versions", []):
         names = [v.get("name", "")] + list(v.get("aliases", []))
         for n in names:
@@ -88,7 +90,7 @@ def get_price(kb, version_query, dose):
     version = find_version(kb, version_query)
     if not version:
         return {
-            "error": f"未找到版本：{version_query}",
+            "error": f"未找到版本：{version_query or '未指定'}",
             "available_versions": [v["name"] for v in kb.get("product_versions", [])],
         }
 
@@ -275,7 +277,7 @@ def get_product_info(kb, version_query):
     version = find_version(kb, version_query)
     if not version:
         return {
-            "error": f"未找到版本：{version_query}",
+            "error": f"未找到版本：{version_query or '未指定'}",
             "available_versions": [v["name"] for v in kb.get("product_versions", [])],
         }
     return {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { ConversationDetail, ConversationSummary, PortalRole, UserRecord } from "@/types";
 
 const STATUS = { ai_serving: "AI 服务中", human_serving: "人工服务中", closed: "已关闭" };
@@ -15,9 +15,11 @@ export default function Portal({ role }: { role: PortalRole }) {
   const [conversation, setConversation] = useState<ConversationDetail | null>(null);
   const [activeId, setActiveId] = useState("S-001");
   const [text, setText] = useState("");
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -65,10 +67,27 @@ export default function Portal({ role }: { role: PortalRole }) {
     setUser(payload.user);
   }
 
+  async function pickImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || busy) return;
+    setBusy(true); setNotice("");
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      const response = await fetch("/api/uploads", { method: "POST", body: form });
+      const payload = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !payload.url) setNotice(payload.error || "图片上传失败");
+      else setPendingImage(payload.url);
+    } catch { setNotice("图片上传失败"); }
+    setBusy(false);
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!text.trim() || !conversation || busy) return;
+    if ((!text.trim() && !pendingImage) || !conversation || busy) return;
     const outgoing = text.trim();
+    const outgoingImage = pendingImage;
     setBusy(true); setNotice("");
     if (role === "customer") {
       const optimisticId = `optimistic-${Date.now()}`;
@@ -81,13 +100,17 @@ export default function Portal({ role }: { role: PortalRole }) {
           actor: "customer",
           senderId: user?.id ?? null,
           content: outgoing,
+          contentType: outgoingImage ? "image" : "text",
+          mediaPath: outgoingImage,
+          imageDescription: null,
           createdAt: new Date().toISOString(),
         }],
       } : current);
       setText("");
+      setPendingImage(null);
     }
     const endpoint = role === "customer" ? "/api/chat" : "/api/agent/reply";
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: conversation.id, message: outgoing }) });
+    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: conversation.id, message: outgoing, mediaUrl: outgoingImage ?? undefined }) });
     const payload = await response.json() as { error?: string };
     if (response.ok) setText(""); else setNotice(payload.error || "发送失败");
     setBusy(false);
@@ -123,7 +146,7 @@ export default function Portal({ role }: { role: PortalRole }) {
           <aside className="conversationList">
             <div className="search">⌕ 搜索</div>
             <h2>{role === "customer" ? "聊天" : "客户会话"} <small>{conversations.length}</small></h2>
-            {conversations.map((item) => <button key={item.id} className={conversation?.id === item.id ? "conversation active" : "conversation"} onClick={() => setActiveId(item.id)}>
+            {conversations.map((item) => <button key={item.id} className={conversation?.id === item.id ? "conversation active" : "conversation"} onClick={() => { setPendingImage(null); setActiveId(item.id); }}>
               {role === "customer" ? <span className="contactAvatar">禾</span> : <Image className="contactAvatar customerPhoto" src="/avatars/lin.png" alt="林女士" width={42} height={42} />}<span className="contactText"><b>{role === "customer" ? "小禾健康顾问" : item.customerName}</b><small>{role === "customer" ? "为您提供商品、价格与物流咨询" : item.lastMessage}</small></span>
               <span className="meta"><time>{formatTime(item.lastMessageAt)}</time>{item.unreadCount > 0 && <i>{item.unreadCount}</i>}</span>
             </button>)}
@@ -134,15 +157,17 @@ export default function Portal({ role }: { role: PortalRole }) {
               {conversation?.messages.map((message) => message.actor === "system" ? role === "agent" && <div className="systemMessage" key={message.id}>{message.content}</div> : (
                 <div key={message.id} className={`message ${message.actor === "customer" ? "fromCustomer" : "fromService"}`}>
                   {message.actor === "customer" ? <Image className="messageAvatar customerPhoto" src="/avatars/lin.png" alt="林女士" width={36} height={36} /> : <span className="messageAvatar">{role === "customer" ? "禾" : message.actor === "agent" ? "禾" : "AI"}</span>}
-                  <div><label>{message.actor === "customer" ? "林女士" : role === "customer" ? "小禾健康顾问" : message.actor === "agent" ? "人工客服 · 小禾" : "智能助手"}</label><p>{message.content}</p><time>{formatTime(message.createdAt)}</time></div>
+                  <div><label>{message.actor === "customer" ? "林女士" : role === "customer" ? "小禾健康顾问" : message.actor === "agent" ? "人工客服 · 小禾" : "智能助手"}</label>{message.contentType === "image" && message.mediaPath && <Image src={message.mediaPath} alt="图片消息" width={240} height={240} className="messageImage" />}{message.imageDescription && <small className="imageDescription">图片识别:{message.imageDescription}</small>}{message.content && <p>{message.content}</p>}<time>{formatTime(message.createdAt)}</time></div>
                 </div>
               ))}
               <div ref={bottomRef} />
             </div>
             <form className="composer" onSubmit={submit}>
-              <div className="tools">☺　▧　⌘</div>
+              <div className="tools"><span>☺</span><button type="button" className="toolImageBtn" title="发送图片" disabled={role === "agent" && conversation?.status !== "human_serving"} onClick={() => fileInputRef.current?.click()}>📷</button><span>⌘</span></div>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={pickImage} />
+              {pendingImage && <div className="imagePreview"><Image src={pendingImage} alt="待发送图片" width={72} height={72} /><button type="button" title="移除图片" onClick={() => setPendingImage(null)}>×</button></div>}
               <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={role === "agent" && conversation?.status !== "human_serving" ? "接管会话后可人工回复" : "输入消息，Enter 发送"} disabled={role === "agent" && conversation?.status !== "human_serving"} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }} />
-              {notice && <div className="notice">{notice}</div>}<button disabled={busy || !text.trim()}>发送</button>
+              {notice && <div className="notice">{notice}</div>}<button disabled={busy || (!text.trim() && !pendingImage)}>发送</button>
             </form>
           </section>
           {role === "agent" && <AgentPanel conversation={conversation} busy={busy} handoff={handoff} reset={reset} />}

@@ -29,3 +29,21 @@ describe("demo-login API", () => {
     assert.equal(payload.apiKey, undefined);
   });
 });
+
+describe("chat API 图片消息校验", () => {
+  it("message 与 mediaUrl 至少提供一项", async () => {
+    const { POST } = await import("../src/app/api/chat/route");
+    const response = await POST(new Request("http://localhost/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: "S-001", message: "  " }),
+    }));
+    assert.equal(response.status, 400);
+  });
+
+  it("拒绝非法 mediaUrl", async () => {
+    const { POST } = await import("../src/app/api/chat/route");
+    const response = await POST(new Request("http://localhost/api/chat", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId: "S-001", message: "你好", mediaUrl: "/etc/passwd" }),
+    }));
+    assert.equal(response.status, 400);
+  });
+});

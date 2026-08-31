@@ -277,6 +277,9 @@ async function generateCustomerReply({
           plan.toolName === "compliance" && outcome.matchedEvidence.includes("risk:clarify_needed")
             ? "- 当前任务是先安抚客户，再围绕既往病史、当前用药、特殊阶段、当前不适这几个维度补充追问；不要直接下医疗结论。"
             : "- 如果不是风险补信息场景，就按正常客服话术输出。",
+          (plan.toolName === "price" || plan.toolName === "promo" || plan.intent === "pricing")
+            ? "- 客户核心诉求是价格：直接简洁报价（版本+剂量+价格），最多 1 句引导选版本，禁止展开产品对比或功效分析。"
+            : "- 回复保持口语化、简洁，不超过 2 句话（含引导），避免信息堆砌。",
           styleVariant ? `- 本轮话术风格必须使用：${styleVariant}。` : "- 本轮话术保持稳定、克制。",
           "",
           "只返回 JSON：",
@@ -1224,7 +1227,9 @@ async function getSkillPrompt(): Promise<string> {
 
 async function getKnowledgeText(): Promise<string> {
   if (!cachedKnowledgeText) {
-    cachedKnowledgeText = await readFile(KNOWLEDGE_BASE_PATH, "utf8");
+    const raw = await readFile(KNOWLEDGE_BASE_PATH, "utf8");
+    // 剥离 stock 字段:库存只由 price/promo 工具确定性返回,防止 LLM 从 KB 原文自行判断有货/缺货
+    cachedKnowledgeText = raw.replace(/\s*stock:\s*(?:in_stock|out_of_stock),?/g, "");
   }
   return cachedKnowledgeText;
 }
