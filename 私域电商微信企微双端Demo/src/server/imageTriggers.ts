@@ -10,18 +10,25 @@ import { DEAL_STAGE_ORDER, type DealStage, type PresalesIntent } from "@/types";
 export interface ImageTriggerInput {
   intent: PresalesIntent;
   subIntent: string | null | undefined;
+  message?: string;
   sentMediaPaths: string[];
   stage: DealStage;
 }
 
 const PREPAYMENT_STAGES: DealStage[] = DEAL_STAGE_ORDER.slice(0, DEAL_STAGE_ORDER.indexOf("awaiting_review"));
 
-export function selectTriggeredImageAsset({ intent, subIntent, sentMediaPaths, stage }: ImageTriggerInput): string | null {
+export function selectTriggeredImageAsset({ intent, subIntent, message = "", sentMediaPaths, stage }: ImageTriggerInput): string | null {
   if (!PREPAYMENT_STAGES.includes(stage)) return null;
-  if (intent === "pricing" && !sentMediaPaths.includes(QUOTE_SHEET_ASSET)) {
+  const asksForSpecifications = /规格|型号|剂量|多少毫克|几毫克|一盒几支|包装|版本|哪一款|怎么选/i.test(message);
+  if ((intent === "pricing" || (intent === "version" && asksForSpecifications)) && !sentMediaPaths.includes(QUOTE_SHEET_ASSET)) {
     return QUOTE_SHEET_ASSET;
   }
-  if (intent === "fulfillment_payment" && subIntent === "payment_methods" && !sentMediaPaths.includes(PAYMENT_CODE_ASSET)) {
+  const asksForPayment = /怎么付|如何付款|付款方式|支付方式|收款码|二维码|转账|付款链接/i.test(message);
+  if (
+    intent === "fulfillment_payment" &&
+    (subIntent === "payment_methods" || asksForPayment) &&
+    !sentMediaPaths.includes(PAYMENT_CODE_ASSET)
+  ) {
     return PAYMENT_CODE_ASSET;
   }
   return null;

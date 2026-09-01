@@ -41,8 +41,8 @@ doc_type: 设计文档
 
 - 前端：Next.js App Router + React
 - 后端：Next.js API Routes
-- 规则引擎：本地 TypeScript 售前引擎
+- 编排层：LangGraph StateGraph 编排的 4 段式链路（LLM 意图规划 → Python 工具执行 → TypeScript 边界判定 → 受约束话术生成 + 输出校验）
 - 状态存储：本地内存 Demo Store
 - 文档中心：`docs/` 下 Markdown 文档自动注册
-- 测试：31 条自动化回归 + 结果报告输出
+- 测试：33 条自动化回归 + 结果报告输出
 

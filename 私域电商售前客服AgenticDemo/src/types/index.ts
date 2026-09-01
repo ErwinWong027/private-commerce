@@ -228,5 +228,5 @@ export interface PresalesAutomationCase {
   expectedIntent: PresalesIntent;
   expectedNeedHuman?: boolean;
   expectedSilentIntercept?: boolean;
-  expectedBoundaryIncludes?: string[];
+  expectedBoundaryIncludes: string[];
 }

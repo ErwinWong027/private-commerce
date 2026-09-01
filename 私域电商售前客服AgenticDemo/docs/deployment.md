@@ -13,6 +13,21 @@ doc_type: 设计文档
 npm install
 ```
 
+编排链路的工具执行段会调用 `presales-qa-agent/scripts/answer_engine.py`，因此本机还需要 Python 3 与 PyYAML：
+
+```bash
+pip install pyyaml
+```
+
+解释器按 `python` → `python3` → `py -3` 的顺序探测，取第一个 `--version` 成功的命令；三者都不可用时会直接抛出「当前环境未找到可用的 Python 解释器」。
+
+技能根目录与知识库路径可用环境变量覆盖，默认指向相邻的规划目录：
+
+```bash
+PRESALES_SKILL_ROOT=../私域电商售前客服AI规划/presales-qa-agent
+PRESALES_KNOWLEDGE_BASE=../私域电商售前客服AI规划/私域电商售前客服-售前问答知识库.yaml
+```
+
 ## 2. 启动本地服务
 
 先在项目根目录准备 `.env.local`，至少包含以下配置：
@@ -36,7 +51,7 @@ npm run dev
 
 ## 3. 运行自动化测试
 
-页面右上角点击“**一键回归 31 条用例**”，或者直接请求：
+页面右上角点击“**一键回归 33 条用例**”，或者直接请求：
 
 ```bash
 curl -X POST http://localhost:3000/api/test/run

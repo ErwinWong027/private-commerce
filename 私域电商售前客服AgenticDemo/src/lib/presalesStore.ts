@@ -29,7 +29,7 @@ export function recordDecision(
     autoServedMessages += 1;
   }
 
-  const conversationContext = buildConversationContext(history, message, decision.reply, decision.silentIntercept);
+  const conversationContext = buildConversationContext(history, message, decision.reply ?? "", decision.silentIntercept ?? false);
 
   session = {
     ...session,

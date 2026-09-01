@@ -46,7 +46,7 @@ export function runPresalesEngine({ message, history = [] }: EngineInput): Presa
   return {
     intent: intentResult.intent,
     confidence: intentResult.confidence,
-    reply: decision.reply,
+    reply: decision.reply ?? "",
     needHuman: decision.needHuman,
     silentIntercept: decision.silentIntercept,
     interceptReason: decision.interceptReason,

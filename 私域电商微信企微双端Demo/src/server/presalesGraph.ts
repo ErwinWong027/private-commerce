@@ -1,5 +1,6 @@
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import { DealStage, DealState, PresalesDecision } from "@/types";
+import { joinReplySegments } from "./replyConstraints";
 import { runPresalesSkillOrchestrator } from "./presalesOrchestrator";
 import { enforceReplyDiscipline, nextStageFromCustomer, StageDecisionInput } from "./dealStage";
 
@@ -53,7 +54,7 @@ function toStageInput(decision: PresalesDecision): StageDecisionInput {
     toolName: decision.toolName,
     subIntent: decision.subIntent,
     needHuman: decision.needHuman,
-    reply: decision.reply,
+    reply: joinReplySegments(decision.reply),
   };
 }
 
@@ -78,12 +79,12 @@ function stageGateNode(state: GraphStateType): Partial<GraphStateType> {
     return {};
   }
   const stageInput = toStageInput(decision);
-  const discipline = enforceReplyDiscipline(decision.reply, state.dealState, stageInput);
+  const discipline = enforceReplyDiscipline(joinReplySegments(decision.reply), state.dealState, stageInput);
   const nextStage = nextStageFromCustomer(state.dealState.stage, stageInput);
   const guardedDecision: PresalesDecision = discipline.corrected
     ? {
         ...decision,
-        reply: discipline.reply,
+        reply: [discipline.reply],
         trace: [
           ...decision.trace,
           {

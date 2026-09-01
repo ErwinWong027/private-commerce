@@ -129,7 +129,7 @@ export default function Portal({ role }: { role: PortalRole }) {
     }
     const endpoint = role === "customer" ? "/api/chat" : "/api/agent/reply";
     const response = await fetch(endpoint, { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ sessionId: conversation.id, message: outgoing, mediaUrl: outgoingImage ?? undefined }) });
-    const payload = await response.json() as { error?: string };
+    const payload = await response.json() as { error?: string; draft?: string };
     if (response.ok) setText(""); else setNotice(payload.error || "发送失败");
     setBusy(false);
     await refresh();
@@ -147,8 +147,12 @@ export default function Portal({ role }: { role: PortalRole }) {
     if (!conversation) return;
     setBusy(true); setNotice("");
     const response = await fetch("/api/deal/advance", { method: "POST", headers: authHeaders({ "Content-Type": "application/json" }), body: JSON.stringify({ sessionId: conversation.id, action }) });
-    const payload = await response.json() as { error?: string };
+    const payload = await response.json() as { error?: string; draft?: string };
     if (!response.ok) setNotice(payload.error || "推进失败");
+    else if (payload.draft) {
+      setText(payload.draft);
+      setNotice("已按当前进度生成话术草稿，请确认后发送");
+    }
     setBusy(false); await refresh();
   }
 

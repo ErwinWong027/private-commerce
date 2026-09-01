@@ -10,8 +10,8 @@ export async function POST() {
     const results = [];
     for (const testCase of presalesAutomationCases) {
       const decision = await runPresalesSkillOrchestrator({ message: testCase.input });
-      const includesPassed = testCase.expectedReplyIncludes.every((item) => decision.reply.includes(item));
-      const excludesPassed = (testCase.expectedReplyExcludes ?? []).every((item) => !decision.reply.includes(item));
+      const includesPassed = testCase.expectedReplyIncludes.every((item) => decision.reply.join("。\n").includes(item));
+      const excludesPassed = (testCase.expectedReplyExcludes ?? []).every((item) => !decision.reply.join("。\n").includes(item));
       const intentPassed = decision.intent === testCase.expectedIntent;
       const humanPassed =
         testCase.expectedNeedHuman === undefined ? true : decision.needHuman === testCase.expectedNeedHuman;
@@ -30,7 +30,7 @@ export async function POST() {
         intent: decision.intent,
         needHuman: decision.needHuman,
         silentIntercept: decision.silentIntercept,
-        reply: decision.reply,
+        reply: decision.reply.join("。\n"),
       });
     }
 
@@ -72,7 +72,7 @@ function buildMarkdownReport(
 
   return `---
 title: 私域售前 Demo 自动化测试报告
-description: 基于 31 条售前测试用例自动生成的回归结果。
+description: 基于 33 条售前测试用例自动生成的回归结果。
 category: 测试评估
 doc_type: 测试评估
 ---

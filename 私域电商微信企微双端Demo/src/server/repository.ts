@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { ChatActor, ConversationDetail, ConversationSummary, DealStage, DealState, DecisionRecord, HandoffTicketRecord, MessageContentType, MessageRecord, PortalRole, SessionStatus, TicketStatus, UserRecord } from "@/types";
+import type { ChatActor, ConversationDetail, ConversationSummary, DealStage, DealState, DecisionRecord, HandoffTicketRecord, MediaAsset, MessageContentType, MessageRecord, PortalRole, SessionStatus, TicketStatus, UserRecord } from "@/types";
 
 const DEFAULT_DB = path.join(process.cwd(), "data", "presales-demo.db");
 const WELCOME = "哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～";
@@ -12,6 +12,16 @@ function id(prefix: string) { return `${prefix}-${Date.now()}-${Math.random().to
 function bool(value: unknown) { return Number(value) === 1; }
 function jsonArray(value: unknown): string[] { try { return JSON.parse(String(value ?? "[]")); } catch { return []; } }
 function jsonObject(value: unknown): Record<string, unknown> | null { if (!value) return null; try { return JSON.parse(String(value)); } catch { return null; } }
+function mediaFilename(mediaPath: string): string { return mediaPath.split("?")[0].slice(mediaPath.split("?")[0].lastIndexOf("/") + 1); }
+function inferMediaContentType(mediaPath: string | null, explicit?: MessageContentType): MessageContentType {
+  if (explicit) return explicit;
+  if (!mediaPath) return "text";
+  const filename = mediaFilename(mediaPath).toLowerCase();
+  if (/\.(mp3|wav|m4a|ogg|webm)$/.test(filename)) return "voice";
+  if (/\.(png|jpe?g|webp|gif)$/.test(filename)) return "image";
+  return "text";
+}
+
 
 export type TicketUpdateResult =
   | { ok: true; ticket: HandoffTicketRecord }
@@ -44,8 +54,14 @@ export class PresalesRepository {
         id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
         sequence INTEGER NOT NULL, actor TEXT NOT NULL CHECK(actor IN ('customer','ai','agent','system')),
         sender_id TEXT REFERENCES users(id), content TEXT NOT NULL,
-        content_type TEXT NOT NULL DEFAULT 'text' CHECK(content_type IN ('text','image')),
-        media_path TEXT, image_description TEXT, created_at TEXT NOT NULL, UNIQUE(session_id, sequence)
+        content_type TEXT NOT NULL DEFAULT 'text' CHECK(content_type IN ('text','image','voice')),
+        media_path TEXT, image_description TEXT, media_asset_id TEXT REFERENCES media_assets(id), created_at TEXT NOT NULL, UNIQUE(session_id, sequence)
+      );
+      CREATE TABLE IF NOT EXISTS media_assets (
+        id TEXT PRIMARY KEY, message_id TEXT REFERENCES messages(id) ON DELETE CASCADE,
+        kind TEXT NOT NULL CHECK(kind IN ('voice','image')), local_path TEXT NOT NULL,
+        transcript TEXT, extracted TEXT, confidence REAL, needs_manual_confirm INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS decisions (
         id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -70,19 +86,70 @@ export class PresalesRepository {
       CREATE INDEX IF NOT EXISTS idx_sessions_updated ON sessions(updated_at DESC);
       CREATE INDEX IF NOT EXISTS idx_decisions_session_created ON decisions(session_id, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_tickets_session_status ON handoff_tickets(session_id, status);
+      CREATE INDEX IF NOT EXISTS idx_media_assets_message ON media_assets(message_id);
     `);
     for (const [column, definition] of [
       ["content_type", "TEXT NOT NULL DEFAULT 'text'"],
       ["media_path", "TEXT"],
       ["image_description", "TEXT"],
+      ["media_asset_id", "TEXT"],
     ] as const) {
       const columns = (this.db.prepare("PRAGMA table_info(messages)").all() as Row[]).map((item) => String(item.name));
       if (!columns.includes(column)) this.db.exec(`ALTER TABLE messages ADD COLUMN ${column} ${definition}`);
+    }
+    if (this.messagesNeedVoiceConstraint()) this.rebuildMessagesForVoice();
+    const mediaColumns = (this.db.prepare("PRAGMA table_info(media_assets)").all() as Row[]).map((item) => String(item.name));
+    if (mediaColumns.length === 0) {
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS media_assets (
+          id TEXT PRIMARY KEY, message_id TEXT REFERENCES messages(id) ON DELETE CASCADE,
+          kind TEXT NOT NULL CHECK(kind IN ('voice','image')), local_path TEXT NOT NULL,
+          transcript TEXT, extracted TEXT, confidence REAL, needs_manual_confirm INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_media_assets_message ON media_assets(message_id);
+      `);
     }
     // unread_count 表示客服侧未读，customer_unread_count 表示客户侧未读（旧库原地补列）。
     const sessionColumns = (this.db.prepare("PRAGMA table_info(sessions)").all() as Row[]).map((item) => String(item.name));
     if (!sessionColumns.includes("customer_unread_count")) {
       this.db.exec("ALTER TABLE sessions ADD COLUMN customer_unread_count INTEGER NOT NULL DEFAULT 0");
+    }
+  }
+
+  private messagesNeedVoiceConstraint(): boolean {
+    const row = this.db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='messages'").get() as Row | undefined;
+    const sql = String(row?.sql ?? "").replace(/\s+/g, " ").toLowerCase();
+    const legacyConstraint = /check\s*\(\s*content_type\s+in\s*\(\s*'text'\s*,\s*'image'\s*\)\s*\)/;
+    return legacyConstraint.test(sql) && !sql.includes("'voice'");
+  }
+
+  private rebuildMessagesForVoice(): void {
+    this.db.exec("PRAGMA foreign_keys = OFF");
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db.exec(`
+        CREATE TABLE messages_new (
+          id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+          sequence INTEGER NOT NULL, actor TEXT NOT NULL CHECK(actor IN ('customer','ai','agent','system')),
+          sender_id TEXT REFERENCES users(id), content TEXT NOT NULL,
+          content_type TEXT NOT NULL DEFAULT 'text' CHECK(content_type IN ('text','image','voice')),
+          media_path TEXT, image_description TEXT, media_asset_id TEXT REFERENCES media_assets(id),
+          created_at TEXT NOT NULL, UNIQUE(session_id, sequence)
+        );
+        INSERT INTO messages_new(id,session_id,sequence,actor,sender_id,content,content_type,media_path,image_description,media_asset_id,created_at)
+          SELECT id,session_id,sequence,actor,sender_id,content,content_type,media_path,image_description,media_asset_id,created_at FROM messages;
+        DROP INDEX IF EXISTS idx_messages_session_sequence;
+        DROP TABLE messages;
+        ALTER TABLE messages_new RENAME TO messages;
+        CREATE INDEX idx_messages_session_sequence ON messages(session_id, sequence);
+      `);
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    } finally {
+      this.db.exec("PRAGMA foreign_keys = ON");
     }
   }
 
@@ -174,6 +241,7 @@ export class PresalesRepository {
     contentType: (r.content_type as MessageContentType) ?? "text",
     mediaPath: r.media_path ? String(r.media_path) : null,
     imageDescription: r.image_description ? String(r.image_description) : null,
+    mediaAssetId: r.media_asset_id ? String(r.media_asset_id) : null,
     createdAt: String(r.created_at),
   });
   private mapDecision = (r: Row): DecisionRecord => ({
@@ -183,6 +251,18 @@ export class PresalesRepository {
     toolName: r.tool_name ? String(r.tool_name) : null, toolArgs: jsonArray(r.tool_args),
     toolResult: jsonObject(r.tool_result), handoffSummary: String(r.handoff_summary), createdAt: String(r.created_at),
   });
+  private mapMediaAsset = (r: Row): MediaAsset => ({
+    id: String(r.id),
+    messageId: r.message_id ? String(r.message_id) : null,
+    kind: r.kind as MediaAsset["kind"],
+    localPath: String(r.local_path),
+    transcript: r.transcript ? String(r.transcript) : null,
+    extracted: r.extracted ? String(r.extracted) : null,
+    confidence: r.confidence === null || r.confidence === undefined ? null : Number(r.confidence),
+    needsManualConfirm: bool(r.needs_manual_confirm),
+    createdAt: String(r.created_at),
+  });
+
   private mapTicket = (r: Row): HandoffTicketRecord => ({
     id: String(r.id), sessionId: String(r.session_id), status: r.status as TicketStatus,
     triggerType: String(r.trigger_type), summary: String(r.summary), assignedAgentId: r.assigned_agent_id ? String(r.assigned_agent_id) : null,
@@ -202,23 +282,86 @@ export class PresalesRepository {
     this.db.prepare("UPDATE messages SET image_description=? WHERE id=?").run(description, messageId);
   }
 
+  setMessageContent(messageId: string, content: string): void {
+    this.db.prepare("UPDATE messages SET content=? WHERE id=?").run(content, messageId);
+  }
+
+  createMediaAsset(input: {
+    kind: MediaAsset["kind"];
+    localPath: string;
+    transcript?: string | null;
+    extracted?: string | null;
+    confidence?: number | null;
+    needsManualConfirm?: boolean;
+    messageId?: string | null;
+  }): MediaAsset {
+    const assetId = id("A");
+    const t = now();
+    this.db.prepare(
+      "INSERT INTO media_assets(id,message_id,kind,local_path,transcript,extracted,confidence,needs_manual_confirm,created_at) VALUES(?,?,?,?,?,?,?,?,?)",
+    ).run(
+      assetId,
+      input.messageId ?? null,
+      input.kind,
+      input.localPath,
+      input.transcript ?? null,
+      input.extracted ?? null,
+      input.confidence ?? null,
+      input.needsManualConfirm === undefined ? 1 : input.needsManualConfirm ? 1 : 0,
+      t,
+    );
+    return {
+      id: assetId,
+      messageId: input.messageId ?? null,
+      kind: input.kind,
+      localPath: input.localPath,
+      transcript: input.transcript ?? null,
+      extracted: input.extracted ?? null,
+      confidence: input.confidence ?? null,
+      needsManualConfirm: input.needsManualConfirm === undefined ? true : input.needsManualConfirm,
+      createdAt: t,
+    };
+  }
+
+
+  linkMediaAsset(messageId: string, assetId: string): void {
+    this.db.prepare("UPDATE messages SET media_asset_id=? WHERE id=?").run(assetId, messageId);
+    this.db.prepare("UPDATE media_assets SET message_id=? WHERE id=?").run(messageId, assetId);
+  }
+
+  getMediaAsset(assetId: string): MediaAsset | null {
+    const row = this.db.prepare("SELECT * FROM media_assets WHERE id=?").get(assetId) as Row | undefined;
+    return row ? this.mapMediaAsset(row) : null;
+  }
+
+  listMediaAssets(sessionId: string): MediaAsset[] {
+    return (this.db.prepare(`
+      SELECT a.*
+      FROM media_assets a
+      JOIN messages m ON m.id = a.message_id
+      WHERE m.session_id = ?
+      ORDER BY a.created_at
+    `).all(sessionId) as Row[]).map(this.mapMediaAsset);
+  }
+
   private insertMessage(sessionId: string, actor: ChatActor, senderId: string | null, content: string, mediaPath: string | null = null): MessageRecord {
     const t = now();
     const next = Number((this.db.prepare("SELECT COALESCE(MAX(sequence),0)+1 seq FROM messages WHERE session_id=?").get(sessionId) as Row).seq);
     const messageId = id("M");
+    const contentType = inferMediaContentType(mediaPath);
     this.db.prepare("INSERT INTO messages(id,session_id,sequence,actor,sender_id,content,content_type,media_path,created_at) VALUES(?,?,?,?,?,?,?,?,?)")
-      .run(messageId, sessionId, next, actor, senderId, content, mediaPath ? "image" : "text", mediaPath, t);
+      .run(messageId, sessionId, next, actor, senderId, content, contentType, mediaPath, t);
     // 按接收方视角双向记账：客户发言累加客服未读，AI/人工发言累加客户未读，系统消息不计未读。
     const agentUnread = actor === "customer" ? 1 : 0;
     const customerUnread = actor === "ai" || actor === "agent" ? 1 : 0;
     this.db.prepare("UPDATE sessions SET updated_at=?, unread_count=unread_count+?, customer_unread_count=customer_unread_count+? WHERE id=?")
       .run(t, agentUnread, customerUnread, sessionId);
     this.bump("total_messages", 1, t);
-    return { id: messageId, sessionId, sequence: next, actor, senderId, content, contentType: mediaPath ? "image" : "text", mediaPath, imageDescription: null, createdAt: t };
+    return { id: messageId, sessionId, sequence: next, actor, senderId, content, contentType, mediaPath, imageDescription: null, mediaAssetId: null, createdAt: t };
   }
 
   saveAutomatedDecision(sessionId: string, customerMessageId: string, customerContent: string, decision: {
-    intent: string; confidence: number; reply: string; needHuman: boolean; silentIntercept: boolean;
+    intent: string; confidence: number; reply: string[] | string; needHuman: boolean; silentIntercept: boolean;
     handoffTriggerType: string | null; boundaryDecision: string; matchedEvidence: string[]; handoffSummary: string;
     toolName: string | null; toolArgs?: string[]; toolResult?: Record<string, unknown> | null;
   }) {
@@ -237,7 +380,12 @@ export class PresalesRepository {
         decision.toolName, JSON.stringify(decision.toolArgs ?? []), decision.toolResult ? JSON.stringify(decision.toolResult) : null,
         decision.handoffSummary, t,
       );
-      const reply = !decision.silentIntercept && decision.reply ? this.insertMessage(sessionId, "ai", null, decision.reply) : null;
+      const replySegments = Array.isArray(decision.reply) ? decision.reply.filter(Boolean) : [decision.reply].filter(Boolean);
+      const replyMessages = !decision.silentIntercept
+        ? replySegments.map((segment) => this.insertMessage(sessionId, "ai", null, segment))
+        : [];
+      if (replyMessages.length) this.bump("ai_replies", replyMessages.length, t);
+      const reply = replyMessages.length ? replyMessages[replyMessages.length - 1] : null;
       let ticket: HandoffTicketRecord | null = null;
       if (decision.needHuman) {
         const ticketId = id("T");
@@ -246,7 +394,6 @@ export class PresalesRepository {
         ticket = { id: ticketId, sessionId, status: "pending", triggerType: decision.handoffTriggerType || "知识盲区", summary: decision.handoffSummary || customerContent, assignedAgentId: null, createdAt: t, updatedAt: t };
         this.bump("handoffs", 1, t);
       }
-      if (reply) this.bump("ai_replies", 1, t);
       return { customer, reply, ticket };
     });
   }
@@ -279,6 +426,13 @@ export class PresalesRepository {
       }
       return { ok: true as const, ticket: this.readTicket(ticketId) };
     });
+  }
+
+  resolveActiveTicketAfterReply(sessionId: string, agentId: string): HandoffTicketRecord | null {
+    const row = this.db.prepare("SELECT id FROM handoff_tickets WHERE session_id=? AND status='in_progress' ORDER BY created_at DESC LIMIT 1").get(sessionId) as Row | undefined;
+    if (!row) return null;
+    const result = this.updateTicket(String(row.id), "resolve", agentId);
+    return result.ok ? result.ticket : null;
   }
 
   private readTicket(ticketId: string): HandoffTicketRecord {

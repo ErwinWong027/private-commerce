@@ -1,10 +1,11 @@
 import { getRepository } from "./repository";
 import { runPresalesGraph } from "./presalesGraph";
-import { applyManualAdvance } from "./dealStage";
+import { applyManualAdvance, buildStageAwareShippingReply } from "./dealStage";
 import { describeCustomerImage } from "./imageVision";
+import { normalizeVoice } from "./mediaPipeline";
 import { selectTriggeredImageAsset } from "./imageTriggers";
 import { ForbiddenError } from "./identity";
-import type { DealAdvanceAction, MessageRecord } from "@/types";
+import type { DealAdvanceAction, DealStage, MessageRecord } from "@/types";
 
 export class NotFoundError extends Error {}
 export class ConflictError extends Error {}
@@ -34,11 +35,41 @@ export async function handleCustomerMessage(sessionId: string, customerId: strin
   }
   let aiMessage = content || "[图片]";
   if (mediaPath) {
-    const imageDescription = await describeCustomerImage(mediaPath);
-    if (imageDescription) {
-      repo.setMessageImageDescription(customerMessage.id, imageDescription);
+    if (customerMessage.contentType === "voice") {
+      const voice = await normalizeVoice(mediaPath);
+      const transcript = voice.transcript || null;
+      if (transcript) {
+        repo.setMessageContent(customerMessage.id, transcript);
+        aiMessage = transcript;
+      } else {
+        aiMessage = "[语音]";
+      }
+      const asset = repo.createMediaAsset({
+        kind: "voice",
+        localPath: mediaPath,
+        transcript,
+        extracted: transcript,
+        confidence: voice.confidence,
+        needsManualConfirm: true,
+        messageId: customerMessage.id,
+      });
+      repo.linkMediaAsset(customerMessage.id, asset.id);
+    } else {
+      const imageDescription = await describeCustomerImage(mediaPath);
+      if (imageDescription) {
+        repo.setMessageImageDescription(customerMessage.id, imageDescription);
+      }
+      const asset = repo.createMediaAsset({
+        kind: "image",
+        localPath: mediaPath,
+        extracted: imageDescription,
+        confidence: imageDescription ? 0.5 : 0,
+        needsManualConfirm: true,
+        messageId: customerMessage.id,
+      });
+      repo.linkMediaAsset(customerMessage.id, asset.id);
+      aiMessage = composeImageText(content, imageDescription);
     }
-    aiMessage = composeImageText(content, imageDescription);
   }
   const history = conversation.messages.slice(-8).map((item) => ({
     role: item.actor === "customer" ? "user" as const : item.actor === "system" ? "system" as const : "assistant" as const,
@@ -60,6 +91,7 @@ export async function handleCustomerMessage(sessionId: string, customerId: strin
   const triggeredAsset = selectTriggeredImageAsset({
     intent: decision.intent,
     subIntent: decision.subIntent,
+    message: content,
     sentMediaPaths,
     stage: repo.getDealState(sessionId).stage,
   });
@@ -70,6 +102,17 @@ export async function handleCustomerMessage(sessionId: string, customerId: strin
   return { mode: "ai" as const, decision, turn, triggeredImage, conversation: repo.getConversation(sessionId, "customer") };
 }
 
+function buildProgressDraft(state: { stage: DealStage; trackingNo: string | null }, customerMessage: string): string {
+  if (/单号|运单|物流|运输|到哪|进度/i.test(customerMessage)) return buildStageAwareShippingReply(state);
+  switch (state.stage) {
+    case "awaiting_review": return "您好，付款信息我这边正在为您核对，核对完成后会安排出单，请您稍等一下～";
+    case "awaiting_shipment": return "您好，付款已核对，订单现在进入待出单阶段，生成单号后我第一时间同步您～";
+    case "awaiting_pickup": return `您好，订单单号已经生成${state.trackingNo ? `，单号是 ${state.trackingNo}` : ""}，目前等待快递揽收，揽收后我再同步您～`;
+    case "picked_up": return `您好，快递已经揽收${state.trackingNo ? `，单号是 ${state.trackingNo}` : ""}，正在运输中，预计揽收后 1-3 天送达～`;
+    case "in_transit": return `您好，包裹目前运输中${state.trackingNo ? `，单号是 ${state.trackingNo}` : ""}，您可以凭单号查询物流进度～`;
+    default: return "您好，您的订单进度我这边已经确认，会继续为您跟进，有更新第一时间同步您～";
+  }
+}
 export function advanceDealStage(sessionId: string, action: DealAdvanceAction) {
   const repo = getRepository();
   const conversation = repo.getConversation(sessionId);
@@ -78,7 +121,13 @@ export function advanceDealStage(sessionId: string, action: DealAdvanceAction) {
   const result = applyManualAdvance(conversation.dealState, action);
   if (!result.ok) throw new ConflictError(result.error || "当前进度不支持该操作");
   repo.setDealState(sessionId, result.state);
-  return { dealState: result.state, note: result.note ?? null, conversation: repo.getConversation(sessionId) };
+  const customerMessage = [...conversation.messages].reverse().find((message) => message.actor === "customer")?.content ?? "";
+  return {
+    dealState: result.state,
+    note: result.note ?? null,
+    draft: buildProgressDraft(result.state, customerMessage),
+    conversation: repo.getConversation(sessionId),
+  };
 }
 
 export function handleAgentReply(sessionId: string, agentId: string, content: string, mediaPath: string | null = null) {

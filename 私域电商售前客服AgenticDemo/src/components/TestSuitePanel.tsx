@@ -28,7 +28,7 @@ export function TestSuitePanel({ summary, results, running, onRun }: TestSuitePa
       <div className="panel-card__header">
         <div>
           <p className="eyebrow">自动化验证</p>
-          <h2>31 条测试用例逐条回归</h2>
+          <h2>33 条测试用例逐条回归</h2>
         </div>
         <button className="primary-button" onClick={onRun} type="button" disabled={running}>
           {running ? "执行中..." : "运行测试"}

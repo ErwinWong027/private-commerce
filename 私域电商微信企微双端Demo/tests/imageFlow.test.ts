@@ -37,6 +37,19 @@ describe("发图触发规则(基于真实聊天记录归纳)", () => {
     );
   });
 
+  it("规格/版本问题也发送报价表", () => {
+    assert.equal(
+      selectTriggeredImageAsset({ intent: "version", subIntent: "general", message: "这个规格怎么选？", sentMediaPaths: [], stage: "consulting" }),
+      QUOTE_SHEET_ASSET,
+    );
+  });
+
+  it("付款关键词即使子意图漏标也发送收款码", () => {
+    assert.equal(
+      selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "general", message: "我要付款，怎么付？", sentMediaPaths: [], stage: "awaiting_payment" }),
+      PAYMENT_CODE_ASSET,
+    );
+  });
   it("首次进入付款环节(询问支付方式)发送收款码", () => {
     assert.equal(
       selectTriggeredImageAsset({ intent: "fulfillment_payment", subIntent: "payment_methods", sentMediaPaths: [], stage: "awaiting_payment" }),

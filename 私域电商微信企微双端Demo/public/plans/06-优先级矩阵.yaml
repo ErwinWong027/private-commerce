@@ -1,0 +1,107 @@
+# 第 6 步 · 保健品私域电商全链路AI优先级矩阵（业务级 · 4个独立价值机会评分）
+# 承接⑤AI场景地图的4个独立AI机会，按「收益积 / 成本和」打分排序
+# 收益(1-5): userCount 覆盖客户面 × usageFrequency 使用频次 × businessValue 业务价值
+# 成本(1-5): dataComplexity 数据 + aiDesignComplexity AI设计 + integrationComplexity 集成 + knowledgeComplexity 知识工程
+# type 用于路线图分组：repetitive 重复性 / cognitive 认知性 / innovation 创新性
+# dependencies 供第 7 步里程碑做「被依赖者前置」排序
+#
+# 机会粒度铁律：每个机会 = 可独立立项、独立交付、独立完成业务闭环的增量价值单元，非功能点或约束
+# 结构变更（v7）：原O3合规话术库红线守护=O1的critical级合规护栏module；原O4真人话术拟合=O1的持续调优module。二者从属O1不单列。
+# 结构变更（v8）：移除原O1 AI引流钩子A/B测试优化（经审视属API+看板+数据分析，非AI机会）；
+#                原O2→O1, 原O3→O2, 原O4→O3, 原O5→O4。机会数量5→4。
+
+title: "保健品私域电商全链路AI优先级矩阵（业务级·4个独立价值机会）"
+
+useCases:
+  - id: "O1"
+    name: "7×24 RAG自动接待（含合规护栏+持续调优）"
+    type: "innovation"
+    business_stage: "售前客服1v1咨询"
+    pain_points: "夜间35%~45%咨询积压首响>8小时；正品/版本/算账等标准化问题占75%~85%反复人工回答；新人培训30天；人工心算易错价；功效类长尾问题合规风险最高（最高罚100万~200万元）；自动回复机器感强影响转化"
+    ai_capabilities: "RAG秒级检索应答+确定性规则算账+问题链引导澄清+未命中兜底转人工+合规话术库红线守护（critical级约束module）+真人话术拟合与持续调优（上线后迭代module）+真实会话回流扩库"
+    expected_value: "首响≤10秒、接待成本降50%、零夜班覆盖全时段、新人培训30天→7天、守住10%转化水位、红线事件0起（规避100万~200万元罚款）、真人拟合度≥90%客户无机器感、自动接待率随交付周期持续爬升"
+    userCount: 5
+    usageFrequency: 5
+    businessValue: 5
+    dataComplexity: 5
+    aiDesignComplexity: 5
+    integrationComplexity: 4
+    knowledgeComplexity: 5
+    dependencies: ["kf通道接入与消息回调", "RAG平台与基础知识库", "正品溯源库/商品库/促销规则库建设", "预审核合规话术库建设（法务参与，critical）", "会话存档API开通与合规取数（持续调优阶段）"]
+    key_assumptions: "kf通道风险已与客户确认并选定；合规语料可经法务预审核入库；会话存档已开通且可合规用于训练"
+    validation_needed: "首响达标率、自动接待率、转化率守护基线、错价事件数、功效红线事件数、双盲抽检拟合度评分"
+    risk_control: "价格/优惠结果禁止大模型独立计算；发货时效禁止推测；功效表述禁止自由生成，仅检索预审核合规语料"
+    scoring_note: "合并合规护栏+持续调优后成本升高（数据/AI设计/知识工程均满格），分数不高，但O1是售前客服AI化核心立项与全链路转化引擎，不纯按分数排期须最先具备"
+
+  - id: "O2"
+    name: "智能支付承接与订单自动核对"
+    type: "repetitive"
+    business_stage: "下单支付"
+    pain_points: "支付方式引导不清导致最后一步流失；付款截图确认依赖人工高峰期漏接引发信任危机；地址核对易出错"
+    ai_capabilities: "标准化支付引导+付款截图自动识别+订单要素自动核对确认"
+    expected_value: "支付完成率提升、付款漏接率归零、订单核对错误率降为0"
+    userCount: 4
+    usageFrequency: 4
+    businessValue: 4
+    dataComplexity: 3
+    aiDesignComplexity: 3
+    integrationComplexity: 4
+    knowledgeComplexity: 2
+    dependencies: ["订单系统API对接", "付款截图识别能力"]
+    key_assumptions: "订单系统提供可对接API"
+    validation_needed: "支付完成率、漏接率、核对准确率"
+
+  - id: "O3"
+    name: "物流查询自动化与时效确定性承诺"
+    type: "repetitive"
+    business_stage: "物流发货履约"
+    pain_points: "物流状态跨系统人工查询手动复述重复劳动；夜间物流咨询无人应答；发货时效凭感觉承诺说错引发客诉"
+    ai_capabilities: "订单物流数据源实时查询+确定性时效承诺话术生成"
+    expected_value: "7×24即时应答替代人工查单复述、时效客诉消除、释放售前精力"
+    userCount: 4
+    usageFrequency: 4
+    businessValue: 3
+    dataComplexity: 3
+    aiDesignComplexity: 2
+    integrationComplexity: 4
+    knowledgeComplexity: 2
+    dependencies: ["订单/物流数据源API对接"]
+    key_assumptions: "物流系统提供可对接API"
+    validation_needed: "查询成功率与时延、时效承诺一致率"
+    risk_control: "发货时效承诺禁止大模型推测，必须以订单系统返回值为准"
+
+  - id: "O4"
+    name: "AI复购周期预测与精准唤回"
+    type: "cognitive"
+    business_stage: "复购与私域运营"
+    pain_points: "复购靠人工经验无预测大量老客自然流失；沉睡客户无系统化唤回；复购率仅35%LTV主体增量流失"
+    ai_capabilities: "复购周期预测模型+沉睡客户分群+个性化唤回策略"
+    expected_value: "复购率35%→45%、月均复购频次1.8→2.5次、LTV主体增量（复购贡献占比60%+）"
+    userCount: 4
+    usageFrequency: 3
+    businessValue: 5
+    dataComplexity: 5
+    aiDesignComplexity: 5
+    integrationComplexity: 3
+    knowledgeComplexity: 4
+    dependencies: ["CRM数据打通", "客户全生命周期数据", "会员体系与唤回策略设计"]
+    key_assumptions: "客户交易历史与行为数据可整合"
+    validation_needed: "复购率提升、唤回成交率、LTV增量"
+
+insights:
+  - "核心转化引擎不纯按分数排期：O1 7×24 RAG自动接待（6.58分）合并合规护栏+持续调优后成本升高，但它是售前客服AI化核心立项与全链路转化引擎，须最先具备。其上线阶段（M2-M3）含合规护栏critical module，持续调优module（M4-M6）后置迭代"
+  - "售前客服环节1个独立机会：O1 RAG自动接待内含合规护栏（critical约束module，上线即具备）+真人话术拟合（持续调优module，上线后迭代），二者无独立用户场景与独立交付，从属O1不单列机会"
+  - "业务级优先级分布：售前客服环节1个机会O1（含合规护栏+持续调优）构成AI化核心；复购运营O4是LTV主体增量的第二切入群（远期）；支付O2与物流O3是下单履约环节扩面"
+  - "LTV全链路覆盖：4个机会覆盖LTV公式——O1守住首单贡献（含合规护栏规避罚款风险）、O2提升支付完成率、O3守护履约体验、O4放大复购贡献（主体增量）"
+  - "远期增量：O4复购周期预测是LTV主体增量机会，但数据与模型复杂度满格，属远期规划，不影响售前客服AI助手项目级交付"
+  - "成立前提先行：O1 RAG自动接待是全链路核心，其持续调优module依赖上线后语料积累，须分阶段交付（上线M2-M3 → 持续调优M4-M6）"
+  - "引流获客环节无AI机会：引流钩子A/B测试+转化归因属API+看板+数据分析（运营工具），非AI机会，不列入本矩阵"
+
+priority_recommendation: "第一梯队（业务级地基）：O1 RAG自动接待（含合规护栏同批上线）；第二梯队（全链路扩面）：O2支付承接 + O3物流查询；远期（LTV增量）：O4复购周期预测。O1持续调优module（真人拟合+回流扩库）在O1上线后M4-M6迭代。⑧产品画布从第一梯队中选取售前客服环节O1作为项目级交付展开"
+
+scoring_criteria:
+  benefit: "userCount 覆盖客户面 × usageFrequency 使用频次 × businessValue 业务价值，均为 1-5"
+  cost: "dataComplexity + aiDesignComplexity + integrationComplexity + knowledgeComplexity，均为 1-5"
+  priority: "priorityScore = 收益积 / 成本和，分数越高越优先"
+
+dependencies_summary: "依赖根节点：RAG平台+基础知识库、kf通道接入、四大知识库（正品/合规/促销/商品）、会话存档API（O1持续调优）；数据依赖：订单物流API（O2/O3）、CRM数据（O4）；被依赖者须前置——第7步里程碑据此排期"

@@ -190,7 +190,7 @@ export default function Home() {
             重置演示状态
           </button>
           <button className="primary-button" type="button" onClick={handleRunTests} disabled={runningTests}>
-            {runningTests ? "测试执行中..." : "一键回归 31 条用例"}
+            {runningTests ? "测试执行中..." : "一键回归 33 条用例"}
           </button>
         </div>
       </section>

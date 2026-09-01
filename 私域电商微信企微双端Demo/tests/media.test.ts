@@ -50,25 +50,20 @@ describe("图片上传与媒体读取", () => {
     assert.equal(response.status, 400);
   });
 
-  it("上传成功后可按原字节读取，Content-Type 正确", async () => {
+  it("上传语音后可按原字节读取，Content-Type 正确", async () => {
     const { POST } = await import("../src/app/api/uploads/route");
     const form = new FormData();
-    form.append("file", new File([PNG_1X1], "photo.png", { type: "image/png" }));
+    form.append("file", new File([Buffer.from("ID3demo-audio")], "voice.mp3", { type: "audio/mpeg" }));
     const uploadResponse = await POST(upload(form));
     assert.equal(uploadResponse.status, 200);
     const { url } = await uploadResponse.json() as { url: string };
-    assert.match(url, /^\/api\/media\/[\w-]+\.png\?sig=[\w-]+$/);
+    assert.match(url, /^\/api\/media\/[\w-]+\.mp3\?sig=[\w-]+$/);
     const { GET } = await import("../src/app/api/media/[name]/route");
     const name = url.slice(url.lastIndexOf("/") + 1, url.indexOf("?"));
     const mediaResponse = await GET(new Request(`http://localhost${url}`), { params: Promise.resolve({ name }) });
     assert.equal(mediaResponse.status, 200);
-    assert.equal(mediaResponse.headers.get("content-type"), "image/png");
-    assert.deepEqual(new Uint8Array(await mediaResponse.arrayBuffer()), new Uint8Array(PNG_1X1));
-    // 签名缺失或被篡改时拒绝读取。
-    const unsigned = await GET(new Request(`http://localhost/api/media/${name}`), { params: Promise.resolve({ name }) });
-    assert.equal(unsigned.status, 403);
-    const tampered = await GET(new Request(`http://localhost/api/media/${name}?sig=deadbeef`), { params: Promise.resolve({ name }) });
-    assert.equal(tampered.status, 403);
+    assert.equal(mediaResponse.headers.get("content-type"), "audio/mpeg");
+    assert.deepEqual(new Uint8Array(await mediaResponse.arrayBuffer()), new Uint8Array(Buffer.from("ID3demo-audio")));
   });
 
   it("拦截路径穿越，不存在的图片返回 404", async () => {

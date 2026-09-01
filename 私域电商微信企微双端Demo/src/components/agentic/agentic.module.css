@@ -1,0 +1,115 @@
+/* /agentic 专用样式。与 globals.css 完全隔离：不使用全局选择器，不复用 .portal/.chat 等已占用类名。 */
+.page { height:100dvh; overflow-y:auto; background:#F4F6F9; color:#182234; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif; line-height:1.6; }
+.container { width:min(1560px,94%); margin:0 auto; padding:24px 0 56px; }
+
+.pageHeader { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; padding:18px 0 16px; border-bottom:1px solid #E2E8F0; margin-bottom:20px; }
+.pageHeader h1 { font-size:24px; font-weight:600; margin:0; }
+.pageHeader .subtitle { font-size:13px; color:#64748B; margin-top:6px; }
+.headerActions { display:flex; align-items:center; gap:10px; }
+.backLink { color:#2673C6; text-decoration:none; font-weight:600; font-size:13px; }
+.backLink:hover { text-decoration:underline; }
+
+.eyebrow { font-size:11px; font-weight:700; letter-spacing:.08em; color:#6C63A6; margin:0 0 4px; }
+.helperCopy { font-size:12px; color:#78838F; margin:6px 0 0; }
+
+.panelCard { background:#fff; border-radius:10px; box-shadow:0 2px 10px rgba(16,33,62,.07); padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+.panelHeader { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.panelHeader h2 { font-size:17px; font-weight:600; margin:0; }
+
+.workbench { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+.column { display:flex; flex-direction:column; gap:18px; min-width:0; }
+
+.statusPill { flex:none; font-size:11px; color:#0A7C46; background:#DFF5E8; border-radius:11px; padding:3px 10px; }
+.errorBanner { background:#FDECEA; color:#B3261E; border-radius:6px; padding:9px 12px; font-size:12.5px; }
+.emptyState { border:1px dashed #D7DEE8; border-radius:8px; padding:18px; color:#8A929D; font-size:12.5px; }
+.emptyState p { margin:0; }
+
+.chatThread { display:flex; flex-direction:column; gap:12px; min-height:280px; max-height:420px; overflow-y:auto; overscroll-behavior:contain; padding:4px 2px; }
+.chatBubble { display:flex; flex-direction:column; gap:4px; max-width:86%; padding:9px 12px; border-radius:9px; font-size:13.5px; }
+.chatBubble p { margin:0; white-space:pre-wrap; }
+.bubbleRole { font-size:10px; color:#96A0AC; }
+.bubbleUser { align-self:flex-end; background:#DCF3D7; }
+.bubbleAssistant { align-self:flex-start; background:#F1F4F8; }
+.bubbleSystem { align-self:center; background:#E7EAEE; color:#5A636E; font-size:12px; max-width:92%; }
+.typingIndicator { color:#56A06F; font-size:12px; }
+
+.quickQuestionList { display:flex; flex-wrap:wrap; gap:8px; }
+.chipButton { border:1px solid #D3DEEB; background:#F6FAFF; color:#2673C6; border-radius:14px; padding:5px 12px; font-size:12px; cursor:pointer; }
+.chipButton:hover { background:#EAF3FE; }
+.chipButton:disabled { color:#AEB6BF; background:#F4F5F7; border-color:#E4E8ED; cursor:not-allowed; }
+
+.chatForm { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; }
+.chatForm input { border:1px solid #D7DEE8; border-radius:7px; padding:9px 12px; font:inherit; outline:none; min-width:0; }
+.chatForm input:focus { border-color:#2673C6; }
+.chatForm button { border:0; border-radius:7px; background:#2673C6; color:#fff; padding:9px 22px; cursor:pointer; }
+.chatForm button:disabled { background:#B9C2CB; cursor:not-allowed; }
+
+.primaryButton { flex:none; border:0; border-radius:7px; background:#182234; color:#fff; padding:8px 16px; font-size:12.5px; cursor:pointer; }
+.primaryButton:disabled { background:#B9C2CB; cursor:not-allowed; }
+.ghostButton { flex:none; border:1px solid #D7DEE8; border-radius:7px; background:#fff; color:#5A636E; padding:8px 14px; font-size:12.5px; cursor:pointer; }
+.ghostButton:disabled { color:#AEB6BF; cursor:not-allowed; }
+
+/* 决策透明面板 */
+.traceStack { display:flex; flex-direction:column; gap:12px; }
+.decisionSummary { display:flex; flex-wrap:wrap; gap:8px; }
+.metricChip { font-size:11.5px; background:#EEF2F7; color:#475569; border-radius:11px; padding:3px 10px; }
+.metricChipWarn { background:#FDECEA; color:#B3261E; }
+.metricChipOk { background:#DFF5E8; color:#0A7C46; }
+.traceCard { border:1px solid #E4EAF2; border-radius:8px; padding:11px 13px; background:#FBFCFE; }
+.traceCard h3 { font-size:12.5px; font-weight:600; margin:0 0 6px; color:#334155; }
+.traceCard p { margin:0; font-size:12.5px; color:#475569; }
+.traceCard ul { margin:0; padding-left:18px; font-size:12.5px; color:#475569; }
+.traceCard pre { margin:0; font-size:11.5px; line-height:1.55; background:#F1F4F8; border-radius:6px; padding:9px 10px; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+.traceCardWarn { border-color:#F5C6C2; background:#FFF8F7; }
+.traceGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; }
+.traceStep { border:1px solid #E4EAF2; border-left-width:3px; border-radius:7px; padding:9px 11px; background:#fff; }
+.traceStep h3 { font-size:12.5px; font-weight:600; margin:5px 0 4px; }
+.traceStep p { margin:0; font-size:12px; color:#64748B; white-space:pre-wrap; }
+.traceStepTag { font-size:10px; font-weight:700; letter-spacing:.06em; color:#94A3B8; }
+.traceStepLlm { border-left-color:#625D9C; }
+.traceStepTool { border-left-color:#5DB2E2; }
+.traceStepOutput { border-left-color:#00524C; }
+
+/* 自动化回归面板 */
+.testStack { display:flex; flex-direction:column; gap:12px; }
+.metricGrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+.metricCard { border:1px solid #E4EAF2; border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:3px; background:#FBFCFE; }
+.metricCard span { font-size:11.5px; color:#78838F; }
+.metricCard strong { font-size:19px; font-weight:600; color:#182234; }
+.resultList { display:flex; flex-direction:column; gap:8px; }
+.resultRow { display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid #E4EAF2; border-left-width:3px; border-radius:7px; padding:8px 11px; }
+.resultRow strong { font-size:12.5px; font-weight:600; }
+.resultRow p { margin:2px 0 0; font-size:11.5px; color:#78838F; }
+.resultRow > span { flex:none; font-size:11.5px; }
+.resultRowPass { border-left-color:#0A7C46; }
+.resultRowPass > span { color:#0A7C46; }
+.resultRowFail { border-left-color:#B3261E; background:#FFF8F7; }
+.resultRowFail > span { color:#B3261E; }
+
+/* 演示看板（只呈现 metrics 表真实统计到的指标，不做推算） */
+.dashboardGrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+.dealRow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12.5px; color:#475569; }
+.ticketList { display:flex; flex-direction:column; gap:8px; }
+.ticketRow { border:1px solid #E4EAF2; border-radius:7px; padding:9px 11px; display:flex; flex-direction:column; gap:3px; background:#FBFCFE; }
+.ticketRow strong { font-size:12.5px; font-weight:600; }
+.ticketRow p { margin:0; font-size:11.5px; color:#78838F; }
+.ticketMeta { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:#94A3B8; }
+.sectionTitle { font-size:12.5px; font-weight:600; color:#334155; margin:0; }
+
+/* 文档折叠区 */
+.docSection { margin-top:18px; }
+.tabBar { display:flex; flex-wrap:wrap; gap:8px; }
+.tabButton { border:1px solid #D7DEE8; background:#fff; color:#5A636E; border-radius:7px; padding:6px 14px; font-size:12.5px; cursor:pointer; }
+.tabButtonActive { border-color:#2673C6; background:#EAF3FE; color:#2673C6; font-weight:600; }
+.docBody { border-top:1px solid #E2E8F0; margin-top:4px; padding-top:14px; font-size:13px; overflow-x:auto; }
+.docBody :global(pre) { overflow-x:auto; }
+.docBody :global(table) { border-collapse:collapse; }
+
+/* 顶部提示条 */
+.toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:40; border-radius:8px; padding:9px 16px; font-size:12.5px; box-shadow:0 4px 16px rgba(16,33,62,.16); }
+.toastInfo { background:#182234; color:#fff; }
+.toastError { background:#B3261E; color:#fff; }
+.toastSuccess { background:#0A7C46; color:#fff; }
+.toast button { margin-left:12px; border:0; background:transparent; color:inherit; font-size:13px; cursor:pointer; opacity:.7; }
+
+.icon { width:14px; height:14px; flex:none; vertical-align:-2px; }

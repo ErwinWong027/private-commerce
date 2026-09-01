@@ -1,0 +1,2341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瘦身减肥类保健品私域电商 · 业务流程深度分析（As-Is 全链路）</title>
+  <style>
+    :root {
+      --color-primary: #10213E;
+      --color-accent: #5DB2E2;
+      --color-secondary: #625D9C;
+      --color-success: #00524C;
+      --color-info: #6FB1C8;
+      --color-warning: #F59E0B;
+      --color-destructive: #EF4444;
+      --color-background: #FFFFFF;
+      --color-bg-alt: #F5F5F6;
+      --color-foreground: #10213E;
+      --color-text-muted: #64748B;
+      --color-border: #E2E8F0;
+      --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+      --radius-md: 8px;
+      --font-family: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", Arial, sans-serif;
+      
+      /* Severity colors */
+      --pain-critical: #dc2626;
+      --pain-critical-bg: #fef2f2;
+      --pain-high: #ea580c;
+      --pain-high-bg: #fff7ed;
+      --pain-medium: #ca8a04;
+      --pain-medium-bg: #fefce8;
+      --pain-low: #2563eb;
+      --pain-low-bg: #eff6ff;
+      
+      /* Business type colors */
+      --bt-color-1: #0ea5e9;   /* Sky */
+      --bt-color-2: #8b5cf6;   /* Violet */
+      --bt-color-3: #10b981;   /* Emerald */
+      --bt-color-4: #f59e0b;   /* Amber */
+      --bt-color-5: #ec4899;   /* Pink */
+      --bt-color-6: #6366f1;   /* Indigo */
+    }
+
+    /* Business Type Color Variants */
+    .bt-v1 { --bt-color: var(--bt-color-1); }
+    .bt-v2 { --bt-color: var(--bt-color-2); }
+    .bt-v3 { --bt-color: var(--bt-color-3); }
+    .bt-v4 { --bt-color: var(--bt-color-4); }
+    .bt-v5 { --bt-color: var(--bt-color-5); }
+    .bt-v6 { --bt-color: var(--bt-color-6); }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-alt);
+      color: var(--color-foreground);
+      line-height: 1.6;
+      padding: 40px;
+    }
+
+    /* Standardized Header */
+    .page-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-header h1::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      padding-left: 16px;
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+
+    /* ── Section Title ── */
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin: 48px 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin: -12px 0 24px 0;
+    }
+
+    /* ── Business Type Matrix ── */
+    .bt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .bt-card {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .bt-card:hover {
+      box-shadow: 0 4px 12px rgba(16, 33, 62, 0.12);
+      transform: translateY(-2px);
+    }
+    .bt-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--bt-color);
+    }
+    .bt-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--color-primary);
+    }
+    .bt-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .bt-tag {
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      background: var(--color-bg-alt);
+      color: var(--color-text-muted);
+      font-weight: 600;
+      border: 1px solid var(--color-border);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .bt-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── Value Stream Section ── */
+    .vs-section {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+    .vs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .vs-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .vs-bt-badge {
+      font-size: 0.75rem;
+      padding: 4px 14px;
+      border-radius: 4px;
+      background: var(--bt-color);
+      color: white;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .vs-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── L1 Timeline ── */
+    .l1-timeline {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding: 12px 0;
+      margin-bottom: 32px;
+    }
+    .l1-stage {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .l1-stage:hover .l1-stage-inner {
+      box-shadow: 0 4px 12px rgba(16, 33, 62, 0.1);
+      transform: translateY(-2px);
+    }
+    .l1-stage-inner {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin: 0 12px;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .l1-stage.active .l1-stage-inner {
+      border-color: var(--bt-color);
+      border-width: 2px;
+      background: linear-gradient(to bottom, white, var(--color-bg-alt));
+    }
+    .l1-stage-order {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bt-color);
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .l1-stage-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--color-primary);
+    }
+    .l1-stage-desc {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    /* Arrow between stages */
+    .l1-stage::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      width: 24px;
+      height: 2px;
+      background: var(--color-border);
+      z-index: 1;
+    }
+    .l1-stage:last-child::after {
+      display: none;
+    }
+    .l1-stage-arrow {
+      position: absolute;
+      top: 50%;
+      right: -16px;
+      transform: translateY(-50%);
+      color: var(--color-border);
+      font-size: 1rem;
+      z-index: 2;
+    }
+    .l1-stage:last-child .l1-stage-arrow {
+      display: none;
+    }
+    /* Pain indicator on L1 */
+    .l1-pain-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .pain-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .pain-dot.critical { background: var(--pain-critical); box-shadow: 0 0 6px var(--pain-critical); }
+    .pain-dot.high { background: var(--pain-high); }
+    .pain-dot.medium { background: var(--pain-medium); }
+    .pain-dot.low { background: var(--pain-low); }
+
+    /* ── L2 Detail Panel ── */
+    .l2-panel {
+      display: none;
+      margin-top: 24px;
+      padding: 32px;
+      background: var(--color-bg-alt);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+    .l2-panel.active {
+      display: block;
+      animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .l2-panel-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--color-primary);
+    }
+    .panel-header-icon {
+      font-size: 1.4rem;
+      color: var(--bt-color);
+    }
+    .l2-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .l2-activity {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .l2-activity:hover {
+      box-shadow: 0 4px 12px rgba(16, 33, 62, 0.1);
+    }
+    /* Activity connector line */
+    .l2-activity::before {
+      content: '';
+      position: absolute;
+      left: 32px;
+      top: -16px;
+      width: 2px;
+      height: 16px;
+      background: var(--color-border);
+    }
+    .l2-activity:first-child::before {
+      display: none;
+    }
+    .l2-activity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .l2-activity-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .l2-activity-order {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      background: var(--color-bg-alt);
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .l2-activity-meta {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .l2-meta-item {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .l2-meta-item b {
+      color: var(--color-foreground);
+      font-weight: 700;
+    }
+    .l2-io {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      background: var(--color-bg-alt);
+      padding: 16px;
+      border-radius: 4px;
+    }
+    .l2-io-item {
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 200px;
+    }
+    .l2-io-label {
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .l2-io-value {
+      color: var(--color-foreground);
+      font-weight: 500;
+    }
+    .l2-desc {
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Pain Points in L2 ── */
+    .l2-pains {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pain-card {
+      border-radius: 4px;
+      padding: 16px;
+      border-left: 4px solid;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .pain-card.critical {
+      background: var(--pain-critical-bg);
+      border-left-color: var(--pain-critical);
+    }
+    .pain-card.high {
+      background: var(--pain-high-bg);
+      border-left-color: var(--pain-high);
+    }
+    .pain-card.medium {
+      background: var(--pain-medium-bg);
+      border-left-color: var(--pain-medium);
+    }
+    .pain-card.low {
+      background: var(--pain-low-bg);
+      border-left-color: var(--pain-low);
+    }
+    .pain-severity {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pain-severity.critical { color: var(--pain-critical); }
+    .pain-severity.high { color: var(--pain-high); }
+    .pain-severity.medium { color: var(--pain-medium); }
+    .pain-severity.low { color: var(--pain-low); }
+    .pain-desc {
+      color: var(--color-foreground);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pain-impact {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+    }
+    .pain-root {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(0,0,0,0.05);
+      font-style: italic;
+    }
+
+    /* ── Pain Summary Panel ── */
+    .summary-panel {
+      background: var(--color-background);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      margin-top: 32px;
+      box-shadow: var(--shadow-sm);
+    }
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: var(--color-bg-alt);
+      border: 1px solid var(--color-border);
+      transition: all 0.2s;
+    }
+    .stat-card:hover { border-color: var(--color-primary); }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+    .stat-number.critical { color: var(--pain-critical); }
+    .stat-number.high { color: var(--pain-high); }
+    .stat-number.medium { color: var(--pain-medium); }
+    .stat-number.low { color: var(--pain-low); }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Pain table */
+    .pain-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.9rem;
+    }
+    .pain-table th {
+      text-align: left;
+      padding: 16px;
+      background: var(--color-bg-alt);
+      color: var(--color-text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      border-bottom: 2px solid var(--color-border);
+      position: sticky;
+      top: 0;
+    }
+    .pain-table td {
+      padding: 16px;
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+    .pain-table tr:last-child td { border-bottom: none; }
+    .pain-table tr:hover td {
+      background: var(--color-bg-alt);
+    }
+    .pain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pain-badge.critical {
+      background: var(--pain-critical-bg);
+      color: var(--pain-critical);
+    }
+    .pain-badge.high {
+      background: var(--pain-high-bg);
+      color: var(--pain-high);
+    }
+    .pain-badge.medium {
+      background: var(--pain-medium-bg);
+      color: var(--pain-medium);
+    }
+    .pain-badge.low {
+      background: var(--pain-low-bg);
+      color: var(--pain-low);
+    }
+    .table-stage {
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .table-activity {
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      text-align: center;
+      padding: 48px;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      margin-top: 48px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* ── Scrollbar styling ── */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg-alt);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .l1-timeline {
+        flex-wrap: wrap;
+      }
+      .l1-stage {
+        min-width: 160px;
+        flex: 0 0 calc(50% - 24px);
+        margin-bottom: 24px;
+      }
+      .l1-stage::after,
+      .l1-stage-arrow {
+        display: none;
+      }
+    }
+    @media (max-width: 768px) {
+      body { padding: 20px; }
+      .page-header { padding: 32px 24px; }
+      .page-header h1 { font-size: 1.6rem; }
+      .header-meta { gap: 12px; }
+      .bt-grid { grid-template-columns: 1fr; }
+      .l1-stage {
+        flex: 0 0 100%;
+      }
+      .l2-activity-header {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .vs-header { flex-direction: column; gap: 16px; }
+      .vs-bt-badge { align-self: flex-start; }
+    }
+    
+    .btn-copy-yaml {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-left: auto;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn-copy-yaml:hover {
+      background: rgba(255, 255, 255, 0.25);
+      border-color: white;
+    }
+    
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--color-primary); color: #fff;
+      padding: 12px 24px; border-radius: 4px;
+      font-size: 14px; font-weight: 700;
+      display: none; z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border: 1px solid var(--color-accent);
+    }
+    /* Page Wrap & Print Styles */
+    .page-wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 40px;
+      min-height: calc(100vh - 80px);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .page-wrap { box-shadow: none; border: none; padding: 0; margin: 0; width: 100%; max-width: none; }
+      .btn-group { display: none !important; }
+      .l2-panel { max-height: none !important; margin-bottom: 24px; padding: 24px; display: block !important; border: 1px solid var(--color-border); }
+      .l1-stage:hover .l1-stage-inner { transform: none; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav-shell{position:fixed;top:12px;left:0;right:0;z-index:9999;pointer-events:none;}
+.ai4pm-nav-spacer{height:118px;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:calc(100% - 48px);max-width:1440px;margin:0 auto;pointer-events:auto;}
+.ai4pm-nav,.ai4pm-nav *{box-sizing:border-box;font-style:normal;letter-spacing:normal;text-transform:none;}
+.ai4pm-nav a,.ai4pm-nav span,.ai4pm-nav div{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;}
+.ai4pm-nav-top{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-row{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;}
+.ai4pm-nav-row::-webkit-scrollbar{height:6px;}
+.ai4pm-nav-row::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px;}
+.ai4pm-nav-row::-webkit-scrollbar-track{background:transparent;}
+.ai4pm-nav-top .idx{display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{display:inline-flex;align-items:center;color:#E2E8F0;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{display:inline-flex;align-items:center;color:#CBD5E1;font-size:11px;line-height:1;margin:0!important;}
+.ai4pm-nav-top .idx,.ai4pm-nav-top .sep,.ai4pm-nav-top .pill,.ai4pm-nav-top .arrow{flex:0 0 auto;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav{width:calc(100% - 24px);}.ai4pm-nav-spacer{height:126px;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav-shell"><div class="ai4pm-nav"><div class="ai4pm-nav-top"><div class="ai4pm-nav-row"><a class="idx" href="/plans">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="01-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="02-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill cur" href="03-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="04-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="05-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="06-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="07-里程碑计划.html">⑦ 里程碑计划</a></div><div class="ai4pm-nav-row"><a class="pill" href="08-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="09-政策规则数据清单.html">⑨ 数据清单</a><span class="arrow">›</span><a class="pill" href="10-业务本体设计.html">⑩ 本体设计</a><span class="arrow">›</span><a class="pill" href="11-测试用例集.html">⑪ 测试用例</a><span class="arrow">›</span><a class="pill" href="/customer">⑫ 问答Demo</a></div></div></div></div><div class="ai4pm-nav-spacer"></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="page-wrap">
+  <header class="page-header">
+      <div class="header-left">
+        <h1>瘦身减肥类保健品私域电商 · 业务流程深度分析（As-Is 全链路）</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+  <div class="section-title">📊 业务类型分析</div>
+  <div class="section-subtitle">基于业务模式、产品类型、市场类型的三维分型</div>
+  <div class="bt-grid">
+    
+    <div class="bt-card" style="--bt-color: var(--bt-color-1); --bt-color-bg: #0ea5e915;">
+      <div class="bt-name">瘦身保健品私域电商</div>
+      <div class="bt-tags">
+        <span class="bt-tag">B2C</span>
+        <span class="bt-tag">实体产品（功能性食品/保健品）</span>
+        <span class="bt-tag">垂直市场（25~45岁女性减脂塑形需求）</span>
+      </div>
+      <div class="bt-desc">抖音直播引流×企微私域1v1成交的瘦身减肥类保健品电商，产品为中客单价（100~1000元）周期性消耗品，服务周期2~6个月，核心商业逻辑是私域资产的持续变现（LTV驱动）</div>
+    </div>
+    
+  </div>
+
+  <div class="section-title">🔄 L1 端到端价值流 & L2 流程详情</div>
+  <div class="section-subtitle">点击阶段卡片展开 L2 级业务流程与痛点分析</div>
+  
+  
+  <div class="vs-section">
+    <div class="vs-header">
+      <div>
+        <div class="vs-title">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">从抖音直播引流获客，经企微售前客服1v1咨询转化，到下单支付、物流发货履约、复购与私域运营的端到端业务全过程。售前客服是其中第二个L1阶段，也是本次AI规划的聚焦环节。</div>
+      </div>
+      <span class="vs-bt-badge bt-v1">瘦身保健品私域电商</span>
+    </div>
+    
+    <div class="l1-timeline">
+      
+      <div class="l1-stage bt-v1" 
+           data-vs="0" 
+           data-stage="0"
+           data-stage-name="抖音直播引流获客"
+           style="--bt-color-bg: #0ea5e915;">
+        <div class="l1-stage-inner">
+          <div class="l1-stage-order">1</div>
+          <div class="l1-stage-name">抖音直播引流获客</div>
+          <div class="l1-stage-desc">通过抖音直播间内容种草，引导观众添加企微客服，完成公域流量到私域流量池的转化。此阶段决定私域流量池的规模与质量，是LTV的分母优化环节。</div>
+          
+          <div class="l1-pain-indicator">
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l1-stage-arrow">▶</div>
+        
+      </div>
+      
+      <div class="l1-stage bt-v1" 
+           data-vs="1" 
+           data-stage="1"
+           data-stage-name="售前客服1v1咨询（AI聚焦环节）"
+           style="--bt-color-bg: #0ea5e915;">
+        <div class="l1-stage-inner">
+          <div class="l1-stage-order">2</div>
+          <div class="l1-stage-name">售前客服1v1咨询（AI聚焦环节）</div>
+          <div class="l1-stage-desc">客户添加企微后的1v1售前咨询全过程，包括正品溯源答疑、需求澄清与版本推荐、促销算账与下单撮合。标品信任逻辑下客户主问正品/版本/渠道可信，是LTV的首单贡献环节。本次AI规划聚焦此子流程，后续④服务蓝图与⑤AI场景地图以此为对象展开。</div>
+          
+          <div class="l1-pain-indicator">
+            
+            <span class="pain-dot critical"></span>
+            
+            <span class="pain-dot critical"></span>
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot critical"></span>
+            
+            <span class="pain-dot critical"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l1-stage-arrow">▶</div>
+        
+      </div>
+      
+      <div class="l1-stage bt-v1" 
+           data-vs="2" 
+           data-stage="2"
+           data-stage-name="下单支付转化"
+           style="--bt-color-bg: #0ea5e915;">
+        <div class="l1-stage-inner">
+          <div class="l1-stage-order">3</div>
+          <div class="l1-stage-name">下单支付转化</div>
+          <div class="l1-stage-desc">售前咨询完成后的支付与订单确认环节，包括支付方式引导、订单信息核对与付款承接。此阶段是成交的最后一公里，支付体验直接影响转化完成率。</div>
+          
+          <div class="l1-pain-indicator">
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l1-stage-arrow">▶</div>
+        
+      </div>
+      
+      <div class="l1-stage bt-v1" 
+           data-vs="3" 
+           data-stage="3"
+           data-stage-name="物流发货履约"
+           style="--bt-color-bg: #0ea5e915;">
+        <div class="l1-stage-inner">
+          <div class="l1-stage-order">4</div>
+          <div class="l1-stage-name">物流发货履约</div>
+          <div class="l1-stage-desc">订单确认后的发货与物流履约环节，包括发货时效承诺、冷链物流处理、物流轨迹查询。保健品需冷链运输，履约质量影响客户体验与复购意愿。服务边界止于发货跟进。</div>
+          
+          <div class="l1-pain-indicator">
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+            <span class="pain-dot low"></span>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l1-stage-arrow">▶</div>
+        
+      </div>
+      
+      <div class="l1-stage bt-v1" 
+           data-vs="4" 
+           data-stage="4"
+           data-stage-name="复购与私域运营"
+           style="--bt-color-bg: #0ea5e915;">
+        <div class="l1-stage-inner">
+          <div class="l1-stage-order">5</div>
+          <div class="l1-stage-name">复购与私域运营</div>
+          <div class="l1-stage-desc">客户首单后的复购引导与私域资产持续运营环节，包括效果跟进、复购周期预测、沉睡客户唤回与会员运营。此阶段是LTV的主体增量环节（复购贡献占比60%+），决定私域电商的长期盈利能力。</div>
+          
+          <div class="l1-pain-indicator">
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot high"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+            <span class="pain-dot medium"></span>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+      
+    </div>
+
+    
+    <div class="l2-panel" id="l2-panel-0" data-vs="0">
+      <div class="l2-panel-header">
+        <span class="panel-header-icon bt-v1">▸</span>
+        阶段 1: 抖音直播引流获客 — L2 流程详情
+      </div>
+      <div class="l2-flow">
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">直播间内容种草与引流</div>
+            <span class="l2-activity-order">#1</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 主播/运营</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 抖音直播/巨量千川投放</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">直播间流量（自然+投流）, 产品卖点与版本差异脚本</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">观众添加企微好友请求</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">主播在直播间讲解产品功效认知（已在直播完成种草）、版本差异与促销口径，通过引流组件引导观众添加企微客服进入私域</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">流量波动大，引流钩子转化率不稳定，加粉后30分钟黄金窗口易错过</div>
+              <div class="pain-impact">💥 影响: 私域流量池增长不稳定，获客成本波动大，影响LTV分母</div>
+              <div class="pain-root">🔍 根因: 引流钩子缺乏A/B测试机制，加粉后首响慢导致黄金窗口流失</div>
+            </div>
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">不同直播场次的促销口径未系统化传递到客服侧</div>
+              <div class="pain-impact">💥 影响: 客服算账口径混乱，客户体验不一致</div>
+              <div class="pain-root">🔍 根因: 引流场次与客服话术未打通，活码分流未系统化</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">企微活码分流与来源打标</div>
+            <span class="l2-activity-order">#2</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 运营</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/渠道活码/SCRM</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">好友添加请求, 直播场次来源信息</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">已通过好友+来源标签</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">通过渠道活码自动识别客户来源场次，打标后分配对应客服，为后续售前话术与促销口径匹配做准备</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">来源打标依赖人工手动备注，高峰期漏打标率高</div>
+              <div class="pain-impact">💥 影响: 无法按直播场次匹配促销口径，算账口径混乱</div>
+              <div class="pain-root">🔍 根因: 无自动渠道识别与打标，活码分流未系统化</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="l2-panel" id="l2-panel-1" data-vs="1">
+      <div class="l2-panel-header">
+        <span class="panel-header-icon bt-v1">▸</span>
+        阶段 2: 售前客服1v1咨询（AI聚焦环节） — L2 流程详情
+      </div>
+      <div class="l2-flow">
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">正品溯源与版本答疑</div>
+            <span class="l2-activity-order">#1</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/商品资质资料</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户正品/版本疑问</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">正品凭据与版本说明应答</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">标品信任逻辑下的首位高频问题——出示资质文号/授权链路/防伪验证，说明孟版/日版等版本区别，建立正品信任</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card critical">
+              <div class="pain-severity critical">
+                🔴
+                CRITICAL 严重程度
+              </div>
+              <div class="pain-desc">全天候流量×班次制人力：白班首响1~3分钟、夜间>8小时；夜间咨询占35%~45%无人接待</div>
+              <div class="pain-impact">💥 影响: 夜间直播后咨询高峰在等待中冷却流失，首响超时静默离开，直接损失LTV首单贡献</div>
+              <div class="pain-root">🔍 根因: 6-20人团队不设夜班，人力与全天候流量结构性错位</div>
+            </div>
+            
+            <div class="pain-card critical">
+              <div class="pain-severity critical">
+                🔴
+                CRITICAL 严重程度
+              </div>
+              <div class="pain-desc">正品凭据、授权链路散落，新客服记不全，答复口径不一</div>
+              <div class="pain-impact">💥 影响: 信任建立慢、口径参差影响转化；资深客服成瓶颈，培训周期30天</div>
+              <div class="pain-root">🔍 根因: 正品溯源知识未结构化沉淀，靠个人记忆与经验</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">需求澄清与版本推荐</div>
+            <span class="l2-activity-order">#2</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户模糊需求</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">澄清后需求画像与适配版本推荐</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">通过问题链澄清适用版本/规格/用法，收敛到可推荐SKU，结合客户诉求推荐适配版本与购买规格</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">澄清问题链靠客服个人经验，新人易漏问关键条件，会话轮次拉长（15~30轮）</div>
+              <div class="pain-impact">💥 影响: 推荐错版本、反复追问，转化受个人能力波动影响</div>
+              <div class="pain-root">🔍 根因: 澄清话术未沉淀为标准问题链知识</div>
+            </div>
+            
+            <div class="pain-card critical">
+              <div class="pain-severity critical">
+                🔴
+                CRITICAL 严重程度
+              </div>
+              <div class="pain-desc">合规靠培训+个人自觉，夜间/大促疲劳时段违规话术高发，最高罚100万~200万元</div>
+              <div class="pain-impact">💥 影响: 触碰功效宣称红线，合规塌方即转化塌方，私域资产面临罚款与封号风险</div>
+              <div class="pain-root">🔍 根因: 无预审核合规语料库，语义级违规敏感词挡不住</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">促销算账与下单撮合</div>
+            <span class="l2-activity-order">#3</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/促销规则（人工记忆）/下单链接</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">推荐方案, 当场促销规则</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">精确到手价与已下单支付</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">按满减/赠品/组合价规则计算客户到手价，推送下单链接、临门促单完成成交（约10%转化率）</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card critical">
+              <div class="pain-severity critical">
+                🔴
+                CRITICAL 严重程度
+              </div>
+              <div class="pain-desc">人工心算易错价，促销规则随场变动记不全，错价引发纠纷/亏损</div>
+              <div class="pain-impact">💥 影响: 错价客诉赔付，算账口径全渠道不一致，直接损失利润</div>
+              <div class="pain-root">🔍 根因: 促销规则未入库，无确定性计算工具</div>
+            </div>
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">促单节奏靠资深客服经验，新人成交话术弱</div>
+              <div class="pain-impact">💥 影响: 转化率受客服个人能力波动，10%转化基本盘不稳定</div>
+              <div class="pain-root">🔍 根因: 真实成交话术未沉淀拟合</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="l2-panel" id="l2-panel-2" data-vs="2">
+      <div class="l2-panel-header">
+        <span class="panel-header-icon bt-v1">▸</span>
+        阶段 3: 下单支付转化 — L2 流程详情
+      </div>
+      <div class="l2-flow">
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">支付方式引导</div>
+            <span class="l2-activity-order">#1</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户支付方式疑问</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">支付方式说明与收款码</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">引导客户通过微信扫码/微信红包/支付宝完成支付（企微未开通转账收款），说明运费到付口径</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">支付方式引导不当导致客户在最后一步流失</div>
+              <div class="pain-impact">💥 影响: 售前咨询全部完成但支付环节掉单，前功尽弃</div>
+              <div class="pain-root">🔍 根因: 支付方式说明依赖客服话术，无标准化引导流程</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">订单信息核对与付款承接</div>
+            <span class="l2-activity-order">#2</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/订单系统</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户付款截图, 收货地址信息</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">已确认订单</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">客户发送付款截图后，客服人工复述订单要素（姓名/电话/地址/SKU）核对确认，完成订单承接</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">付款截图确认依赖人工，承接超时引发信任危机（客户觉得付了钱没人理）</div>
+              <div class="pain-impact">💥 影响: 客户恐慌退款或投诉，直接损失成交且影响口碑</div>
+              <div class="pain-root">🔍 根因: 无自动付款承接与订单确认机制，客服高峰期漏接</div>
+            </div>
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">地址/SKU信息核对靠人工复述，易出错</div>
+              <div class="pain-impact">💥 影响: 发错货引发售后成本与客诉</div>
+              <div class="pain-root">🔍 根因: 订单核对未与系统打通</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="l2-panel" id="l2-panel-3" data-vs="3">
+      <div class="l2-panel-header">
+        <span class="panel-header-icon bt-v1">▸</span>
+        阶段 4: 物流发货履约 — L2 流程详情
+      </div>
+      <div class="l2-flow">
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">发货时效承诺与订单处理</div>
+            <span class="l2-activity-order">#1</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售后/仓储</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 订单系统/WMS</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">已确认订单</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">已发货订单与物流单号</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">按48h内发出承诺处理订单，安排冷链物流发货，深圳发货揽收后1-3天送达</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">发货时效凭感觉承诺，说错引发客诉</div>
+              <div class="pain-impact">💥 影响: 承诺与实际不一致导致客户不满，影响复购意愿</div>
+              <div class="pain-root">🔍 根因: 时效承诺无确定性数据支撑，大促期间发货压力估算不准</div>
+            </div>
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">冷链物流断链风险，运输途中温度失控</div>
+              <div class="pain-impact">💥 影响: 产品品质受损，引发退款与差评</div>
+              <div class="pain-root">🔍 根因: 冷链物流质量监控不到位</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">物流轨迹查询与到货跟进</div>
+            <span class="l2-activity-order">#2</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 售前/售后客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/物流系统</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户物流疑问</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">物流状态应答</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">回答客户何时发货、快递到哪了等确定性问题，冷链到付运费约20元</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">物流状态需跨系统人工查询，重复问答占用售前有效服务时间</div>
+              <div class="pain-impact">💥 影响: 大量重复物流咨询挤占售前客服精力，影响新客转化</div>
+              <div class="pain-root">🔍 根因: 物流数据未与对话打通，无自动查询</div>
+            </div>
+            
+            <div class="pain-card low">
+              <div class="pain-severity low">
+                🔵
+                LOW 严重程度
+              </div>
+              <div class="pain-desc">到货后无主动跟进机制</div>
+              <div class="pain-impact">💥 影响: 错失到货关怀与复购引导时机</div>
+              <div class="pain-root">🔍 根因: 物流签收事件未与客户运营联动</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="l2-panel" id="l2-panel-4" data-vs="4">
+      <div class="l2-panel-header">
+        <span class="panel-header-icon bt-v1">▸</span>
+        阶段 5: 复购与私域运营 — L2 流程详情
+      </div>
+      <div class="l2-flow">
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">效果跟进与复购唤回</div>
+            <span class="l2-activity-order">#1</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 私域运营/客服</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/CRM</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户首单成交记录, 产品服务周期（2~6个月）</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">复购订单</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">基于保健品2~6个月服务周期，在客户预计用完前3天触发关怀话术与复购引导，通过效果跟进建立信任并促成复购</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">复购靠人工经验无预测，大量老客在服务周期结束后自然流失</div>
+              <div class="pain-impact">💥 影响: 复购率仅35%，LTV主体增量流失，私域资产未充分变现</div>
+              <div class="pain-root">🔍 根因: 无复购周期预测模型，消耗节点靠人工记忆</div>
+            </div>
+            
+            <div class="pain-card high">
+              <div class="pain-severity high">
+                🟠
+                HIGH 严重程度
+              </div>
+              <div class="pain-desc">沉睡客户流失无系统化唤回机制</div>
+              <div class="pain-impact">💥 影响: 48h未成交客户与超周期未复购老客直接流失，无挽留</div>
+              <div class="pain-root">🔍 根因: 无沉睡客户分群与精准唤回策略</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+        <div class="l2-activity">
+          <div class="l2-activity-header">
+            <div class="l2-activity-title">私域沉淀与会员运营</div>
+            <span class="l2-activity-order">#2</span>
+          </div>
+          <div class="l2-activity-meta">
+            <span class="l2-meta-item">👤 <b>角色:</b> 私域运营</span>
+            <span class="l2-meta-item">💻 <b>系统:</b> 企业微信/CRM/会员系统</span>
+          </div>
+          
+          <div class="l2-io">
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输入</div>
+              <div class="l2-io-value">客户交易历史与行为数据</div>
+            </div>
+            
+            
+            <div class="l2-io-item">
+              <div class="l2-io-label">输出</div>
+              <div class="l2-io-value">会员等级与私域资产沉淀</div>
+            </div>
+            
+          </div>
+          
+          
+          <div class="l2-desc">通过会员等级体系、积分激励、社群运营等手段提升留存动机，将客户沉淀为可持续运营的私域资产</div>
+          
+          
+          <div class="l2-pains">
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">私域资产未系统化运营，会员等级与积分体系缺失</div>
+              <div class="pain-impact">💥 影响: 老客留存动机不足，复购频次仅1.8次/月</div>
+              <div class="pain-root">🔍 根因: 会员运营未与CRM打通，无数据驱动的分层运营</div>
+            </div>
+            
+            <div class="pain-card medium">
+              <div class="pain-severity medium">
+                🟡
+                MEDIUM 严重程度
+              </div>
+              <div class="pain-desc">社群运营靠人工发内容，无精准触达</div>
+              <div class="pain-impact">💥 影响: 社群活跃度低，私域流量池价值未释放</div>
+              <div class="pain-root">🔍 根因: 无客户分群与个性化内容推荐机制</div>
+            </div>
+            
+          </div>
+          
+        </div>
+        
+      </div>
+    </div>
+    
+  </div>
+  
+
+  <div class="section-title">⚠️ 业务痛点汇总分析</div>
+  <div class="section-subtitle">全量痛点按严重程度统计与明细</div>
+  
+  <div class="summary-panel">
+    <div class="summary-stats">
+      <div class="stat-card">
+        <div class="stat-number critical">4</div>
+        <div class="stat-label">严重痛点</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number high">7</div>
+        <div class="stat-label">高优先级</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number medium">8</div>
+        <div class="stat-label">中优先级</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number low">1</div>
+        <div class="stat-label">低优先级</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: var(--text-main);">20</div>
+        <div class="stat-label">痛点总数</div>
+      </div>
+    </div>
+
+    <table class="pain-table">
+      <thead>
+        <tr>
+          <th style="width: 80px;">严重程度</th>
+          <th style="width: 120px;">价值流 / 阶段</th>
+          <th style="width: 120px;">活动</th>
+          <th>痛点描述</th>
+          <th>影响</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>
+            <span class="pain-badge critical">
+              🔴
+              CRITICAL
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">正品溯源与版本答疑</td>
+          <td>全天候流量×班次制人力：白班首响1~3分钟、夜间>8小时；夜间咨询占35%~45%无人接待</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">夜间直播后咨询高峰在等待中冷却流失，首响超时静默离开，直接损失LTV首单贡献</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge critical">
+              🔴
+              CRITICAL
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">正品溯源与版本答疑</td>
+          <td>正品凭据、授权链路散落，新客服记不全，答复口径不一</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">信任建立慢、口径参差影响转化；资深客服成瓶颈，培训周期30天</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge critical">
+              🔴
+              CRITICAL
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">需求澄清与版本推荐</td>
+          <td>合规靠培训+个人自觉，夜间/大促疲劳时段违规话术高发，最高罚100万~200万元</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">触碰功效宣称红线，合规塌方即转化塌方，私域资产面临罚款与封号风险</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge critical">
+              🔴
+              CRITICAL
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">促销算账与下单撮合</td>
+          <td>人工心算易错价，促销规则随场变动记不全，错价引发纠纷/亏损</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">错价客诉赔付，算账口径全渠道不一致，直接损失利润</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">抖音直播引流获客</div>
+          </td>
+          <td class="table-activity">直播间内容种草与引流</td>
+          <td>流量波动大，引流钩子转化率不稳定，加粉后30分钟黄金窗口易错过</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">私域流量池增长不稳定，获客成本波动大，影响LTV分母</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">需求澄清与版本推荐</td>
+          <td>澄清问题链靠客服个人经验，新人易漏问关键条件，会话轮次拉长（15~30轮）</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">推荐错版本、反复追问，转化受个人能力波动影响</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">下单支付转化</div>
+          </td>
+          <td class="table-activity">支付方式引导</td>
+          <td>支付方式引导不当导致客户在最后一步流失</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">售前咨询全部完成但支付环节掉单，前功尽弃</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">下单支付转化</div>
+          </td>
+          <td class="table-activity">订单信息核对与付款承接</td>
+          <td>付款截图确认依赖人工，承接超时引发信任危机（客户觉得付了钱没人理）</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">客户恐慌退款或投诉，直接损失成交且影响口碑</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">物流发货履约</div>
+          </td>
+          <td class="table-activity">发货时效承诺与订单处理</td>
+          <td>发货时效凭感觉承诺，说错引发客诉</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">承诺与实际不一致导致客户不满，影响复购意愿</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">复购与私域运营</div>
+          </td>
+          <td class="table-activity">效果跟进与复购唤回</td>
+          <td>复购靠人工经验无预测，大量老客在服务周期结束后自然流失</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">复购率仅35%，LTV主体增量流失，私域资产未充分变现</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge high">
+              🟠
+              HIGH
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">复购与私域运营</div>
+          </td>
+          <td class="table-activity">效果跟进与复购唤回</td>
+          <td>沉睡客户流失无系统化唤回机制</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">48h未成交客户与超周期未复购老客直接流失，无挽留</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">抖音直播引流获客</div>
+          </td>
+          <td class="table-activity">直播间内容种草与引流</td>
+          <td>不同直播场次的促销口径未系统化传递到客服侧</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">客服算账口径混乱，客户体验不一致</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">抖音直播引流获客</div>
+          </td>
+          <td class="table-activity">企微活码分流与来源打标</td>
+          <td>来源打标依赖人工手动备注，高峰期漏打标率高</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">无法按直播场次匹配促销口径，算账口径混乱</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">售前客服1v1咨询（AI聚焦环节）</div>
+          </td>
+          <td class="table-activity">促销算账与下单撮合</td>
+          <td>促单节奏靠资深客服经验，新人成交话术弱</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">转化率受客服个人能力波动，10%转化基本盘不稳定</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">下单支付转化</div>
+          </td>
+          <td class="table-activity">订单信息核对与付款承接</td>
+          <td>地址/SKU信息核对靠人工复述，易出错</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">发错货引发售后成本与客诉</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">物流发货履约</div>
+          </td>
+          <td class="table-activity">发货时效承诺与订单处理</td>
+          <td>冷链物流断链风险，运输途中温度失控</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">产品品质受损，引发退款与差评</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">物流发货履约</div>
+          </td>
+          <td class="table-activity">物流轨迹查询与到货跟进</td>
+          <td>物流状态需跨系统人工查询，重复问答占用售前有效服务时间</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">大量重复物流咨询挤占售前客服精力，影响新客转化</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">复购与私域运营</div>
+          </td>
+          <td class="table-activity">私域沉淀与会员运营</td>
+          <td>私域资产未系统化运营，会员等级与积分体系缺失</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">老客留存动机不足，复购频次仅1.8次/月</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge medium">
+              🟡
+              MEDIUM
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">复购与私域运营</div>
+          </td>
+          <td class="table-activity">私域沉淀与会员运营</td>
+          <td>社群运营靠人工发内容，无精准触达</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">社群活跃度低，私域流量池价值未释放</td>
+        </tr>
+        
+        <tr>
+          <td>
+            <span class="pain-badge low">
+              🔵
+              LOW
+            </span>
+          </td>
+          <td>
+            <div class="table-activity">私域电商全链路价值流（引流→售前→下单→履约→复购）</div>
+            <div class="table-stage">物流发货履约</div>
+          </td>
+          <td class="table-activity">物流轨迹查询与到货跟进</td>
+          <td>到货后无主动跟进机制</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">错失到货关怀与复购引导时机</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+  <footer style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--color-border); text-align: center; font-size: 12px; color: var(--color-text-muted);">
+    Generated by business-process-deep-analyzer · 2026-08-04 20:31 · &copy; 2026 Inspire AI4PM
+  </footer>
+  </div> <!-- /.page-wrap -->
+
+  <div class="toast" id="toast" style="position: fixed; bottom: 24px; right: 24px; background: var(--color-primary); color: #fff; padding: 12px 24px; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; z-index: 1000;">已成功复制 YAML 数据</div>
+  
+  <script type="application/yaml" id="raw-yaml">
+title: "瘦身减肥类保健品私域电商 · 业务流程深度分析（As-Is 全链路）"
+company: "瘦身减肥类保健品私域电商（白牌/新锐品牌典型业态）"
+domain: "私域电商全链路（引流→售前→下单→履约→复购）"
+description: "第 3 步 · 承接①业务现状分析与②北极星OSM，把保健品私域电商全链路解剖到流程级（L1 价值流 → 阶段 → L2 流程 → 痛点）。售前客服是 L1 价值流中的一个子流程（非全部），本次 AI 规划聚焦该子流程，后续④服务蓝图与⑤AI场景地图均以售前客服为对象展开。标品信任逻辑：客户主问正品/版本/渠道可信，功效认知已在直播间完成。"
+
+business_types:
+  - name: "瘦身保健品私域电商"
+    model: "B2C"
+    product_type: "实体产品（功能性食品/保健品）"
+    market_type: "垂直市场（25~45岁女性减脂塑形需求）"
+    description: "抖音直播引流×企微私域1v1成交的瘦身减肥类保健品电商，产品为中客单价（100~1000元）周期性消耗品，服务周期2~6个月，核心商业逻辑是私域资产的持续变现（LTV驱动）"
+
+l1_value_streams:
+  - name: "私域电商全链路价值流（引流→售前→下单→履约→复购）"
+    description: "从抖音直播引流获客，经企微售前客服1v1咨询转化，到下单支付、物流发货履约、复购与私域运营的端到端业务全过程。售前客服是其中第二个L1阶段，也是本次AI规划的聚焦环节。"
+    business_type: "瘦身保健品私域电商"
+    stages:
+      # ══════════════════════════════════════════════════════════════
+      # L1-1: 抖音直播引流获客
+      # ══════════════════════════════════════════════════════════════
+      - name: "抖音直播引流获客"
+        description: "通过抖音直播间内容种草，引导观众添加企微客服，完成公域流量到私域流量池的转化。此阶段决定私域流量池的规模与质量，是LTV的分母优化环节。"
+        order: 1
+        type: "process"
+        l2_processes:
+          - name: "直播间内容种草与引流"
+            role: "主播/运营"
+            system: "抖音直播/巨量千川投放"
+            inputs:
+              - "直播间流量（自然+投流）"
+              - "产品卖点与版本差异脚本"
+            outputs:
+              - "观众添加企微好友请求"
+            description: "主播在直播间讲解产品功效认知（已在直播完成种草）、版本差异与促销口径，通过引流组件引导观众添加企微客服进入私域"
+            order: 1
+            pain_points:
+              - severity: "high"
+                description: "流量波动大，引流钩子转化率不稳定，加粉后30分钟黄金窗口易错过"
+                impact: "私域流量池增长不稳定，获客成本波动大，影响LTV分母"
+                root_cause: "引流钩子缺乏A/B测试机制，加粉后首响慢导致黄金窗口流失"
+              - severity: "medium"
+                description: "不同直播场次的促销口径未系统化传递到客服侧"
+                impact: "客服算账口径混乱，客户体验不一致"
+                root_cause: "引流场次与客服话术未打通，活码分流未系统化"
+          - name: "企微活码分流与来源打标"
+            role: "运营"
+            system: "企业微信/渠道活码/SCRM"
+            inputs:
+              - "好友添加请求"
+              - "直播场次来源信息"
+            outputs:
+              - "已通过好友+来源标签"
+            description: "通过渠道活码自动识别客户来源场次，打标后分配对应客服，为后续售前话术与促销口径匹配做准备"
+            order: 2
+            pain_points:
+              - severity: "medium"
+                description: "来源打标依赖人工手动备注，高峰期漏打标率高"
+                impact: "无法按直播场次匹配促销口径，算账口径混乱"
+                root_cause: "无自动渠道识别与打标，活码分流未系统化"
+
+      # ══════════════════════════════════════════════════════════════
+      # L1-2: 售前客服1v1咨询 ← 本次AI聚焦环节
+      # ══════════════════════════════════════════════════════════════
+      - name: "售前客服1v1咨询（AI聚焦环节）"
+        description: "客户添加企微后的1v1售前咨询全过程，包括正品溯源答疑、需求澄清与版本推荐、促销算账与下单撮合。标品信任逻辑下客户主问正品/版本/渠道可信，是LTV的首单贡献环节。本次AI规划聚焦此子流程，后续④服务蓝图与⑤AI场景地图以此为对象展开。"
+        order: 2
+        type: "process"
+        l2_processes:
+          - name: "正品溯源与版本答疑"
+            role: "售前客服"
+            system: "企业微信/商品资质资料"
+            inputs:
+              - "客户正品/版本疑问"
+            outputs:
+              - "正品凭据与版本说明应答"
+            description: "标品信任逻辑下的首位高频问题——出示资质文号/授权链路/防伪验证，说明孟版/日版等版本区别，建立正品信任"
+            order: 1
+            pain_points:
+              - severity: "critical"
+                description: "全天候流量×班次制人力：白班首响1~3分钟、夜间>8小时；夜间咨询占35%~45%无人接待"
+                impact: "夜间直播后咨询高峰在等待中冷却流失，首响超时静默离开，直接损失LTV首单贡献"
+                root_cause: "6-20人团队不设夜班，人力与全天候流量结构性错位"
+              - severity: "critical"
+                description: "正品凭据、授权链路散落，新客服记不全，答复口径不一"
+                impact: "信任建立慢、口径参差影响转化；资深客服成瓶颈，培训周期30天"
+                root_cause: "正品溯源知识未结构化沉淀，靠个人记忆与经验"
+          - name: "需求澄清与版本推荐"
+            role: "售前客服"
+            system: "企业微信"
+            inputs:
+              - "客户模糊需求"
+            outputs:
+              - "澄清后需求画像与适配版本推荐"
+            description: "通过问题链澄清适用版本/规格/用法，收敛到可推荐SKU，结合客户诉求推荐适配版本与购买规格"
+            order: 2
+            pain_points:
+              - severity: "high"
+                description: "澄清问题链靠客服个人经验，新人易漏问关键条件，会话轮次拉长（15~30轮）"
+                impact: "推荐错版本、反复追问，转化受个人能力波动影响"
+                root_cause: "澄清话术未沉淀为标准问题链知识"
+              - severity: "critical"
+                description: "合规靠培训+个人自觉，夜间/大促疲劳时段违规话术高发，最高罚100万~200万元"
+                impact: "触碰功效宣称红线，合规塌方即转化塌方，私域资产面临罚款与封号风险"
+                root_cause: "无预审核合规语料库，语义级违规敏感词挡不住"
+          - name: "促销算账与下单撮合"
+            role: "售前客服"
+            system: "企业微信/促销规则（人工记忆）/下单链接"
+            inputs:
+              - "推荐方案"
+              - "当场促销规则"
+            outputs:
+              - "精确到手价与已下单支付"
+            description: "按满减/赠品/组合价规则计算客户到手价，推送下单链接、临门促单完成成交（约10%转化率）"
+            order: 3
+            pain_points:
+              - severity: "critical"
+                description: "人工心算易错价，促销规则随场变动记不全，错价引发纠纷/亏损"
+                impact: "错价客诉赔付，算账口径全渠道不一致，直接损失利润"
+                root_cause: "促销规则未入库，无确定性计算工具"
+              - severity: "medium"
+                description: "促单节奏靠资深客服经验，新人成交话术弱"
+                impact: "转化率受客服个人能力波动，10%转化基本盘不稳定"
+                root_cause: "真实成交话术未沉淀拟合"
+
+      # ══════════════════════════════════════════════════════════════
+      # L1-3: 下单支付转化
+      # ══════════════════════════════════════════════════════════════
+      - name: "下单支付转化"
+        description: "售前咨询完成后的支付与订单确认环节，包括支付方式引导、订单信息核对与付款承接。此阶段是成交的最后一公里，支付体验直接影响转化完成率。"
+        order: 3
+        type: "process"
+        l2_processes:
+          - name: "支付方式引导"
+            role: "售前客服"
+            system: "企业微信"
+            inputs:
+              - "客户支付方式疑问"
+            outputs:
+              - "支付方式说明与收款码"
+            description: "引导客户通过微信扫码/微信红包/支付宝完成支付（企微未开通转账收款），说明运费到付口径"
+            order: 1
+            pain_points:
+              - severity: "high"
+                description: "支付方式引导不当导致客户在最后一步流失"
+                impact: "售前咨询全部完成但支付环节掉单，前功尽弃"
+                root_cause: "支付方式说明依赖客服话术，无标准化引导流程"
+          - name: "订单信息核对与付款承接"
+            role: "售前客服"
+            system: "企业微信/订单系统"
+            inputs:
+              - "客户付款截图"
+              - "收货地址信息"
+            outputs:
+              - "已确认订单"
+            description: "客户发送付款截图后，客服人工复述订单要素（姓名/电话/地址/SKU）核对确认，完成订单承接"
+            order: 2
+            pain_points:
+              - severity: "high"
+                description: "付款截图确认依赖人工，承接超时引发信任危机（客户觉得付了钱没人理）"
+                impact: "客户恐慌退款或投诉，直接损失成交且影响口碑"
+                root_cause: "无自动付款承接与订单确认机制，客服高峰期漏接"
+              - severity: "medium"
+                description: "地址/SKU信息核对靠人工复述，易出错"
+                impact: "发错货引发售后成本与客诉"
+                root_cause: "订单核对未与系统打通"
+
+      # ══════════════════════════════════════════════════════════════
+      # L1-4: 物流发货履约
+      # ══════════════════════════════════════════════════════════════
+      - name: "物流发货履约"
+        description: "订单确认后的发货与物流履约环节，包括发货时效承诺、冷链物流处理、物流轨迹查询。保健品需冷链运输，履约质量影响客户体验与复购意愿。服务边界止于发货跟进。"
+        order: 4
+        type: "process"
+        l2_processes:
+          - name: "发货时效承诺与订单处理"
+            role: "售后/仓储"
+            system: "订单系统/WMS"
+            inputs:
+              - "已确认订单"
+            outputs:
+              - "已发货订单与物流单号"
+            description: "按48h内发出承诺处理订单，安排冷链物流发货，深圳发货揽收后1-3天送达"
+            order: 1
+            pain_points:
+              - severity: "high"
+                description: "发货时效凭感觉承诺，说错引发客诉"
+                impact: "承诺与实际不一致导致客户不满，影响复购意愿"
+                root_cause: "时效承诺无确定性数据支撑，大促期间发货压力估算不准"
+              - severity: "medium"
+                description: "冷链物流断链风险，运输途中温度失控"
+                impact: "产品品质受损，引发退款与差评"
+                root_cause: "冷链物流质量监控不到位"
+          - name: "物流轨迹查询与到货跟进"
+            role: "售前/售后客服"
+            system: "企业微信/物流系统"
+            inputs:
+              - "客户物流疑问"
+            outputs:
+              - "物流状态应答"
+            description: "回答客户何时发货、快递到哪了等确定性问题，冷链到付运费约20元"
+            order: 2
+            pain_points:
+              - severity: "medium"
+                description: "物流状态需跨系统人工查询，重复问答占用售前有效服务时间"
+                impact: "大量重复物流咨询挤占售前客服精力，影响新客转化"
+                root_cause: "物流数据未与对话打通，无自动查询"
+              - severity: "low"
+                description: "到货后无主动跟进机制"
+                impact: "错失到货关怀与复购引导时机"
+                root_cause: "物流签收事件未与客户运营联动"
+
+      # ══════════════════════════════════════════════════════════════
+      # L1-5: 复购与私域运营
+      # ══════════════════════════════════════════════════════════════
+      - name: "复购与私域运营"
+        description: "客户首单后的复购引导与私域资产持续运营环节，包括效果跟进、复购周期预测、沉睡客户唤回与会员运营。此阶段是LTV的主体增量环节（复购贡献占比60%+），决定私域电商的长期盈利能力。"
+        order: 5
+        type: "process"
+        l2_processes:
+          - name: "效果跟进与复购唤回"
+            role: "私域运营/客服"
+            system: "企业微信/CRM"
+            inputs:
+              - "客户首单成交记录"
+              - "产品服务周期（2~6个月）"
+            outputs:
+              - "复购订单"
+            description: "基于保健品2~6个月服务周期，在客户预计用完前3天触发关怀话术与复购引导，通过效果跟进建立信任并促成复购"
+            order: 1
+            pain_points:
+              - severity: "high"
+                description: "复购靠人工经验无预测，大量老客在服务周期结束后自然流失"
+                impact: "复购率仅35%，LTV主体增量流失，私域资产未充分变现"
+                root_cause: "无复购周期预测模型，消耗节点靠人工记忆"
+              - severity: "high"
+                description: "沉睡客户流失无系统化唤回机制"
+                impact: "48h未成交客户与超周期未复购老客直接流失，无挽留"
+                root_cause: "无沉睡客户分群与精准唤回策略"
+          - name: "私域沉淀与会员运营"
+            role: "私域运营"
+            system: "企业微信/CRM/会员系统"
+            inputs:
+              - "客户交易历史与行为数据"
+            outputs:
+              - "会员等级与私域资产沉淀"
+            description: "通过会员等级体系、积分激励、社群运营等手段提升留存动机，将客户沉淀为可持续运营的私域资产"
+            order: 2
+            pain_points:
+              - severity: "medium"
+                description: "私域资产未系统化运营，会员等级与积分体系缺失"
+                impact: "老客留存动机不足，复购频次仅1.8次/月"
+                root_cause: "会员运营未与CRM打通，无数据驱动的分层运营"
+              - severity: "medium"
+                description: "社群运营靠人工发内容，无精准触达"
+                impact: "社群活跃度低，私域流量池价值未释放"
+                root_cause: "无客户分群与个性化内容推荐机制"
+  </script>
+
+  <script>
+    // Track active L2 panels per value stream
+    var activePanels = {};
+    
+    function toggleL2(stageIndex, stageName) {
+      var panel = document.getElementById('l2-panel-' + stageIndex);
+      if (!panel) return;
+      
+      // Close other panels in the same value stream
+      var vsPanels = document.querySelectorAll('.l2-panel[data-vs="' + stageIndex + '"]');
+      
+      if (panel.classList.contains('active')) {
+        panel.classList.remove('active');
+      } else {
+        // Close all panels first
+        document.querySelectorAll('.l2-panel.active').forEach(function(p) {
+          p.classList.remove('active');
+        });
+        // Open clicked panel
+        panel.classList.add('active');
+        // Scroll to panel
+        setTimeout(function() {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+    }
+    
+    // Highlight and Click for L1 stage
+    document.querySelectorAll('.l1-stage').forEach(function(stage) {
+      stage.addEventListener('mouseenter', function() {
+        this.classList.add('active');
+      });
+      stage.addEventListener('mouseleave', function() {
+        var panel = document.getElementById('l2-panel-' + this.dataset.stage);
+        if (panel && !panel.classList.contains('active')) {
+          this.classList.remove('active');
+        }
+      });
+      stage.addEventListener('click', function() {
+        toggleL2(parseInt(this.dataset.stage), this.dataset.stageName);
+      });
+    });
+
+    function copyYAML() {
+      const yaml = document.getElementById('raw-yaml').textContent.trim();
+      navigator.clipboard.writeText(yaml).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="02-OSM战略地图.html"><div class="dir">← 上一步 · 战略</div><div class="t">② 北极星OSM</div><div class="d">前承：NSM=首单转化率护城河（稳健维持 ≥10%），三层拆解：底线维持/效率降本/增量捞回</div></a><a class="navcard next" href="04-服务蓝图.html"><div class="dir">下一步 · 分析 →</div><div class="t">④ 服务蓝图</div><div class="d">后启：三层泳道解剖 As-Is 人工售前 5 阶段，定位认知负荷 critical 的痛点节点</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

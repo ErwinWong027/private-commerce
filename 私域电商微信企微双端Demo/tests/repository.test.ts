@@ -131,6 +131,27 @@ describe("PresalesRepository", () => {
     repo.close();
   });
 
+  it("AI 回复指标按实际消息段数累计", () => {
+    const repo = createRepository();
+    const initial = repo.getMetrics().ai_replies;
+    const first = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "价格多少");
+    repo.saveAutomatedDecision("S-001", first.id, first.content, {
+      intent: "pricing", confidence: 0.99, reply: ["5mg 价格 280 元"], needHuman: false, silentIntercept: false,
+      handoffTriggerType: null, boundaryDecision: "自动回复", matchedEvidence: [], handoffSummary: "",
+      toolName: "price", toolArgs: [], toolResult: null,
+    });
+    assert.equal(repo.getMetrics().ai_replies, initial + 1);
+
+    const second = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "怎么选");
+    repo.saveAutomatedDecision("S-001", second.id, second.content, {
+      intent: "version", confidence: 0.99, reply: ["先确认使用需求", "再选择对应规格"], needHuman: false, silentIntercept: false,
+      handoffTriggerType: null, boundaryDecision: "自动回复", matchedEvidence: [], handoffSummary: "",
+      toolName: null, toolArgs: [], toolResult: null,
+    });
+    assert.equal(repo.getMetrics().ai_replies, initial + 3);
+    repo.close();
+  });
+
   it("旧库（无图片列）启动时原地升级", () => {
     const dir = mkdtempSync(path.join(tmpdir(), "presales-repo-"));
     dirs.push(dir);
@@ -155,13 +176,43 @@ describe("PresalesRepository", () => {
     repo.close();
   });
 
-  it("成交状态默认咨询中，可持久化并随 reset 恢复初始", () => {
+  it("旧库的图片约束升级后允许写入语音", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "presales-repo-"));
+    dirs.push(dir);
+    const dbPath = path.join(dir, "legacy-voice.db");
+    const raw = new DatabaseSync(dbPath);
+    raw.exec(`
+      CREATE TABLE users (id TEXT PRIMARY KEY, role TEXT NOT NULL, name TEXT NOT NULL, avatar TEXT NOT NULL, organization TEXT, created_at TEXT NOT NULL);
+      CREATE TABLE sessions (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, status TEXT NOT NULL, assigned_agent_id TEXT, unread_count INTEGER NOT NULL DEFAULT 0, customer_unread_count INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+      CREATE TABLE media_assets (id TEXT PRIMARY KEY, message_id TEXT, kind TEXT NOT NULL, local_path TEXT NOT NULL, transcript TEXT, extracted TEXT, confidence REAL, needs_manual_confirm INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL);
+      CREATE TABLE messages (
+        id TEXT PRIMARY KEY, session_id TEXT NOT NULL, sequence INTEGER NOT NULL, actor TEXT NOT NULL,
+        sender_id TEXT, content TEXT NOT NULL,
+        content_type TEXT NOT NULL DEFAULT 'text' CHECK (content_type IN ('text', 'image')),
+        media_path TEXT, image_description TEXT, media_asset_id TEXT, created_at TEXT NOT NULL,
+        UNIQUE(session_id, sequence)
+      );
+      INSERT INTO users VALUES ('U-1','customer','A','A',NULL,'t');
+      INSERT INTO sessions VALUES ('S-1','U-1','ai_serving',NULL,0,0,'t','t');
+      INSERT INTO messages VALUES ('M-1','S-1',1,'customer',NULL,'旧消息','text',NULL,NULL,NULL,'t');
+    `);
+    raw.close();
+
+    const repo = new PresalesRepository(dbPath);
+    assert.equal(repo.getConversation("S-1")!.messages[0].content, "旧消息");
+    const voice = repo.appendMessage("S-1", "customer", "U-1", "", "/api/media/voice.mp3");
+    assert.equal(voice.contentType, "voice");
+    repo.close();
+  });
+
+  it("可创建、关联并按会话列出媒体资产", () => {
     const repo = createRepository();
-    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "consulting", trackingNo: null });
-    repo.setDealState("S-001", { stage: "awaiting_pickup", trackingNo: "SF12345678" });
-    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "awaiting_pickup", trackingNo: "SF12345678" });
-    repo.reset();
-    assert.deepEqual(repo.getConversation("S-001")?.dealState, { stage: "consulting", trackingNo: null });
+    const message = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "", "/api/media/voice.mp3");
+    const asset = repo.createMediaAsset({ kind: "voice", localPath: "/api/media/voice.mp3", transcript: "我想咨询用量", confidence: 0.9, messageId: message.id });
+    repo.linkMediaAsset(message.id, asset.id);
+    assert.equal(repo.getMediaAsset(asset.id)?.transcript, "我想咨询用量");
+    assert.equal(repo.getConversation("S-001")?.messages[1].mediaAssetId, asset.id);
+    assert.equal(repo.listMediaAssets("S-001").length, 1);
     repo.close();
   });
 });

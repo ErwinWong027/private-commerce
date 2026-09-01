@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>售前转化闭环 Demo · 企微 AI 售前助手</title>
+  <style>
+    :root {
+      --color-primary: #10213E;
+      --color-accent: #5DB2E2;
+      --color-secondary: #625D9C;
+      --color-success: #00524C;
+      --color-info: #6FB1C8;
+      --color-warning: #F59E0B;
+      --color-destructive: #EF4444;
+      --color-background: #FFFFFF;
+      --color-bg-alt: #F5F5F6;
+      --color-foreground: #10213E;
+      --color-text-muted: #64748B;
+      --color-border: #E2E8F0;
+      --shadow-sm: 0 2px 8px rgba(16, 33, 62, 0.08);
+      --radius-md: 8px;
+      --font-family: "MiSans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", "PingFang SC", Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background: var(--color-bg-alt);
+      padding: 32px;
+      color: var(--color-foreground);
+      line-height: 1.5;
+    }
+
+    .canvas-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      min-height: 800px;
+    }
+
+    /* Standardized Header */
+    .page-header {
+      padding: 32px 40px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-header h1::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--color-text-muted);
+      font-weight: 500;
+      padding-left: 16px;
+    }
+
+    .header-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .meta-info {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--color-primary);
+      border: 1px solid var(--color-border);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+    .btn-secondary:hover { background: var(--color-bg-alt); }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--color-primary); color: #fff;
+      padding: 12px 24px; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none; z-index: 1000;
+    }
+
+    .canvas-body {
+      padding: 24px 40px 40px 40px;
+      display: flex;
+      flex: 1;
+      gap: 16px;
+      overflow-x: auto;
+    }
+
+    /* 5 columns Grid */
+    .column {
+      flex: 1;
+      min-width: 260px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Card Base */
+    .card {
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--color-border);
+      transition: transform 0.15s ease-out;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-alt);
+    }
+
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    .card-subtitle {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-header-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: rgba(16, 33, 62, 0.05);
+      color: var(--color-primary);
+    }
+
+    .card-header-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .card-body {
+      padding: 20px;
+      font-size: 14px;
+      color: var(--color-foreground);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-body ul, .card-body ol {
+      list-style: none;
+    }
+
+    .card-body li {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .card-body li:last-child {
+      margin-bottom: 0;
+    }
+
+    .bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    
+    .number-bullet {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-accent);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    /* Color Overrides for specific cards */
+    .theme-roles { border-left: 4px solid var(--color-secondary); }
+    .theme-pains { border-left: 4px solid var(--color-destructive); }
+    .theme-input { border-left: 4px solid var(--color-accent); }
+    .theme-data { border-left: 4px solid var(--color-info); }
+    .theme-workflow { border-left: 4px solid var(--color-primary); }
+    .theme-cap { border-left: 4px solid var(--color-secondary); }
+    .theme-output { border-left: 4px solid var(--color-accent); }
+    .theme-tools { border-left: 4px solid var(--color-info); }
+    .theme-product { border-left: 4px solid var(--color-success); }
+    .theme-gains { border-left: 4px solid var(--color-success); }
+
+  </style>
+</head>
+<body>
+<!-- ai4pm-nav-top-start -->
+<style>
+.ai4pm-nav-shell{position:fixed;top:12px;left:0;right:0;z-index:9999;pointer-events:none;}
+.ai4pm-nav-spacer{height:118px;}
+.ai4pm-nav{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;width:calc(100% - 48px);max-width:1440px;margin:0 auto;pointer-events:auto;}
+.ai4pm-nav,.ai4pm-nav *{box-sizing:border-box;font-style:normal;letter-spacing:normal;text-transform:none;}
+.ai4pm-nav a,.ai4pm-nav span,.ai4pm-nav div{font-family:"MiSans","Microsoft YaHei","Inter",Arial,sans-serif;}
+.ai4pm-nav-top{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;box-shadow:0 2px 8px rgba(16,33,62,.06);}
+.ai4pm-nav-row{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#CBD5E1 transparent;}
+.ai4pm-nav-row::-webkit-scrollbar{height:6px;}
+.ai4pm-nav-row::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:999px;}
+.ai4pm-nav-row::-webkit-scrollbar-track{background:transparent;}
+.ai4pm-nav-top .idx{display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;background:#10213E;border-radius:6px;padding:5px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .idx:hover{background:#1B2B47;}
+.ai4pm-nav-top .sep{display:inline-flex;align-items:center;color:#E2E8F0;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill{display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#64748B;background:#F5F5F6;border:1px solid #E2E8F0;border-radius:20px;padding:4px 12px;text-decoration:none;white-space:nowrap;line-height:1.2;margin:0!important;}
+.ai4pm-nav-top .pill:hover{border-color:#5DB2E2;color:#10213E;}
+.ai4pm-nav-top .pill.cur{background:#5DB2E2;border-color:#5DB2E2;color:#fff;font-weight:700;}
+.ai4pm-nav-top .arrow{display:inline-flex;align-items:center;color:#CBD5E1;font-size:11px;line-height:1;margin:0!important;}
+.ai4pm-nav-top .idx,.ai4pm-nav-top .sep,.ai4pm-nav-top .pill,.ai4pm-nav-top .arrow{flex:0 0 auto;}
+.ai4pm-nav-bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px auto 28px;}
+.ai4pm-nav-bottom .navcard{display:block;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:14px 18px;text-decoration:none;transition:box-shadow .2s,border-color .2s;}
+.ai4pm-nav-bottom .navcard:hover{border-color:#5DB2E2;box-shadow:0 4px 12px rgba(16,33,62,.12);}
+.ai4pm-nav-bottom .navcard .dir{font-size:11px;font-weight:700;letter-spacing:.05em;color:#625D9C;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .t{font-size:14px;font-weight:700;color:#10213E;margin-bottom:4px;}
+.ai4pm-nav-bottom .navcard .d{font-size:12px;color:#64748B;line-height:1.6;}
+.ai4pm-nav-bottom .navcard.next{text-align:right;border-top:3px solid #5DB2E2;}
+.ai4pm-nav-bottom .navcard.prev{border-top:3px solid #E2E8F0;}
+.ai4pm-nav-bottom .navcard.single{grid-column:span 2;}
+@media (max-width:768px){.ai4pm-nav{width:calc(100% - 24px);}.ai4pm-nav-spacer{height:126px;}.ai4pm-nav-bottom{grid-template-columns:1fr;}.ai4pm-nav-bottom .navcard.single{grid-column:span 1;}}
+</style>
+<div class="ai4pm-nav-shell"><div class="ai4pm-nav"><div class="ai4pm-nav-top"><div class="ai4pm-nav-row"><a class="idx" href="/plans">☰ 导航索引</a><span class="sep">|</span><a class="pill" href="01-业务现状分析.html">① 业务现状分析</a><span class="arrow">›</span><a class="pill" href="02-OSM战略地图.html">② 北极星OSM</a><span class="arrow">›</span><a class="pill" href="03-业务流程.html">③ 业务流程</a><span class="arrow">›</span><a class="pill" href="04-服务蓝图.html">④ 服务蓝图</a><span class="arrow">›</span><a class="pill" href="05-AI机会场景地图.html">⑤ AI场景地图</a><span class="arrow">›</span><a class="pill" href="06-优先级矩阵.html">⑥ 优先级矩阵</a><span class="arrow">›</span><a class="pill" href="07-里程碑计划.html">⑦ 里程碑计划</a></div><div class="ai4pm-nav-row"><a class="pill cur" href="08-产品画布.html">⑧ 产品画布</a><span class="arrow">›</span><a class="pill" href="09-政策规则数据清单.html">⑨ 数据清单</a><span class="arrow">›</span><a class="pill" href="10-业务本体设计.html">⑩ 本体设计</a><span class="arrow">›</span><a class="pill" href="11-测试用例集.html">⑪ 测试用例</a><span class="arrow">›</span><a class="pill" href="/customer">⑫ 问答Demo</a></div></div></div></div><div class="ai4pm-nav-spacer"></div><!-- ai4pm-nav-top-end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  <div class="canvas-container">
+    <header class="page-header">
+      <div class="header-left">
+        <h1>售前转化闭环 Demo · 企微 AI 售前助手</h1>
+      </div>
+      <div class="header-right">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="window.print()">导出 PDF / 打印</button>
+          <button class="btn-primary" onclick="copyYAML()">复制原始 YAML</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="canvas-body">
+      
+      <!-- Col 1: userRoles & userPains -->
+      <div class="column">
+        <!-- userRoles -->
+        <div class="card theme-roles">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户角色</div>
+              <div class="card-subtitle">使用该AI场景的用户角色和群体</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>进入企微私域咨询的潜在下单客户（直播、短视频、投流加粉后进入 1v1）</li>
+              
+                <li><span class="bullet"></span>售前客服（从全程手工回复转为兜底接管与异常处理）</li>
+              
+                <li><span class="bullet"></span>运营/店长（负责活动口径、试点范围与转化守护）</li>
+              
+            </ul>
+          </div>
+        </div>
+        <!-- userPains -->
+        <div class="card theme-pains">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户痛点</div>
+              <div class="card-subtitle">用户当前面临的问题 and 挑战</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2v1"/><path d="M12 6a6 6 0 0 1 6 6c0 1.66-.67 3.16-1.76 4.25a2.99 2.99 0 0 0-.88 2.12v.63h-6v-.63c0-.8-.31-1.55-.88-2.12A5.99 5.99 0 0 1 6 12a6 6 0 0 1 6-6Z"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>客户刚进线时等回复太久，第一轮信任没有建立起来就流失</li>
+              
+                <li><span class="bullet"></span>客户最常卡在「是不是正品」「为什么这个版本更贵」「渠道靠不靠谱」这些成交前问题</li>
+              
+                <li><span class="bullet"></span>活动价、满减、赠品规则靠客服临时心算，容易错价、说错口径</li>
+              
+                <li><span class="bullet"></span>涉及功效、安全、适用人群时容易越界，踩广告合规红线</li>
+              
+                <li><span class="bullet"></span>AI 回答不确定时如果不能顺滑转人工，客户会觉得被机器人敷衍</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 2: aiInput & dataKnowledge -->
+      <div class="column">
+        <div class="card theme-input">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 场景输入</div>
+              <div class="card-subtitle">AI系统需要的输入数据和格式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>客户在企微发出的高频售前问题（如「这是正品吗」「现在买多少钱」「有什么活动」「转人工」）</li>
+              
+                <li><span class="bullet"></span>客户提及的 SKU、版本、规格、活动场次或直播来源</li>
+              
+                <li><span class="bullet"></span>客户点名人工、敏感功效词、连续追问等风险信号</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-data">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">数据/知识</div>
+              <div class="card-subtitle">AI系统需要的数据 and 领域知识</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>正品溯源与商品库：资质文号、授权链路、防伪方式、SKU/版本/规格差异</li>
+              
+                <li><span class="bullet"></span>促销规则库：满减、赠品、组合价、限购、有效期、不同场次口径</li>
+              
+                <li><span class="bullet"></span>预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料（O1合规护栏critical module的基石）</li>
+              
+                <li><span class="bullet"></span>转人工规则与试点看板口径：什么情况必须转人工、如何判断转化不下降</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3: workflow & modelUsage (Core Capabilities) -->
+      <div class="column">
+        <div class="card theme-workflow">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 处理 WORKFLOW</div>
+              <div class="card-subtitle">AI系统的工作流程和步骤</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M14 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M20 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M10 18H5c-1.7 0-3-1.3-3-3v-1"/><polyline points="7 21 10 18 7 15"/><rect width="8" height="8" x="14" y="14" rx="2"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ol>
+              
+                <li><span class="number-bullet">1.</span>秒级首响：客户进入企微后先收到欢迎语与第一轮承接回复，避免冷场流失</li>
+              
+                <li><span class="number-bullet">2.</span>意图分流：识别是正品信任问题、价格促销问题，还是需要转人工/敏感问题</li>
+              
+                <li><span class="number-bullet">3.</span>正品信任应答：检索正品溯源与商品库，给出凭据、版本差异与验真指引</li>
+              
+                <li><span class="number-bullet">4.</span>确定性算账：命中促销问题时调用规则库输出到手价与活动说明，大模型只做话术组织</li>
+              
+                <li><span class="number-bullet">5.</span>合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工（O1合规护栏critical module）</li>
+              
+                <li><span class="number-bullet">6.</span>试点守护：记录首响、转人工、错价、转化等指标，按小流量试点判断是否继续放量</li>
+              
+            </ol>
+          </div>
+        </div>
+        <div class="card theme-cap">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">核心能力</div>
+              <div class="card-subtitle">场景所需的关键 AI 及工程能力</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 2-2"/><path d="m19 11-2-2"/><path d="M12 2v2"/><path d="m18 6 1-1"/><path d="m6 6-1-1"/><path d="M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/><path d="M7 14a5 5 0 0 0 10 0"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>核心编排：通用大模型负责首响话术、意图识别、知识检索后的自然语言组织与转人工摘要</li>
+              
+                <li><span class="bullet"></span>硬约束：正品凭据只能来自知识库，价格只能来自规则库，敏感功效只能来自合规白名单，三类内容都不允许自由编造</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 4: aiOutput & tools -->
+      <div class="column">
+        <div class="card theme-output">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">AI 输出</div>
+              <div class="card-subtitle">AI系统产生的输出结果 and 格式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M3 5h4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微对话中的欢迎语、正品凭据说明、版本差异说明、活动到手价与活动解释</li>
+              
+                <li><span class="bullet"></span>命中不足时的保守答复、转人工提示，以及供人工接手的上下文摘要</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-tools">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">工具调用</div>
+              <div class="card-subtitle">AI系统需要调用的内外部 API</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微微信客服（kf 账号）API 消息回调、代发与人工接管</li>
+              
+                <li><span class="bullet"></span>RAG 平台与正品溯源/商品/合规话术知识库</li>
+              
+                <li><span class="bullet"></span>促销规则计算模块（可先用结构化规则表或 Mock 数据实现）</li>
+              
+                <li><span class="bullet"></span>基础埋点与试点看板（首响、转人工、错价、转化）</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 5: productType & userGains -->
+      <div class="column">
+        <div class="card theme-product">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">产品形态</div>
+              <div class="card-subtitle">AI系统的产品形式 and 交互方式</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>企微侧可直接演示的 AI 售前助手 Demo：先接待、再答疑、再算价，必要时转人工</li>
+              
+                <li><span class="bullet"></span>演示目标是跑通最小售前转化闭环，不追求一次性覆盖全部售前与售后场景</li>
+              
+                <li><span class="bullet"></span>风险边界：优先走 kf 官方通道；价格按规则表输出；敏感功效不自由生成；库内无答案即转人工</li>
+              
+            </ul>
+          </div>
+        </div>
+        <div class="card theme-gains">
+          <div class="card-header">
+            <div class="header-text">
+              <div class="card-title">用户收益</div>
+              <div class="card-subtitle">用户通过使用该AI场景获得的好处</div>
+            </div>
+            <div class="card-header-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  </div>
+          </div>
+          <div class="card-body">
+            <ul>
+              
+                <li><span class="bullet"></span>接得住：客户进入企微就能秒级收到回复，不错过第一轮成交窗口</li>
+              
+                <li><span class="bullet"></span>答得准：正品信任问题统一口径，减少因为解释含糊带来的流失</li>
+              
+                <li><span class="bullet"></span>算得清：活动价和到手价能快速说清楚，减少错价客诉与犹豫</li>
+              
+                <li><span class="bullet"></span>转得顺：AI 不确定时不会硬答，而是把上下文整理好交给人工</li>
+              
+                <li><span class="bullet"></span>守得住：通过小流量试点先验证转化不下降，再决定是否放量</li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--color-text-muted); max-width: 1440px; margin-left: auto; margin-right: auto; padding: 16px 0 8px;">
+    Generated by ai-canvas-generator &middot; &copy; 2026 Inspire AI4PM
+  </div>
+
+  <div class="toast" id="toast">已成功复制 YAML 数据</div>
+  
+  <script type="application/yaml" id="raw-yaml">
+# 第 8 步 · 售前客服AI助手产品画布（项目级）
+# 本画布是项目级交付物，从业务级⑥优先级矩阵与⑦里程碑中选取售前客服环节展开。
+# 业务级④-⑦覆盖保健品私域电商全链路5环节4个独立AI机会（O1-O4）；
+# 本画布聚焦售前客服环节的O1（7×24 RAG自动接待）核心机会展开，
+# 包含O1的上线modules（正品答疑/版本对比/促销算账/需求澄清/转人工/合规护栏critical），
+# 是能完成售前转化业务闭环的最小演示产品。O1持续调优module（真人拟合+回流扩库）留到后续优化阶段。
+title: 售前转化闭环 Demo · 企微 AI 售前助手
+description: 项目级产品画布——从业务级⑥⑦中选取售前客服环节O1展开。面向保健品私域售前的最小演示闭环。客户进入企微后，AI 先完成秒级接待，再围绕「是不是正品 / 现在活动价怎么算 / 需不需要转人工」三类高频决策问题完成自动回复；一旦碰到敏感功效、低置信度或客户点名人工，即无摩擦转接，并用转化守护看板观察小流量试点是否稳定。O1的合规护栏module（critical级）与上线同批，持续调优module（真人拟合）留到后续。
+userRoles:
+  - 进入企微私域咨询的潜在下单客户（直播、短视频、投流加粉后进入 1v1）
+  - 售前客服（从全程手工回复转为兜底接管与异常处理）
+  - 运营/店长（负责活动口径、试点范围与转化守护）
+userPains:
+  - 客户刚进线时等回复太久，第一轮信任没有建立起来就流失
+  - 客户最常卡在「是不是正品」「为什么这个版本更贵」「渠道靠不靠谱」这些成交前问题
+  - 活动价、满减、赠品规则靠客服临时心算，容易错价、说错口径
+  - 涉及功效、安全、适用人群时容易越界，踩广告合规红线
+  - AI 回答不确定时如果不能顺滑转人工，客户会觉得被机器人敷衍
+aiInput:
+  - 客户在企微发出的高频售前问题（如「这是正品吗」「现在买多少钱」「有什么活动」「转人工」）
+  - 客户提及的 SKU、版本、规格、活动场次或直播来源
+  - 客户点名人工、敏感功效词、连续追问等风险信号
+dataKnowledge:
+  - 正品溯源与商品库：资质文号、授权链路、防伪方式、SKU/版本/规格差异
+  - 促销规则库：满减、赠品、组合价、限购、有效期、不同场次口径
+  - 预审核合规话术库：功效、安全、适用人群等敏感问题只能走白名单语料（O1合规护栏critical module的基石）
+  - 转人工规则与试点看板口径：什么情况必须转人工、如何判断转化不下降
+workflow:
+  - 秒级首响：客户进入企微后先收到欢迎语与第一轮承接回复，避免冷场流失
+  - 意图分流：识别是正品信任问题、价格促销问题，还是需要转人工/敏感问题
+  - 正品信任应答：检索正品溯源与商品库，给出凭据、版本差异与验真指引
+  - 确定性算账：命中促销问题时调用规则库输出到手价与活动说明，大模型只做话术组织
+  - 合规与转人工：一旦涉及敏感功效、低置信度或客户点名人工，立即输出保守话术并附摘要转人工（O1合规护栏critical module）
+  - 试点守护：记录首响、转人工、错价、转化等指标，按小流量试点判断是否继续放量
+modelUsage:
+  - 核心编排：通用大模型负责首响话术、意图识别、知识检索后的自然语言组织与转人工摘要
+  - 硬约束：正品凭据只能来自知识库，价格只能来自规则库，敏感功效只能来自合规白名单，三类内容都不允许自由编造
+aiOutput:
+  - 企微对话中的欢迎语、正品凭据说明、版本差异说明、活动到手价与活动解释
+  - 命中不足时的保守答复、转人工提示，以及供人工接手的上下文摘要
+tools:
+  - 企微微信客服（kf 账号）API 消息回调、代发与人工接管
+  - RAG 平台与正品溯源/商品/合规话术知识库
+  - 促销规则计算模块（可先用结构化规则表或 Mock 数据实现）
+  - 基础埋点与试点看板（首响、转人工、错价、转化）
+productType:
+  - 企微侧可直接演示的 AI 售前助手 Demo：先接待、再答疑、再算价，必要时转人工
+  - 演示目标是跑通最小售前转化闭环，不追求一次性覆盖全部售前与售后场景
+  - 风险边界：优先走 kf 官方通道；价格按规则表输出；敏感功效不自由生成；库内无答案即转人工
+userGains:
+  - 接得住：客户进入企微就能秒级收到回复，不错过第一轮成交窗口
+  - 答得准：正品信任问题统一口径，减少因为解释含糊带来的流失
+  - 算得清：活动价和到手价能快速说清楚，减少错价客诉与犹豫
+  - 转得顺：AI 不确定时不会硬答，而是把上下文整理好交给人工
+  - 守得住：通过小流量试点先验证转化不下降，再决定是否放量
+notInScope:
+  - 夜间全自动接待全量上线与来源自动打标（采购SCRM能力）本次不作为演示闭环核心
+  - 需求澄清问题链、适配版本推荐、合规凑单建议（O1高级module）本次不做
+  - 物流查询与发货时效承诺（O3）属于履约侧，本次不纳入
+  - O1持续调优module（真人话术拟合+真实会话回流调优）留到后续优化阶段，本次不做
+  - 支付承接（O2）、复购预测（O4）属其他环节，本次不纳入
+  - 多渠道全量上线、复杂后台运营台与长期数据治理本次不做
+  </script>
+
+  <script>
+    function copyYAML() {
+      const yaml = document.getElementById('raw-yaml').textContent.trim();
+      navigator.clipboard.writeText(yaml).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ai4pm-nav-bottom-start --><div class="ai4pm-nav"><div class="ai4pm-nav-bottom"><a class="navcard prev" href="07-里程碑计划.html"><div class="dir">← 上一步 · 落地</div><div class="t">⑦ 里程碑计划</div><div class="d">前承：依赖驱动排期：被依赖机会前置，6 个月三阶段 FDE 交付甘特图</div></a><a class="navcard next" href="09-政策规则数据清单.html"><div class="dir">下一步 · 附录 →</div><div class="t">⑨ 数据清单</div><div class="d">后启：真实业务数据底稿：19 位客户语料 + 16 档全规格价格 + 验真/物流/支付口径</div></a></div></div><!-- ai4pm-nav-bottom-end -->
+</body>
+</html>

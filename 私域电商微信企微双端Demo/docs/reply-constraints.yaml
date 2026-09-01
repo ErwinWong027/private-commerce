@@ -1,0 +1,58 @@
+{
+  "default": {
+    "maxCharsPerSegment": 60,
+    "maxSegments": 3,
+    "maxFactsPerSegment": 1,
+    "forbidPatterns": ["转人工", "AI", "机器人"]
+  },
+  "rules": [
+    {
+      "toolName": "fulfillment",
+      "subIntent": "payment_methods",
+      "requiredResultKeys": ["payment_methods", "payment_unavailable"],
+      "forbidPatterns": ["支持微信红包", "支持扫码", "支持转账"]
+    },
+    {
+      "toolName": "fulfillment",
+      "subIntent": "shipping_origin",
+      "requiredResultKeys": ["shipping_origin", "ship_time"]
+    },
+    {
+      "toolName": "fulfillment",
+      "subIntent": "delivery_time",
+      "requiredResultKeys": ["ship_time", "delivery_time"]
+    },
+    {
+      "toolName": "fulfillment",
+      "subIntent": "freight",
+      "requiredResultKeys": ["freight"]
+    },
+    {
+      "toolName": "price",
+      "requiredResultKeys": ["list_price"]
+    },
+    {
+      "toolName": "promo",
+      "requiredResultKeys": ["final_price"]
+    },
+    {
+      "toolName": "authenticity",
+      "requiredResultKeys": ["verify_steps"]
+    },
+    {
+      "toolName": "product",
+      "requiredResultKeys": ["name", "product_form", "package_desc", "doses"]
+    },
+    {
+      "toolName": "all_products",
+      "requiredResultKeys": ["versions"]
+    },
+    {
+      "toolName": "manual_promo"
+    },
+    {
+      "toolName": "compliance",
+      "subIntent": "risk:clarify_needed"
+    }
+  ]
+}

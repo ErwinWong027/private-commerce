@@ -43,6 +43,29 @@ describe("demo-login API", () => {
   });
 });
 
+describe("客服人工回复状态", () => {
+  it("人工回复后保持人工接管，显式解决后才恢复 AI", async () => {
+    const { getRepository } = await import("../src/server/repository");
+    const { handleAgentReply } = await import("../src/server/conversationService");
+    const repo = getRepository();
+    const customer = repo.appendMessage("S-001", "customer", "U-CUSTOMER-001", "需要人工");
+    const { ticket } = repo.saveAutomatedDecision("S-001", customer.id, customer.content, {
+      intent: "handoff", confidence: 1, reply: "", needHuman: true, silentIntercept: true,
+      handoffTriggerType: "客户点名人工", boundaryDecision: "停止 AI 回复", matchedEvidence: [],
+      handoffSummary: "客户要求人工", toolName: null, toolArgs: [], toolResult: null,
+    });
+    repo.updateTicket(ticket!.id, "take_over", "U-AGENT-001");
+    const first = handleAgentReply("S-001", "U-AGENT-001", "您好，我来协助您");
+    assert.equal(first.conversation?.status, "human_serving");
+    assert.equal(first.conversation?.tickets[0].status, "in_progress");
+    const second = handleAgentReply("S-001", "U-AGENT-001", "请问您想咨询哪方面？");
+    assert.equal(second.conversation?.status, "human_serving");
+    assert.equal(second.conversation?.tickets[0].status, "in_progress");
+    assert.equal(repo.updateTicket(ticket!.id, "resolve", "U-AGENT-001").ok, true);
+    assert.equal(repo.getSessionStatus("S-001"), "ai_serving");
+  });
+});
+
 describe("chat API 图片消息校验", () => {
   it("未登录返回 401，客服身份返回 403", async () => {
     const { POST } = await import("../src/app/api/chat/route");

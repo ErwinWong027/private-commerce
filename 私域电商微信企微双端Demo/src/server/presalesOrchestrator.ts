@@ -10,6 +10,7 @@ import {
   PresalesTraceStep,
 } from "@/types";
 import { getFoundationModelConfig, isFoundationModelConfigured } from "./foundationModelConfig";
+import { normalizeReplySegments } from "./replyConstraints";
 
 const execFileAsync = promisify(execFile);
 
@@ -119,7 +120,7 @@ export async function runPresalesSkillOrchestrator({
   const silentIntercept = shouldSilentlyIntercept(plan, outcome);
   const notificationStatus = outcome.needHuman ? "pending" : "not_applicable";
   const styleVariant = silentIntercept ? null : pickStyleVariant(plan, outcome);
-  const reply = await generateCustomerReply({
+  const replyText = await generateCustomerReply({
     message: safeMessage,
     history: safeHistory,
     plan,
@@ -129,6 +130,7 @@ export async function runPresalesSkillOrchestrator({
     styleVariant,
     riskAnalysis,
   });
+  const reply = normalizeReplySegments(replyText);
 
   return {
     intent: plan.intent,
@@ -148,7 +150,7 @@ export async function runPresalesSkillOrchestrator({
     subIntent: plan.subIntent,
     styleVariant,
     riskContextSummary: riskAnalysis?.summary ?? null,
-    trace: buildTrace(safeMessage, plan, toolExecution, outcome, reply),
+    trace: buildTrace(safeMessage, plan, toolExecution, outcome, replyText),
   };
 }
 
