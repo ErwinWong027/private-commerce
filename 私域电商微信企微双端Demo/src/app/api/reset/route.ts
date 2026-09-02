@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 import { ForbiddenError, requireIdentity, UnauthorizedError } from "@/server/identity";
 import { getRepository } from "@/server/repository";
 
-// 重置会清空全部演示数据，属不可逆操作，因此三重保护：
-// 1) 生产环境直接当作路由不存在；2) 必须是客服身份；3) 请求体需显式带确认字段。
+// 重置会清空全部演示数据并恢复初始种子状态，属不可逆操作，因此双重保护：
+// 1) 必须是客服身份；2) 请求体需显式带确认字段。
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") return NextResponse.json({ error: "Not Found" }, { status: 404 });
   try {
     requireIdentity(request, { role: "agent" });
     const body = await request.json() as { confirm?: unknown };
