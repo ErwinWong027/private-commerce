@@ -1,0 +1,27 @@
+# ---- VCS ----
+.git
+.git/**
+
+# ---- Node 依赖与构建产物（build 阶段重新 npm ci，绝不进 context）----
+**/node_modules
+**/.next
+
+# ---- 运行时数据（容器内生成 + 卷挂载）----
+**/data
+*.db
+*.sqlite
+
+# ---- 本地环境/密钥（不 bake 进镜像层）----
+**/.env
+**/.env.local
+
+# ---- 各演示项目重目录兜底 ----
+私域电商微信企微双端Demo/node_modules
+私域电商微信企微双端Demo/.next
+私域电商微信企微双端Demo/data
+私域电商售前客服AgenticDemo/node_modules
+私域电商售前客服AgenticDemo/.next
+
+# ---- 系统/杂项 ----
+**/.DS_Store
+*.log

@@ -1,6 +1,7 @@
 # 只纳入私域电商售前客服规划与 Demo 交付物
 /*
 !/.gitignore
+!/.dockerignore
 !/inject_nav.py
 !/私域电商售前客服AI规划/
 !/私域电商售前客服AgenticDemo/
