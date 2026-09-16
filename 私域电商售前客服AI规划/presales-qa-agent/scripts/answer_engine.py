@@ -173,11 +173,69 @@ def calc_promo(kb, version_query, dose, quantity=1):
 # ════════════════════════════════════════════════════════════════
 # 工具 3：合规检查
 # ════════════════════════════════════════════════════════════════
+# ── 个体适配检测 ──────────────────────────────────────────────────────
+# 核心原则：AI 永远不对"某个人能不能用"做判断，只回答"产品是什么"。
+# 检测的是"问题结构"（适用性疑问 + 非产品主体），而非穷举疾病名。
+
+_FIT_QUERY_WORDS = [
+    "能用", "可以用", "能不能", "适合", "安全", "行不行", "可不可以", "有没有风险",
+]
+
+_INDIVIDUAL_REF_WORDS = [
+    "我", "自己", "本人", "家人", "老人", "小孩", "孩子", "宝宝",
+    "朋友", "老公", "老婆", "爸爸", "妈妈", "爷爷", "奶奶",
+]
+
+_MEDICAL_CONTEXT_RE = re.compile(
+    r"(?:病|症|药|医|诊|治|检查|手术|过敏|孕|哺乳|肾|肝|心|糖|压|吃|服用|注射|打(?:了|针))"
+)
+
+
+def _is_individual_fit_question(msg, contra_groups):
+    """检测是否为"个体适配"问题：适用性疑问 + 非产品主体。
+    不穷举疾病名，而是检测问题结构模式，覆盖任意未预见的健康状况。"""
+    has_fit = any(w in msg for w in _FIT_QUERY_WORDS)
+    if not has_fit:
+        return False
+
+    if any(g in msg for g in contra_groups):
+        return True
+
+    if re.search(r"\S{1,8}(?:患者|病人)", msg):
+        return True
+
+    if re.search(r"\S{2,6}病", msg):
+        return True
+
+    if re.search(r"(?:在吃|服用|吃了|注射|打针|用\s*\S{0,4}药|吃\s*\S{0,4}药)", msg):
+        return True
+
+    if any(w in msg for w in _INDIVIDUAL_REF_WORDS) and _MEDICAL_CONTEXT_RE.search(msg):
+        return True
+
+    return False
+
+
 def check_compliance(kb, msg):
-    """检查消息是否命中合规白名单触发词或禁忌人群。返回判定结果，不生成话术。"""
-    # 优先检查禁忌人群（最高优先级，命中即不推进成交）
+    """检查消息的合规风险。返回判定结果，不生成话术。
+
+    优先级：个体适配（一律转人工）> 禁忌人群 > 合规白名单 > 未命中（转人工）
+    """
     contra = kb.get("contraindications", {})
-    for group in contra.get("groups", []):
+    contra_groups = contra.get("groups", [])
+
+    # 1. 个体适配问题：适用性疑问 + 非产品主体 → 一律转人工
+    if _is_individual_fit_question(msg, contra_groups):
+        return {
+            "hit": True,
+            "type": "individual_fit",
+            "need_human": True,
+            "reply_skeleton": contra.get("individual_fit_reply", ""),
+            "rule": "个体适配问题，一律转人工",
+        }
+
+    # 2. 禁忌人群（强信号，保留精确匹配）
+    for group in contra_groups:
         if group in msg:
             return {
                 "hit": True,
@@ -188,7 +246,7 @@ def check_compliance(kb, msg):
                 "rule": "禁忌人群不推进成交",
             }
 
-    # 检查合规白名单
+    # 3. 合规白名单（纯通用产品风险信息）
     for item in kb.get("compliance_whitelist", []):
         for trigger in item.get("trigger_words", []):
             if trigger in msg:
@@ -201,7 +259,8 @@ def check_compliance(kb, msg):
                     "reply_skeleton": item.get("reply", ""),
                 }
 
-    return {"hit": False, "need_human": False}
+    # 4. 未命中 → 保守转人工
+    return {"hit": False, "need_human": True}
 
 
 # ════════════════════════════════════════════════════════════════

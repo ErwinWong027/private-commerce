@@ -9,8 +9,9 @@ import {
   PresalesIntent,
   PresalesTraceStep,
 } from "@/types";
-import { getFoundationModelConfig, isFoundationModelConfigured } from "./foundationModelConfig";
+import { getFoundationModelConfig, getBackupModelConfig, isFoundationModelConfigured } from "./foundationModelConfig";
 import { normalizeReplySegments } from "./replyConstraints";
+import { runRiskPolicy, composeRiskReply, type RiskSemanticTags } from "./riskPolicy";
 
 const execFileAsync = promisify(execFile);
 
@@ -63,6 +64,8 @@ interface IntentPlan {
     quantity?: number | null;
     msg?: string | null;
   };
+  /** risk 意图时 LLM 输出的结构化语义标签（替代 toolName=compliance） */
+  riskTags?: RiskSemanticTags | null;
   subIntent: string;
   sentenceType: "question" | "non_question";
   reasoning: string;
@@ -96,9 +99,11 @@ let cachedKnowledgeText = "";
 export async function runPresalesSkillOrchestrator({
   message,
   history = [],
+  delegateOrderReply = false,
 }: {
   message: string;
   history?: ConversationMessage[];
+  delegateOrderReply?: boolean;
 }): Promise<PresalesDecision> {
   const safeMessage = message.trim();
   const safeHistory = history.slice(-6);
@@ -114,22 +119,88 @@ export async function runPresalesSkillOrchestrator({
     plan.sentenceType = "question";
     plan.reasoning += "（确定性兜底：消息含疑问信号，升格为 question）";
   }
+
+  // risk 意图且有 LLM 提取的结构化标签 → 走 Policy Engine，不调 Python 工具
+  if (plan.intent === "risk" && plan.riskTags) {
+    const kbFacts = {
+      sideEffects: "饱腹感、恶心、嗜睡、口渴、便秘、呕吐，部分人发热",
+      effectPromise: "每个人的情况不一样，没办法承诺具体能瘦多少或多久见效，效果因人而异，具体以产品说明和个人使用情况为准哦。",
+    };
+    const policyResult = runRiskPolicy(plan.riskTags, kbFacts);
+    const reply = composeRiskReply(policyResult);
+    const triggerType = policyResult.policies.some((p) => p.aspect === "personal_suitability" && p.action === "handoff")
+      ? "个体健康适配" as const
+      : policyResult.policies.some((p) => p.aspect === "effect_feedback")
+        ? "效果反馈" as const
+        : policyResult.needsHandoff ? "敏感功效" as const : null;
+    const outcome: EvaluatedOutcome = {
+      needHuman: policyResult.needsHandoff,
+      handoffTriggerType: triggerType,
+      boundaryDecision: `ab_risk_policy -> Policy Engine: ${policyResult.policies.map((p) => `${p.aspect}=${p.action}`).join(", ")}`,
+      matchedEvidence: policyResult.policies.map((p) => `policy:${p.aspect}:${p.action}`),
+      fallbackReply: reply,
+      handoffSummary: policyResult.needsHandoff
+        ? buildHandoffSummary(
+            safeMessage,
+            policyResult.answerableFacts.length > 0 ? "已回答通用产品信息部分" : "未输出知识库外结论",
+            `需人工确认：${policyResult.handoffReasons.join("；")}`,
+          )
+        : "",
+    };
+    const silentIntercept = false;
+    const notificationStatus = outcome.needHuman ? "pending" : "not_applicable";
+    return {
+      intent: plan.intent,
+      confidence: plan.confidence,
+      reply: normalizeReplySegments(reply),
+      needHuman: outcome.needHuman,
+      silentIntercept,
+      notificationStatus,
+      handoffTriggerType: outcome.handoffTriggerType,
+      boundaryDecision: outcome.boundaryDecision,
+      matchedEvidence: outcome.matchedEvidence,
+      handoffSummary: outcome.handoffSummary,
+      toolName: "risk_policy",
+      toolArgs: [],
+      toolResult: { riskTags: plan.riskTags, policyResult: policyResult as unknown as Record<string, unknown> },
+      subIntent: plan.subIntent,
+      styleVariant: null,
+      riskContextSummary: null,
+      trace: [
+        { id: "t1", title: "LLM 语义提取", stage: "llm" as const, content: plan.reasoning },
+        { id: "t2", title: "Policy Engine 决策", stage: "tool" as const, content: outcome.boundaryDecision },
+        { id: "t3", title: "多意图回复组合", stage: "output" as const, content: reply },
+      ],
+    };
+  }
+
   const riskAnalysis = plan.toolName === "compliance" ? analyzeRiskContext(safeMessage, safeHistory) : null;
   const toolExecution = plan.toolName ? await executeSkillTool(plan) : { toolName: null, toolArgs: [], result: null };
   const outcome = evaluateOutcome(plan, toolExecution.result, safeMessage, safeHistory, riskAnalysis);
   const silentIntercept = shouldSilentlyIntercept(plan, outcome);
   const notificationStatus = outcome.needHuman ? "pending" : "not_applicable";
   const styleVariant = silentIntercept ? null : pickStyleVariant(plan, outcome);
-  const replyText = await generateCustomerReply({
-    message: safeMessage,
-    history: safeHistory,
-    plan,
-    toolExecution,
-    outcome,
-    silentIntercept,
-    styleVariant,
-    riskAnalysis,
-  });
+  // 发货时效（delivery_time）：若调用方声明将自行出订单话术（双端 Demo 的 plan→render 层），
+  // 这里跳过会被丢弃的那次对客生成，把这次 LLM 调用省下来。
+  // 发货地（shipping_origin）不在此列——它是阶段无关的确定性 FAQ 事实（如"深圳"），
+  // 由 getDirectReply 直接出确定性话术；若在此空掉，会被路由到缺少「发货地」事实的阶段话术层，
+  // 触发"不好直接确认"式 hedge。
+  const isOrderTiming =
+    delegateOrderReply &&
+    plan.toolName === "fulfillment" &&
+    plan.subIntent === "delivery_time";
+  const replyText = isOrderTiming
+    ? ""
+    : await generateCustomerReply({
+        message: safeMessage,
+        history: safeHistory,
+        plan,
+        toolExecution,
+        outcome,
+        silentIntercept,
+        styleVariant,
+        riskAnalysis,
+      });
   const reply = normalizeReplySegments(replyText);
 
   return {
@@ -160,7 +231,9 @@ async function classifyIntentWithSkill(
 ): Promise<IntentPlan> {
   const prompt = await getSkillPrompt();
   const knowledgeText = await getKnowledgeText();
-  const payload = await callModelForJson([
+  let payload: Record<string, unknown>;
+  try {
+    payload = await callModelForJson([
     {
       role: "system",
       content: [
@@ -168,7 +241,7 @@ async function classifyIntentWithSkill(
         "",
         "你现在只负责两个动作：",
         "1. 对客户最新消息做语义级意图识别。",
-        "2. 选择应该调用的 answer_engine.py 工具和参数。",
+        "2. 非 risk 意图：选择应该调用的 answer_engine.py 工具和参数。risk 意图：输出结构化语义标签（riskTags），不调用工具。",
         "",
         "禁止直接生成对客户的话术。",
         "必须返回 JSON，字段固定为：",
@@ -183,6 +256,7 @@ async function classifyIntentWithSkill(
               quantity: 1,
               msg: null,
             },
+            riskTags: null,
             subIntent: "payment_methods",
             sentenceType: "question",
             reasoning: "一句中文解释",
@@ -191,9 +265,21 @@ async function classifyIntentWithSkill(
           2,
         ),
         "",
-        "toolName 只能取：price, promo, compliance, manual_promo, authenticity, fulfillment, product, all_products, null。",
+        "toolName 只能取：price, promo, manual_promo, authenticity, fulfillment, product, all_products, null。risk 意图 toolName=null。",
         "intent 只能取：greeting, identity, handoff, risk, fulfillment_payment, pricing, authenticity, version, unknown。",
-        "如果需要使用工具，请尽量补全 toolArgs；risk 类把原消息放入 msg。",
+        "如果需要使用工具，请尽量补全 toolArgs。",
+        "risk 意图必须输出 riskTags（结构化语义标签），格式：",
+        JSON.stringify({
+          asks_personal_suitability: "boolean - 客户在问'我能不能用/想用'（含特定健康状况）",
+          asks_side_effects: "boolean - 客户在问产品通用副作用/不良反应",
+          asks_treatment_claim: "boolean - 客户在问能否治疗某疾病/替代某药物",
+            asks_effect_promise: "boolean - 客户在问减重效果承诺（能瘦多少/多久见效/保证有效）",
+            is_negative_feedback: "boolean - 客户对效果给出负面反馈（陈述'已使用/已购买 + 没效果/没瘦/没变化'，是用后反馈，不是询问预期效果）",
+            has_personal_health_context: "boolean - 客户提到了个人健康状况",
+          personal_health_context: "string[] - 提取到的健康状况（如['糖尿病']），无则[]",
+          confidence: "number - 语义提取置信度 0-1",
+        }, null, 2),
+        "risk 意图的 toolName 必须为 null，不要调用 compliance 工具。",
         "pricing 类：",
         "- 问表价/库存 -> price",
         "- 问活动/到手价 -> promo",
@@ -201,7 +287,8 @@ async function classifyIntentWithSkill(
         "version 类：",
         "- 指向具体版本 -> product",
         "- 比较版本/同义词归一/非在售范围 -> all_products",
-        "fulfillment_payment 类：subIntent 只能取 payment_methods, payment_completed, payment_timeout, shipping_origin, delivery_time, freight。",
+        "fulfillment_payment 类：subIntent 只能取 payment_methods, payment_completed, payment_timeout, order_confirmation, shipping_origin, delivery_time, freight。",
+        "order_confirmation 判定：客户提供了收货信息（省/市/区/街道/小区/姓名/手机号，可含'付好了'），或在成交上下文里确认下单（上一轮刚发过地址或刚报过价，客户回'对的/嗯/好的/可以/就这样'）-> fulfillment_payment + subIntent=order_confirmation。这是交易推进动作：即使它读起来是非疑问句（non_question），也不要判成 unknown/闲聊。",
         "authenticity 类：subIntent 只能取 verify, refund_promise, regulatory_id, received_verify_failed。",
         "handoff 类不调用工具，toolName=null。",
         "sentenceType 只能取 question / non_question：",
@@ -222,9 +309,17 @@ async function classifyIntentWithSkill(
         message,
       ].join("\n"),
     },
-  ], {
-    temperature: 0.05,
-  });
+    ], {
+      temperature: 0.05,
+    });
+  } catch (err) {
+    if (err instanceof LlmUnavailableError) {
+      console.warn(`[LLM Fallback] API 不可用 (${err.message})，使用本地语义提取`);
+      payload = localSemanticFallback(message);
+    } else {
+      throw err;
+    }
+  }
 
   return normalizeIntentPlan(payload);
 }
@@ -311,8 +406,13 @@ async function generateCustomerReply({
             : "- 如果不是风险补信息场景，就按正常客服话术输出。",
           (plan.toolName === "price" || plan.toolName === "promo" || plan.intent === "pricing")
             ? "- 客户核心诉求是价格：直接简洁报价（版本+剂量+价格），最多 1 句引导选版本，禁止展开产品对比或功效分析。"
-            : "- 回复保持口语化、简洁，不超过 2 句话（含引导），避免信息堆砌。",
-          styleVariant ? `- 本轮话术风格必须使用：${styleVariant}。` : "- 本轮话术保持稳定、克制。",
+            : "- 回复保持口语化、简洁，不超过 2 句话，避免信息堆砌。",
+          "- 引导问句不是每轮必需；如需在结尾附加引导，引导必须独立成句，用句号或换行与前面的回答分开，严禁用“，”把回答和引导连成一句话。",
+          styleVariant === "简洁直答型"
+            ? "- 本轮只做直答：准确回答客户的问题，结尾不附加任何引导问句。"
+            : styleVariant
+              ? `- 本轮话术风格必须使用：${styleVariant}。`
+              : "- 本轮话术保持稳定、克制。",
           "",
           "只返回 JSON：",
           JSON.stringify(
@@ -387,8 +487,9 @@ function evaluateOutcome(
   riskAnalysis: RiskContextAnalysis | null,
 ): EvaluatedOutcome {
   if (plan.intent === "greeting") {
-    const reply = "哈喽～欢迎添加，专注替西帕肽正品渠道，规格齐全、价优靠谱，支持一对一用量指导，有需要随时滴滴我～";
-    return makeOutcome(false, null, "ab_first_response -> 首响欢迎语按预置模板输出", ["welcome_template"], reply, "");
+    const greetings = ["哈喽你好呀", "哈喽宝子你好呀", "你好", "哈喽"];
+    const reply = pickOne(greetings);
+    return makeOutcome(false, null, "ab_first_response -> 打招呼随机回复", ["greeting_random"], reply, "");
   }
 
   if (plan.intent === "identity") {
@@ -560,9 +661,9 @@ function evaluatePricingOutcome(
 
     const clarifyReply =
       availableVersions.length > 0
-        ? `目前在售的是 ${availableVersions.join("、")}，您想了解哪个版本呢？`
+        ? `目前在售的是 ${availableVersions.join("、")}。您想了解哪个版本呢？`
         : availableDoses.length > 0
-          ? `这个规格我这边没法直接确认，当前可选档位是 ${availableDoses.join("/")}，您想看哪一档？`
+          ? `这个规格我这边没法直接确认，当前可选档位是 ${availableDoses.join("/")}。您想看哪一档？`
           : validDoses.length > 0
             ? `这个剂量写法我这边先帮您核一下，常见档位是 ${validDoses.join("/")}。`
             : "这个规格我先帮您确认一下，稍等哦～";
@@ -674,6 +775,21 @@ function evaluateFulfillmentOutcome(
     );
   }
 
+  if (plan.subIntent === "order_confirmation") {
+    return makeOutcome(
+      true,
+      "订单确认",
+      "ab_order_handoff -> 客户已提交收货信息或确认下单，转人工核对承接（不越权确认收款/发货）",
+      ["fulfillment_payment.order_confirmation"],
+      "收到您发的信息啦，我这边帮您把订单和收货信息核对一下，稍等哦～",
+      buildHandoffSummary(
+        message,
+        "已识别客户提交收货信息/确认下单，已做无感承接，未越权确认收款与发货。",
+        "需要人工接管：核对收货地址与订单，确认付款后安排出单，并同步单号。",
+      ),
+    );
+  }
+
   if (plan.subIntent === "freight") {
     return makeOutcome(
       false,
@@ -744,7 +860,7 @@ function evaluateVersionOutcome(
       "ab_version_answering -> 版本未识别，先澄清商品范围",
       ["product_versions"],
       availableVersions.length > 0
-        ? `目前在售的是 ${availableVersions.join("、")}，您想先了解哪个版本？`
+        ? `目前在售的是 ${availableVersions.join("、")}。您想先了解哪个版本？`
         : "您想先了解哪个版本呢？",
       "",
     );
@@ -874,6 +990,9 @@ function hasQuestionSignal(message: string): boolean {
   return /(吗|嘛|呢|怎么|怎样|咋|多少|几个|几支|几盒|几天|啥时候|为什么|为啥|能不能|可不可以|是不是|有没有|好不好|行不行|要不要|哪里|哪个|哪种|哪年|哪天|哪位)/.test(message);
 }
 
+// 版本类回答结尾附轻量引导问句的概率（引导出现时必须独立成句，见 buildVersionVariantReply 与系统提示约束）
+const GUIDANCE_REPLY_PROBABILITY = 0.5;
+
 function pickStyleVariant(plan: IntentPlan, outcome: EvaluatedOutcome): string | null {
   if (outcome.needHuman) {
     return null;
@@ -892,7 +1011,11 @@ function pickStyleVariant(plan: IntentPlan, outcome: EvaluatedOutcome): string |
     }
   }
 
+  // 引导是有概率出现的行为，不是每轮必需：未抽中引导时只答事实
   if (plan.toolName === "product" || plan.toolName === "all_products") {
+    if (Math.random() >= GUIDANCE_REPLY_PROBABILITY) {
+      return "简洁直答型";
+    }
     return pickOne(["顾问建议型", "对比说明型", "预算引导型"]);
   }
 
@@ -1049,20 +1172,24 @@ function buildFreightVariantReply(toolResult: Record<string, unknown>, styleVari
 function buildVersionVariantReply(plan: IntentPlan, toolResult: Record<string, unknown>, styleVariant: string): string {
   if (plan.toolName === "all_products") {
     const versions = asRecordArray(toolResult.versions);
+    const versionNames = versions.map((item) => asString(item.name)).filter(Boolean).join("、");
     if (versions.length >= 2 && plan.subIntent === "compare_versions") {
       const [first, second] = versions;
       if (styleVariant === "预算引导型") {
         return `${asString(first.name)}更偏${asString(first.product_form)}，${asString(second.name)}会更偏性价比一些。一个更适合追求便捷，一个更适合预算敏感，主要看您的使用习惯和预算。`;
       }
-      if (styleVariant === "对比说明型") {
-        return `${asString(first.name)}是${asString(first.product_form)}，${asString(first.package_desc)}；${asString(second.name)}是${asString(second.product_form)}，${asString(second.package_desc)}。两者成分口径一致，区别主要在剂型、包装和价格带。`;
-      }
+      // 对比说明型与简洁直答型共用事实对比口径（本身不含引导问句）
+      return `${asString(first.name)}是${asString(first.product_form)}，${asString(first.package_desc)}；${asString(second.name)}是${asString(second.product_form)}，${asString(second.package_desc)}。两者成分口径一致，区别主要在剂型、包装和价格带。`;
     }
-    return `目前在售的是 ${versions.map((item) => asString(item.name)).filter(Boolean).join("、")}，您想先看哪一个？`;
+    if (styleVariant === "简洁直答型") {
+      return `目前在售的是 ${versionNames}。`;
+    }
+    // 引导问句独立成句，与主回答用句号断开
+    return `目前在售的是 ${versionNames}。您想先看哪一个？`;
   }
 
   if (styleVariant === "预算引导型") {
-    return `${asString(toolResult.name)}这个版本是${asString(toolResult.product_form)}，${asString(toolResult.package_desc)}，如果您更在意预算或者操作方便程度，我也可以按这个方向帮您选。`;
+    return `${asString(toolResult.name)}是${asString(toolResult.product_form)}，${asString(toolResult.package_desc)}。如果您更在意预算或者操作方便程度，我也可以按这个方向帮您选。`;
   }
   if (styleVariant === "对比说明型") {
     return `${asString(toolResult.name)}是${asString(toolResult.product_form)}，${asString(toolResult.package_desc)}，常见档位有 ${asStringArray(toolResult.doses).join("/")}。`;
@@ -1089,6 +1216,11 @@ function getDirectReply(plan: IntentPlan, outcome: EvaluatedOutcome): string | n
     return outcome.fallbackReply;
   }
   if (plan.toolName === "compliance" && outcome.matchedEvidence.includes("compliance:miss_transfer")) {
+    return outcome.fallbackReply;
+  }
+  // 发货地是确定性 FAQ 事实（如"深圳"），直接出确定性话术，不经 LLM 自由生成，
+  // 避免温度较高的 fulfillment 生成把"深圳"过度保守成"不好确认"。
+  if (plan.toolName === "fulfillment" && plan.subIntent === "shipping_origin") {
     return outcome.fallbackReply;
   }
   return null;
@@ -1143,42 +1275,136 @@ function buildTrace(
   ];
 }
 
+/** LLM API 不可用错误（触发本地 fallback） */
+class LlmUnavailableError extends Error {}
+
+/** 单次 LLM HTTP 调用（内部使用） */
+async function callLlmEndpoint(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
+  temperature: number,
+  maxTokens: number,
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({ model, temperature, max_tokens: maxTokens, response_format: { type: "json_object" }, messages }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    if (response.status === 429 || response.status >= 500) {
+      throw new LlmUnavailableError(`HTTP ${response.status}`);
+    }
+    throw new Error(`LLM ${response.status}: ${body.substring(0, 100)}`);
+  }
+
+  const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string; reasoning?: string } }> };
+  const msg = payload.choices?.[0]?.message;
+  // reasoning model（如 Qwen）可能把内容放在 reasoning 字段
+  const rawContent = msg?.content || msg?.reasoning;
+  if (!rawContent) throw new Error("LLM 未返回内容");
+
+  return JSON.parse(extractJsonObject(rawContent)) as Record<string, unknown>;
+}
+
 async function callModelForJson(
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
   options?: { temperature?: number },
 ): Promise<Record<string, unknown>> {
   if (!(await isFoundationModelConfigured())) {
-    throw new Error("未配置 FOUNDATION_MODEL_API_KEY，无法按 presales-qa-agent 的 LLM + 工具架构执行。");
+    throw new LlmUnavailableError("未配置 FOUNDATION_MODEL_API_KEY");
   }
 
-  const config = await getFoundationModelConfig();
-  const response = await fetch(`${config.baseUrl}${config.chatCompletionsPath}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: config.model,
-      temperature: options?.temperature ?? 0.1,
-      response_format: { type: "json_object" },
-      messages,
-    }),
-  });
+  const temp = options?.temperature ?? 0.1;
 
-  if (!response.ok) {
-    throw new Error(`模型接口调用失败：${response.status} ${await response.text()}`);
+  // 路由：优先主 API，失败走备用 API
+  const primary = await getFoundationModelConfig();
+  try {
+    return await callLlmEndpoint(primary.baseUrl, primary.apiKey, primary.model, messages, temp, primary.maxTokens);
+  } catch (primaryErr) {
+    if (!(primaryErr instanceof LlmUnavailableError)) throw primaryErr;
+
+    // 主 API 不可用，试备用
+    const backup = await getBackupModelConfig();
+    if (backup) {
+      console.warn(`[LLM Route] 主 API 不可用 (${primaryErr.message})，切换备用: ${backup.baseUrl}/${backup.model}`);
+      return await callLlmEndpoint(backup.baseUrl, backup.apiKey, backup.model, messages, temp, backup.maxTokens);
+    }
+
+    throw primaryErr; // 没有备用，抛出让上层 fallback
+  }
+}
+
+/**
+ * 本地 fallback 语义提取：LLM API 不可用时，用粗粒度规则做意图识别。
+ * 这不是主路径，是 emergency fallback。识别不了的一律保守处理（转人工/不回答）。
+ */
+function localSemanticFallback(message: string): Record<string, unknown> {
+  // 基础意图识别（和 Demo 1 的 classifyIntent 逻辑一致）
+  const greetings = ["在吗", "在么", "你好", "您好", "哈喽", "hi", "hello", "有人吗"];
+  if (greetings.some((g) => message.toLowerCase().includes(g))) {
+    return { intent: "greeting", confidence: 0.9, toolName: null, toolArgs: {}, subIntent: "general", sentenceType: "question", reasoning: "fallback: 打招呼" };
+  }
+  if (/(?:转人工|人工|真人|投诉|骗子)/.test(message)) {
+    return { intent: "handoff", confidence: 0.9, toolName: null, toolArgs: {}, subIntent: "general", sentenceType: "question", reasoning: "fallback: 点名人工" };
   }
 
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const rawContent = payload.choices?.[0]?.message?.content;
-  if (!rawContent) {
-    throw new Error("模型未返回 JSON 内容");
+  // risk 意图：用 extractRiskTagsFallback 提取标签
+  const { extractRiskTagsFallback } = require("./riskPolicy") as typeof import("./riskPolicy");
+  const riskTags = extractRiskTagsFallback(message);
+  const hasRiskSignal = riskTags.asks_personal_suitability || riskTags.asks_treatment_claim || riskTags.asks_side_effects || riskTags.asks_effect_promise;
+
+  if (hasRiskSignal) {
+    return {
+      intent: "risk",
+      confidence: riskTags.confidence,
+      toolName: null,
+      riskTags,
+      toolArgs: {},
+      subIntent: "general",
+      sentenceType: "question",
+      reasoning: "fallback: 本地语义提取命中风险维度",
+    };
   }
 
-  return JSON.parse(extractJsonObject(rawContent)) as Record<string, unknown>;
+  // 收货地址块（地域词 + 11 位手机号）-> 订单确认/收货信息，转人工核对承接（降级路径兜底）
+  if (/(?:省|市|区|县|街道|路|号|小区|镇).{0,40}1[3-9]\d{9}/.test(message)) {
+    return {
+      intent: "fulfillment_payment",
+      confidence: 0.8,
+      toolName: "fulfillment",
+      toolArgs: { version: null, dose: null, quantity: 1, msg: null },
+      subIntent: "order_confirmation",
+      sentenceType: "non_question",
+      reasoning: "fallback: 识别收货地址块，转人工核对",
+    };
+  }
+
+  // pricing 意图
+  if (/(?:多少钱|价格|报价|优惠|活动|到手|618)/.test(message)) {
+    const versionMatch = message.match(/(?:日版|孟版|珠峰)/);
+    const doseMatch = message.match(/(\d+\.?\d*)/);
+    return {
+      intent: "pricing",
+      confidence: 0.85,
+      toolName: "price",
+      toolArgs: { version: versionMatch?.[0] ?? null, dose: doseMatch?.[0] ?? null, quantity: 1, msg: null },
+      subIntent: "general",
+      sentenceType: "question",
+      reasoning: "fallback: 价格咨询",
+    };
+  }
+
+  // 非疑问句
+  if (!/(?:吗|嘛|呢|怎么|怎样|多少|能不能|可不可以|有没有|是不是)/.test(message)) {
+    return { intent: "unknown", confidence: 0.3, toolName: null, toolArgs: {}, subIntent: "general", sentenceType: "non_question", reasoning: "fallback: 非疑问句" };
+  }
+
+  // 兜底：unknown
+  return { intent: "unknown", confidence: 0.3, toolName: null, toolArgs: {}, subIntent: "general", sentenceType: "question", reasoning: "fallback: 未识别，保守处理" };
 }
 
 function normalizeIntentPlan(payload: Record<string, unknown>): IntentPlan {
@@ -1200,6 +1426,24 @@ function normalizeIntentPlan(payload: Record<string, unknown>): IntentPlan {
   const toolArgs = isPlainObject(payload.toolArgs) ? payload.toolArgs : {};
   const confidence = typeof payload.confidence === "number" ? Math.max(0, Math.min(1, payload.confidence)) : 0.35;
 
+  // 解析 risk 意图的结构化语义标签
+  let riskTags: RiskSemanticTags | null = null;
+  if (intent === "risk" && isPlainObject(payload.riskTags)) {
+    const rt = payload.riskTags;
+    riskTags = {
+      asks_personal_suitability: rt.asks_personal_suitability === true,
+      asks_side_effects: rt.asks_side_effects === true,
+      asks_treatment_claim: rt.asks_treatment_claim === true,
+      asks_effect_promise: rt.asks_effect_promise === true,
+      is_negative_feedback: rt.is_negative_feedback === true,
+      has_personal_health_context: rt.has_personal_health_context === true,
+      personal_health_context: Array.isArray(rt.personal_health_context)
+        ? rt.personal_health_context.filter((x): x is string => typeof x === "string")
+        : [],
+      confidence: typeof rt.confidence === "number" ? Math.max(0, Math.min(1, rt.confidence)) : 0.5,
+    };
+  }
+
   return {
     intent,
     confidence,
@@ -1210,6 +1454,7 @@ function normalizeIntentPlan(payload: Record<string, unknown>): IntentPlan {
       quantity: typeof toolArgs.quantity === "number" ? toolArgs.quantity : 1,
       msg: asNullableString(toolArgs.msg),
     },
+    riskTags,
     subIntent: typeof payload.subIntent === "string" && payload.subIntent.trim() ? payload.subIntent.trim() : "general",
     sentenceType: payload.sentenceType === "non_question" ? "non_question" : "question",
     reasoning: typeof payload.reasoning === "string" && payload.reasoning.trim() ? payload.reasoning.trim() : "按语义进行意图识别与工具选择。",

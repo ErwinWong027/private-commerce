@@ -42,7 +42,7 @@
 | `authenticity` | ab_authenticity_reply | 凭据只来自知识库，禁伪造监管编号 |
 | `pricing` | ab_deterministic_pricing | 只查表，缺货/冲突转人工 |
 | `risk` | ab_risk_compliance | 白名单 safe_reply / transfer |
-| `fulfillment_payment` | ab_order_handoff | 收截图转人工，不越权确认 |
+| `fulfillment_payment` | ab_order_handoff | 付款截图 / 收货地址 / 确认下单（subIntent=order_confirmation）→ 转人工核对承接，不越权确认收款/发货 |
 | `handoff` | （直接触发 handoff_ticket） | 附三段式摘要 |
 | `unknown + non_question` | ab_kb_fallback（轻承接分支） | 轻承接 + 引导回业务，不触发转人工 |
 

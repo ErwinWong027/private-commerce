@@ -7,9 +7,12 @@ export type HumanNotificationStatus = "pending" | "suppressed" | "not_applicable
 export type MediaAssetKind = "voice" | "image";
 export type HandoffTriggerType =
   | "敏感功效"
+  | "效果反馈"
+  | "个体健康适配"
   | "低置信度"
   | "客户点名人工"
   | "付款承接"
+  | "订单确认"
   | "口径冲突"
   | "承接超时"
   | "监管凭据诱导"

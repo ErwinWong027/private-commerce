@@ -28,6 +28,21 @@ export type TicketUpdateResult =
   | { ok: false; reason: "not_found" }
   | { ok: false; reason: "invalid_transition"; message: string };
 
+export interface AutomatedDecisionInput {
+  intent: string;
+  confidence: number;
+  reply?: string[] | string;
+  needHuman: boolean;
+  silentIntercept: boolean;
+  handoffTriggerType: string | null;
+  boundaryDecision: string;
+  matchedEvidence: string[];
+  handoffSummary: string;
+  toolName: string | null;
+  toolArgs?: string[];
+  toolResult?: Record<string, unknown> | null;
+}
+
 export class PresalesRepository {
   readonly db: DatabaseSync;
 
@@ -360,42 +375,61 @@ export class PresalesRepository {
     return { id: messageId, sessionId, sequence: next, actor, senderId, content, contentType, mediaPath, imageDescription: null, mediaAssetId: null, createdAt: t };
   }
 
-  saveAutomatedDecision(sessionId: string, customerMessageId: string, customerContent: string, decision: {
-    intent: string; confidence: number; reply: string[] | string; needHuman: boolean; silentIntercept: boolean;
-    handoffTriggerType: string | null; boundaryDecision: string; matchedEvidence: string[]; handoffSummary: string;
-    toolName: string | null; toolArgs?: string[]; toolResult?: Record<string, unknown> | null;
-  }) {
+  saveAutomatedDecision(sessionId: string, customerMessageId: string, customerContent: string, decision: AutomatedDecisionInput) {
     return this.transaction(() => {
-      const customerRow = this.db.prepare(
-        "SELECT * FROM messages WHERE id=? AND session_id=? AND actor='customer'",
-      ).get(customerMessageId, sessionId) as Row | undefined;
-      if (!customerRow) throw new Error("客户消息不存在");
-      const customer = this.mapMessage(customerRow);
       const t = now();
-      const decisionId = id("D");
-      this.db.prepare(`INSERT INTO decisions(id,session_id,message_id,intent,confidence,need_human,silent_intercept,boundary_decision,matched_evidence,tool_name,tool_args,tool_result,handoff_summary,created_at)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
-        decisionId, sessionId, customer.id, decision.intent, decision.confidence, decision.needHuman ? 1 : 0,
-        decision.silentIntercept ? 1 : 0, decision.boundaryDecision, JSON.stringify(decision.matchedEvidence),
-        decision.toolName, JSON.stringify(decision.toolArgs ?? []), decision.toolResult ? JSON.stringify(decision.toolResult) : null,
-        decision.handoffSummary, t,
-      );
-      const replySegments = Array.isArray(decision.reply) ? decision.reply.filter(Boolean) : [decision.reply].filter(Boolean);
+      const { customer, ticket } = this.insertDecisionAndTicket(sessionId, customerMessageId, customerContent, decision, t);
+      const replySegments = (Array.isArray(decision.reply) ? decision.reply : [decision.reply]).filter((item): item is string => Boolean(item));
       const replyMessages = !decision.silentIntercept
         ? replySegments.map((segment) => this.insertMessage(sessionId, "ai", null, segment))
         : [];
       if (replyMessages.length) this.bump("ai_replies", replyMessages.length, t);
       const reply = replyMessages.length ? replyMessages[replyMessages.length - 1] : null;
-      let ticket: HandoffTicketRecord | null = null;
-      if (decision.needHuman) {
-        const ticketId = id("T");
-        this.db.prepare("INSERT INTO handoff_tickets(id,session_id,status,trigger_type,summary,assigned_agent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)")
-          .run(ticketId, sessionId, "pending", decision.handoffTriggerType || "知识盲区", decision.handoffSummary || customerContent, null, t, t);
-        ticket = { id: ticketId, sessionId, status: "pending", triggerType: decision.handoffTriggerType || "知识盲区", summary: decision.handoffSummary || customerContent, assignedAgentId: null, createdAt: t, updatedAt: t };
-        this.bump("handoffs", 1, t);
-      }
       return { customer, reply, ticket };
     });
+  }
+
+  // 只落决策与工单、不写 AI 回复消息：供“分段间隔发送”流程在首条消息前记录本轮决策。
+  recordAutomatedDecision(sessionId: string, customerMessageId: string, customerContent: string, decision: AutomatedDecisionInput) {
+    return this.transaction(() => {
+      const t = now();
+      return this.insertDecisionAndTicket(sessionId, customerMessageId, customerContent, decision, t);
+    });
+  }
+
+  countAiReply(segmentCount: number) {
+    if (segmentCount > 0) this.bump("ai_replies", segmentCount, now());
+  }
+
+  private insertDecisionAndTicket(
+    sessionId: string,
+    customerMessageId: string,
+    customerContent: string,
+    decision: AutomatedDecisionInput,
+    t: string,
+  ): { customer: MessageRecord; ticket: HandoffTicketRecord | null } {
+    const customerRow = this.db.prepare(
+      "SELECT * FROM messages WHERE id=? AND session_id=? AND actor='customer'",
+    ).get(customerMessageId, sessionId) as Row | undefined;
+    if (!customerRow) throw new Error("客户消息不存在");
+    const customer = this.mapMessage(customerRow);
+    const decisionId = id("D");
+    this.db.prepare(`INSERT INTO decisions(id,session_id,message_id,intent,confidence,need_human,silent_intercept,boundary_decision,matched_evidence,tool_name,tool_args,tool_result,handoff_summary,created_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+      decisionId, sessionId, customer.id, decision.intent, decision.confidence, decision.needHuman ? 1 : 0,
+      decision.silentIntercept ? 1 : 0, decision.boundaryDecision, JSON.stringify(decision.matchedEvidence),
+      decision.toolName, JSON.stringify(decision.toolArgs ?? []), decision.toolResult ? JSON.stringify(decision.toolResult) : null,
+      decision.handoffSummary, t,
+    );
+    let ticket: HandoffTicketRecord | null = null;
+    if (decision.needHuman) {
+      const ticketId = id("T");
+      this.db.prepare("INSERT INTO handoff_tickets(id,session_id,status,trigger_type,summary,assigned_agent_id,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)")
+        .run(ticketId, sessionId, "pending", decision.handoffTriggerType || "知识盲区", decision.handoffSummary || customerContent, null, t, t);
+      ticket = { id: ticketId, sessionId, status: "pending", triggerType: decision.handoffTriggerType || "知识盲区", summary: decision.handoffSummary || customerContent, assignedAgentId: null, createdAt: t, updatedAt: t };
+      this.bump("handoffs", 1, t);
+    }
+    return { customer, ticket };
   }
 
   // 工单状态机：pending --take_over--> in_progress --resolve--> resolved。

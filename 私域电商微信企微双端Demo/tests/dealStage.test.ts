@@ -5,6 +5,7 @@ import {
   buildStageAwareShippingReply,
   detectRedlineViolation,
   enforceReplyDiscipline,
+  isShippingQuestion,
   INITIAL_DEAL_STATE,
   nextStageFromCustomer,
   type StageDecisionInput,
@@ -55,6 +56,17 @@ describe("dealStage T02 防跳步", () => {
     const result = enforceReplyDiscipline(decision.reply, state, decision);
     assert.equal(result.corrected, true);
     assert.ok(!result.reply.includes("已揽收"));
+  });
+
+  it("发货地（shipping_origin）不纳入阶段话术层：确定性话术走普通红线校验，不被改写也不 hedge", () => {
+    // 回归：此前 shipping_origin 被并入阶段 plan→render 路径（State Context 无「发货地」事实），
+    // 触发"不好直接确认"式 hedge。现改为阶段无关的确定性 FAQ，直接放行。
+    const state: DealState = { stage: "consulting", trackingNo: null };
+    const decision = shippingDecision("shipping_origin", "一般深圳发货，出单号后 48 小时内发出");
+    assert.equal(isShippingQuestion(decision), false);
+    const result = enforceReplyDiscipline(decision.reply, state, decision);
+    assert.equal(result.corrected, false);
+    assert.ok(result.reply.includes("深圳发货"));
   });
 });
 

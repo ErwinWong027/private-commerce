@@ -22,6 +22,11 @@
 私域电商售前客服AgenticDemo/node_modules
 私域电商售前客服AgenticDemo/.next
 
+# ---- 售前规划资料（镜像只 bake presales-qa-agent + 一个 KB yaml，其余不传进构建上下文）----
+# 注意：*.html 只匹配 AI规划 根目录的规划文档；presales-qa-agent/ 内的模板/示例不受影响。
+私域电商售前客服AI规划/context
+私域电商售前客服AI规划/*.html
+
 # ---- 系统/杂项 ----
 **/.DS_Store
 *.log

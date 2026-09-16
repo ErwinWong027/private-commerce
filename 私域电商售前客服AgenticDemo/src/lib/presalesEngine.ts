@@ -8,6 +8,7 @@ import {
   SkuPrice,
 } from "@/types";
 import { presalesKnowledgeBase } from "@/lib/presalesKnowledge";
+import { runRiskPolicy, composeRiskReply, extractRiskTagsFallback } from "@/lib/riskPolicy";
 
 interface ConversationMessage {
   role: "user" | "assistant" | "system";
@@ -72,6 +73,12 @@ function classifyIntent(message: string): { intent: PresalesIntent; confidence: 
 
   if (matchNotInScope(message)) {
     return { intent: "version", confidence: 0.93, reasoning: "命中非在售商品边界，先走商品范围判断而不是直接报价。" };
+  }
+
+  // 个体适配前置检查（降级提取，LLM 不可用时的 fallback）
+  const fallbackTags = extractRiskTagsFallback(message);
+  if (fallbackTags.asks_personal_suitability || fallbackTags.asks_treatment_claim) {
+    return { intent: "risk", confidence: fallbackTags.confidence, reasoning: `语义提取命中风险维度：${fallbackTags.asks_personal_suitability ? "个体适配" : ""}${fallbackTags.asks_treatment_claim ? "治疗声明" : ""}，归入风险分支。` };
   }
 
   const scores = new Map<PresalesIntent, number>();
@@ -186,49 +193,45 @@ function routeIntent(
 }
 
 function handleRisk(message: string): Omit<PresalesDecision, "intent" | "confidence" | "trace"> {
-  const group = presalesKnowledgeBase.contraindications.groups.find((item) => message.includes(item));
-  if (group) {
+  // ① 语义提取（降级模式：从原始消息提取结构化标签）
+  //    主路径是 LLM 提取，这里是 LLM 不可用时的 fallback
+  const tags = extractRiskTagsFallback(message);
+
+  // ② Policy Engine：纯规则决策，无疾病名、无正则
+  const kbFacts = {
+    sideEffects: presalesKnowledgeBase.usageStorage.sideEffects,
+    effectPromise: presalesKnowledgeBase.complianceWhitelist.find((r) => r.intent === "效果承诺")?.reply ?? null,
+  };
+  const policyResult = runRiskPolicy(tags, kbFacts);
+
+  // ③ 多意图回复组合：每个维度独立决策，合并输出
+  const reply = composeRiskReply(policyResult);
+
+  if (policyResult.needsHandoff) {
+    const triggerType = policyResult.policies.some((p) => p.aspect === "personal_suitability" && p.action === "handoff")
+      ? "个体健康适配" as const
+      : "敏感功效" as const;
     return buildHumanDecision(
-      presalesKnowledgeBase.contraindications.reply,
-      "敏感功效",
-      "ab_risk_compliance -> 禁忌人群命中，不推进成交",
-      makeSummary(`客户自述属于禁忌/慎用人群「${group}」`, "已按固定口径说明不建议自行使用", "是否继续推进需人工确认，AI 不再促单"),
-      [`contraindications.groups:${group}`],
+      reply,
+      triggerType,
+      `ab_risk_compliance -> Policy Engine 判定转人工：${policyResult.handoffReasons.join("；")}`,
+      makeSummary(
+        `客户咨询涉及：${policyResult.policies.map((p) => p.aspect).join("、")}`,
+        policyResult.answerableFacts.length > 0 ? "已回答通用产品信息部分" : "未输出知识库外结论",
+        "需人工确认个体适配/治疗类问题",
+      ),
+      policyResult.policies.map((p) => `policy:${p.aspect}:${p.action}`),
       "compliance",
     );
   }
 
-  const rule = presalesKnowledgeBase.complianceWhitelist.find((item) =>
-    item.triggerWords.some((word) => message.includes(word)),
-  );
-  if (!rule) {
-    return buildHumanDecision(
-      "这个问题我不方便直接下结论，帮您确认一下请稍等。",
-      "知识盲区",
-      "ab_risk_compliance -> 风险问题未命中白名单，保守答复并转人工",
-      makeSummary("风险类问题未命中白名单", "未即兴作答", "等待人工按合规口径处理"),
-      ["compliance_whitelist:miss"],
-      "compliance",
-    );
-  }
-
-  if (rule.responseMode === "transfer") {
-    return buildHumanDecision(
-      rule.reply,
-      "敏感功效",
-      `ab_risk_compliance -> 命中白名单「${rule.intent}」，response_mode=transfer`,
-      makeSummary(`客户咨询「${rule.intent}」类问题`, "已给出保守口径并建议遵医嘱", "该问题需要人工进一步承接"),
-      [`compliance_whitelist:${rule.intent}`],
-      "compliance",
-    );
-  }
-
+  // 全部维度都可回答 → 直接输出
   return buildDecision(
-    rule.reply,
+    reply,
     false,
     null,
-    `ab_risk_compliance -> 命中白名单「${rule.intent}」，输出预审核保守话术`,
-    [`compliance_whitelist:${rule.intent}`],
+    `ab_risk_compliance -> Policy Engine 判定全部可回答：${policyResult.policies.map((p) => p.aspect).join("、")}`,
+    policyResult.policies.map((p) => `policy:${p.aspect}:${p.action}`),
     "",
     "compliance",
   );

@@ -88,8 +88,10 @@ export function detectRedlineViolation(reply: string, stage: DealStage): string 
   return null;
 }
 
-function isShippingQuestion(decision: StageDecisionInput): boolean {
-  return decision.toolName === "fulfillment" && (decision.subIntent === "delivery_time" || decision.subIntent === "shipping_origin");
+export function isShippingQuestion(decision: StageDecisionInput): boolean {
+  // 仅「发货时效/物流状态」需要按成交阶段做 plan→render 校验；
+  // 发货地（shipping_origin）是阶段无关的确定性事实，走普通红线校验即可，不纳入阶段话术层。
+  return decision.toolName === "fulfillment" && decision.subIntent === "delivery_time";
 }
 
 // 发货/时效问题按当前真实阶段作答，杜绝跳步到「已揽收/已发货」（T02 核心校验）。

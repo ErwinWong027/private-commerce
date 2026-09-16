@@ -226,7 +226,7 @@ export const presalesKnowledgeBase: PresalesKnowledgeBase = {
       reply: "这类和疾病、用药相关的问题我不能直接给结论，建议遵医嘱。我帮您确认一下，稍等哦～",
     },
     {
-      intent: "副作用与禁忌",
+      intent: "副作用",
       triggerWords: ["副作用", "恶心", "嗜睡", "口渴", "便秘", "呕吐"],
       responseMode: "safe_reply",
       reply: "常见反应包括饱腹感、恶心、嗜睡、口渴、便秘、呕吐，部分人会发热；如有明显不适请停用并咨询医生。具体情况我帮您确认一下，稍等哦～",
@@ -236,6 +236,8 @@ export const presalesKnowledgeBase: PresalesKnowledgeBase = {
     groups: ["孕妇", "备孕", "怀孕", "哺乳", "甲状腺", "甲减", "甲状腺结节", "胰岛素", "磺脲", "过敏", "肾功能"],
     reply:
       "您提到的情况属于禁忌/慎用人群（如甲状腺病史、正在用胰岛素/磺脲类、备孕孕产期等），这种情况不建议自行使用，需遵医嘱。我帮您确认一下具体情况，稍等哦～",
+    individualFitReply:
+      "涉及个人健康状况的用药安全问题，我没办法直接给结论，这种情况建议先咨询医生确认是否适合使用。我帮您安排专人进一步核实，稍等哦～",
   },
   fulfillmentPayment: {
     paymentMethods: ["微信", "支付宝"],

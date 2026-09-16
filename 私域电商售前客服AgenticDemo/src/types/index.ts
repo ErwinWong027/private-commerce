@@ -16,6 +16,7 @@ export type HandoffStatus = "pending" | "taken_over" | "resolved";
 export type HumanNotificationStatus = "pending" | "suppressed" | "not_applicable";
 export type HandoffTriggerType =
   | "敏感功效"
+  | "个体健康适配"
   | "低置信度"
   | "客户点名人工"
   | "付款承接"
@@ -123,6 +124,7 @@ export interface PresalesKnowledgeBase {
   contraindications: {
     groups: string[];
     reply: string;
+    individualFitReply: string;
   };
   fulfillmentPayment: FulfillmentPaymentInfo;
   usageStorage: UsageStorageInfo;

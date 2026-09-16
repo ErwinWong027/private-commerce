@@ -10,6 +10,14 @@ import type { DealAdvanceAction, DealStage, MessageRecord } from "@/types";
 export class NotFoundError extends Error {}
 export class ConflictError extends Error {}
 
+// AI 回复发送节奏（模拟真人客服）：首条消息前等待 2 秒，其余消息按 2 秒间隔逐条发出。
+const AI_REPLY_INITIAL_DELAY_MS = 2000;
+const AI_REPLY_INTERVAL_MS = 2000;
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
 // 图片消息进入大模型输入时的唯一文案实现：历史消息与当前消息共用，避免两种格式并存。
 function composeImageText(content: string, imageDescription: string | null): string {
   if (content) {
@@ -86,7 +94,7 @@ export async function handleCustomerMessage(sessionId: string, customerId: strin
   if (!imageOnly && nextStage !== conversation.dealState.stage) {
     repo.setDealState(sessionId, { stage: nextStage, trackingNo: conversation.dealState.trackingNo });
   }
-  const turn = repo.saveAutomatedDecision(sessionId, customerMessage.id, content, decision);
+  const baseTurn = repo.recordAutomatedDecision(sessionId, customerMessage.id, content, decision);
   const sentMediaPaths = conversation.messages.map((item) => item.mediaPath).filter((value): value is string => Boolean(value));
   const triggeredAsset = selectTriggeredImageAsset({
     intent: decision.intent,
@@ -95,10 +103,27 @@ export async function handleCustomerMessage(sessionId: string, customerId: strin
     sentMediaPaths,
     stage: repo.getDealState(sessionId).stage,
   });
+  // 多段回复逐条“发出”：首条前 2 秒缓冲，段间 2 秒间隔；中途人工接管则停止后续发送。
+  const segments = decision.silentIntercept
+    ? []
+    : (Array.isArray(decision.reply) ? decision.reply : [decision.reply]).filter(Boolean).map((item) => String(item));
+  const replyMessages: MessageRecord[] = [];
+  for (let index = 0; index < segments.length; index += 1) {
+    if (repo.getSessionStatus(sessionId) === "human_serving") break;
+    await sleep(index === 0 ? AI_REPLY_INITIAL_DELAY_MS : AI_REPLY_INTERVAL_MS);
+    replyMessages.push(repo.appendMessage(sessionId, "ai", null, segments[index]));
+  }
+  if (replyMessages.length) repo.countAiReply(replyMessages.length);
   let triggeredImage: MessageRecord | null = null;
-  if (triggeredAsset) {
+  if (triggeredAsset && repo.getSessionStatus(sessionId) !== "human_serving") {
+    await sleep(AI_REPLY_INTERVAL_MS);
     triggeredImage = repo.appendMessage(sessionId, "ai", null, "", triggeredAsset);
   }
+  const turn = {
+    customer: baseTurn.customer,
+    reply: replyMessages.length ? replyMessages[replyMessages.length - 1] : null,
+    ticket: baseTurn.ticket,
+  };
   return { mode: "ai" as const, decision, turn, triggeredImage, conversation: repo.getConversation(sessionId, "customer") };
 }
 
